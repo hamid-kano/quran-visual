@@ -15,7 +15,7 @@ export function Shell() {
           className="flex items-baseline gap-3"
           aria-label="آيات مرئية، الصفحة الرئيسية"
         >
-          <span className="font-kufi text-2xl font-bold text-gold">آيات مرئية</span>
+          <span className="font-display text-2xl font-bold text-gold">آيات مرئية</span>
           <span className="hidden text-sm text-mist md:inline">استكشاف بصري لكتاب الله</span>
         </NavLink>
         <nav aria-label="الأقسام">

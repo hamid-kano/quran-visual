@@ -85,7 +85,7 @@ function Star({
       {showLabel && (
         <Html center position={[0, -r - 1.1, 0]} zIndexRange={[10, 0]}>
           <span
-            className={`pointer-events-none whitespace-nowrap font-kufi select-none ${
+            className={`pointer-events-none whitespace-nowrap font-medium select-none ${
               state === 'selected'
                 ? 'text-[19px] text-gold-soft'
                 : state === 'near'

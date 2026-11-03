@@ -18,9 +18,10 @@
   --color-verdigris: #5aa592;
   --color-mist: #a9b8cf;
 
-  --font-kufi: 'Reem Kufi', 'Noto Naskh Arabic', serif;
-  --font-naskh: 'Noto Naskh Arabic', 'Amiri Quran', serif;
-  --font-quran: 'Amiri Quran', 'Noto Naskh Arabic', serif;
+  /* Each family has one job; fallbacks are the platforms' own Arabic faces. */
+  --font-quran: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  --font-display: 'Amiri', 'Times New Roman', 'Traditional Arabic', serif;
+  --font-ui: 'IBM Plex Sans Arabic', 'Segoe UI', 'Geeza Pro', Tahoma, system-ui, sans-serif;
 }
 
 @layer base {
@@ -30,7 +31,8 @@
   }
   body {
     margin: 0;
-    font-family: var(--font-naskh);
+    font-family: var(--font-ui);
+    font-feature-settings: 'kern';
     color: var(--color-vellum);
     background: var(--color-night);
     -webkit-font-smoothing: antialiased;
@@ -47,11 +49,6 @@
 }
 
 @layer components {
-  /* Reem Kufi ships a very narrow space; widen it so words stay distinct. */
-  .font-kufi {
-    word-spacing: 0.18em;
-  }
-
   /* Ayah text: generous leading so diacritics never collide. */
   .ayah {
     font-family: var(--font-quran);

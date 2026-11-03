@@ -14,7 +14,7 @@ function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-sm text-ink-soft">{label}</dt>
-      <dd className="font-kufi text-xl text-ink">{value}</dd>
+      <dd className="font-display text-xl font-bold text-ink">{value}</dd>
     </div>
   )
 }
@@ -41,7 +41,7 @@ export function SurahPanel({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-ink-soft">سورة رقم {toArabicDigits(surah.id)}</p>
-          <h2 id="surah-title" className="font-kufi text-4xl font-bold leading-tight text-ink">
+          <h2 id="surah-title" className="font-display text-4xl font-bold leading-tight text-ink">
             سورة {surah.name}
           </h2>
           <p className="mt-1 text-ink-soft" dir="ltr" lang="en">
@@ -66,7 +66,7 @@ export function SurahPanel({
       </dl>
 
       <section className="mt-6" aria-labelledby="key-roots">
-        <h3 id="key-roots" className="text-lg font-semibold text-ink">
+        <h3 id="key-roots" className="font-display text-xl font-bold text-ink">
           جذور تميّز السورة
         </h3>
         <p className="mt-1 text-sm text-ink-soft">
@@ -79,7 +79,7 @@ export function SurahPanel({
                 to={`/roots/${encodeURIComponent(r.root)}`}
                 className="inline-flex items-baseline gap-2 rounded-full border border-[#cdb67a] px-3 py-1 hover:bg-vellum-deep"
               >
-                <RootLetters root={r.root} className="text-lg font-semibold text-ink" />
+                <RootLetters root={r.root} className="font-display text-xl font-bold text-ink" />
                 <span className="text-xs text-ink-soft">{toArabicDigits(r.count)}</span>
               </Link>
             </li>
@@ -88,7 +88,7 @@ export function SurahPanel({
       </section>
 
       <section className="mt-6" aria-labelledby="near">
-        <h3 id="near" className="text-lg font-semibold text-ink">
+        <h3 id="near" className="font-display text-xl font-bold text-ink">
           أقرب السور إليها في المعجم
         </h3>
         <p className="mt-1 text-sm text-ink-soft">نسبة اشتراك الجذور المميِّزة بين السورتين.</p>
@@ -102,7 +102,7 @@ export function SurahPanel({
                   onClick={() => onSelect(n.surah)}
                   className="group flex w-full items-center gap-3 rounded px-1 py-1 text-right hover:bg-vellum-deep"
                 >
-                  <span className="w-24 shrink-0 font-kufi text-ink">{o.name}</span>
+                  <span className="w-24 shrink-0 font-display text-lg text-ink">{o.name}</span>
                   <span className="relative h-1.5 flex-1 rounded-full bg-vellum-deep" aria-hidden>
                     <span
                       className="absolute inset-y-0 right-0 rounded-full bg-[#a6852f]"
@@ -120,7 +120,7 @@ export function SurahPanel({
       </section>
 
       <section className="mt-7" aria-labelledby="text">
-        <h3 id="text" className="text-lg font-semibold text-ink">
+        <h3 id="text" className="font-display text-xl font-bold text-ink">
           {full ? 'نص السورة' : 'مطلع السورة'}
         </h3>
         {text.status === 'loading' && <p className="mt-3 text-ink-soft">جارٍ تحميل النص…</p>}

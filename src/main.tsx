@@ -2,10 +2,15 @@ import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import '@fontsource/amiri-quran/400.css'
-import '@fontsource/reem-kufi/500.css'
-import '@fontsource/reem-kufi/700.css'
-import '@fontsource/noto-naskh-arabic/400.css'
-import '@fontsource/noto-naskh-arabic/600.css'
+// Typography by role:
+//   Amiri Quran        — the Quranic text only
+//   Amiri              — headings and long-form reading (classical Naskh, same design family)
+//   IBM Plex Sans Arabic — interface, labels, numbers and data
+import '@fontsource/amiri/400.css'
+import '@fontsource/amiri/700.css'
+import '@fontsource/ibm-plex-sans-arabic/400.css'
+import '@fontsource/ibm-plex-sans-arabic/500.css'
+import '@fontsource/ibm-plex-sans-arabic/600.css'
 import './styles.css'
 import { Shell } from './components/Shell'
 import { Loading } from './components/Status'

@@ -12,7 +12,7 @@ interface NodeAttrs {
   count: number
 }
 
-const LABEL_FONT = '"Reem Kufi", "Noto Naskh Arabic", serif'
+const LABEL_FONT = '"IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif'
 
 /**
  * Sigma draws nodes and edges in WebGL. Arabic labels need proper letter joining,

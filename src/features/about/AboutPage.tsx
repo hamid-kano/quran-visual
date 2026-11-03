@@ -1,8 +1,10 @@
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-10">
-      <h2 className="font-kufi text-2xl text-ink">{title}</h2>
-      <div className="mt-3 space-y-3 text-[1.05rem] leading-[1.95] text-ink">{children}</div>
+      <h2 className="font-display text-2xl font-bold text-ink">{title}</h2>
+      <div className="mt-3 space-y-3 font-display text-[1.2rem] leading-[2] text-ink">
+        {children}
+      </div>
     </section>
   )
 }
@@ -11,8 +13,8 @@ export default function AboutPage() {
   return (
     <div className="absolute inset-0 overflow-y-auto px-3 py-6 sm:py-10">
       <article className="page mx-auto max-w-[44rem] rounded-md px-6 py-10 sm:px-12">
-        <h1 className="font-kufi text-4xl font-bold text-ink">المنهج والمصادر</h1>
-        <p className="mt-4 text-[1.1rem] leading-[1.95] text-ink-soft">
+        <h1 className="font-display text-4xl font-bold text-ink">المنهج والمصادر</h1>
+        <p className="mt-4 font-display text-[1.25rem] leading-[2] text-ink-soft">
           هذه المنصة تعرض ما يمكن قياسه في نص القرآن الكريم: العدّ والتوزيع والاقتران. لا تقدّم
           تفسيراً، ولا تستنبط معنى، ولا تبني على الأرقام دعاوى إعجاز. فهم المعاني يُؤخذ من كتب
           التفسير وأهل العلم.

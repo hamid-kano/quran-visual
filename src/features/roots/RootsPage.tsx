@@ -49,7 +49,7 @@ export default function RootsPage() {
         aria-label="أدوات الشبكة"
         className="absolute inset-x-3 top-3 z-10 rounded-2xl border border-gold/20 bg-night-deep/75 p-4 backdrop-blur sm:inset-x-auto sm:right-5 sm:top-5 sm:w-[22rem]"
       >
-        <h1 className="font-kufi text-2xl text-gold-soft">شبكة الجذور</h1>
+        <h1 className="font-display text-3xl font-bold text-gold-soft">شبكة الجذور</h1>
         <p className="mt-1 text-[0.95rem] leading-relaxed text-mist">
           {formatNumber(inGraph)} جذراً من أكثر الجذور وروداً. يصل الخط بين جذرين يجتمعان في الآيات
           أكثر مما تقتضيه الصدفة، وتشترك الجذور المتقاربة في لون واحد.

@@ -114,7 +114,7 @@ export function SearchBox({
                 i === active ? 'bg-gold/15 text-gold-soft' : 'text-vellum'
               }`}
             >
-              <span className="font-kufi">{r.label}</span>
+              <span className="font-medium">{r.label}</span>
               {r.hint && <span className="text-sm text-mist">{r.hint}</span>}
             </li>
           ))}

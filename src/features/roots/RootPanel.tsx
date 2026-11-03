@@ -149,7 +149,7 @@ export function RootPanel({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-ink-soft">الجذر</p>
-          <h2 id="root-title" className="font-kufi text-5xl font-bold leading-tight text-ink">
+          <h2 id="root-title" className="font-display text-5xl font-bold leading-tight text-ink">
             <RootLetters root={node.root} />
           </h2>
         </div>
@@ -165,23 +165,25 @@ export function RootPanel({
       <dl className="mt-5 grid grid-cols-3 gap-4 border-y border-[#d8c48e] py-4">
         <div>
           <dt className="text-sm text-ink-soft">ورد</dt>
-          <dd className="font-kufi text-xl">
-            {formatNumber(node.count)} <span className="font-naskh text-base">مرة</span>
+          <dd className="font-display text-xl font-bold">
+            {formatNumber(node.count)} <span className="font-normal">مرة</span>
           </dd>
         </div>
         <div>
           <dt className="text-sm text-ink-soft">في آيات</dt>
-          <dd className="font-kufi text-xl">{list.length ? formatNumber(list.length) : '…'}</dd>
+          <dd className="font-display text-xl font-bold">
+            {list.length ? formatNumber(list.length) : '…'}
+          </dd>
         </div>
         <div>
           <dt className="text-sm text-ink-soft">في سور</dt>
-          <dd className="font-kufi text-xl">{formatNumber(node.surahs)}</dd>
+          <dd className="font-display text-xl font-bold">{formatNumber(node.surahs)}</dd>
         </div>
       </dl>
 
       {node.lemmas.length > 0 && (
         <section className="mt-6" aria-labelledby="lemmas">
-          <h3 id="lemmas" className="text-lg font-semibold">
+          <h3 id="lemmas" className="font-display text-xl font-bold">
             ما اشتُقّ منه
           </h3>
           <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
@@ -196,7 +198,7 @@ export function RootPanel({
       )}
 
       <section className="mt-6" aria-labelledby="dist">
-        <h3 id="dist" className="text-lg font-semibold">
+        <h3 id="dist" className="font-display text-xl font-bold">
           حضوره في السور
         </h3>
         <p className="mt-1 text-sm text-ink-soft">
@@ -207,7 +209,7 @@ export function RootPanel({
 
       {related.length > 0 && (
         <section className="mt-6" aria-labelledby="related">
-          <h3 id="related" className="text-lg font-semibold">
+          <h3 id="related" className="font-display text-xl font-bold">
             جذور يجتمع معها
           </h3>
           <p className="mt-1 text-sm text-ink-soft">
@@ -221,7 +223,7 @@ export function RootPanel({
                   onClick={() => onSelect(r.root)}
                   className="flex w-full items-baseline justify-between rounded px-1 py-1 text-right hover:bg-vellum-deep"
                 >
-                  <RootLetters root={r.root} className="text-lg font-semibold" />
+                  <RootLetters root={r.root} className="font-display text-xl font-bold" />
                   <span className="text-sm text-ink-soft">
                     معاً في {formatNumber(r.together)} آية
                   </span>
@@ -233,7 +235,7 @@ export function RootPanel({
       )}
 
       <section className="mt-7" aria-labelledby="occ">
-        <h3 id="occ" className="text-lg font-semibold">
+        <h3 id="occ" className="font-display text-xl font-bold">
           مواضعه في القرآن
         </h3>
         {occ.status === 'loading' && <p className="mt-3 text-ink-soft">جارٍ التحميل…</p>}

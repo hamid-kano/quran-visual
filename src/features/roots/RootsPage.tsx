@@ -4,7 +4,7 @@ import { loadRoots, loadSurahs } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
 import { ErrorNote, Loading } from '../../components/Status'
 import { SearchBox, type SearchItem } from '../../components/SearchBox'
-import { formatNumber, spacedRoot } from '../../lib/arabic'
+import { TIME, countOf, formatNumber, spacedRoot } from '../../lib/arabic'
 import { RootPanel } from './RootPanel'
 
 const RootGraph = lazy(() => import('./RootGraph'))
@@ -24,7 +24,7 @@ export default function RootsPage() {
         .map((r) => ({
           key: r.root,
           label: spacedRoot(r.root),
-          hint: `${formatNumber(r.count)} مرة`,
+          hint: countOf(r.count, TIME),
           terms: [r.root, ...r.lemmas.map((l) => l.lemma)],
         })),
     [data],

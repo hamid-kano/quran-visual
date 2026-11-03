@@ -1,105 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useMemo } from 'react'
 import type { RootIndex, RootNode, Surah } from '../../data/schemas'
-import { loadRootOccurrences, loadSurahText } from '../../data/load'
+import { loadRootOccurrences } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
-import { formatNumber, spacedRoot, toArabicDigits } from '../../lib/arabic'
-import { AyahMark } from '../../components/AyahText'
+import { AYAH, TIME, countOf, formatNumber, spacedRoot, toArabicDigits } from '../../lib/arabic'
+import { Distribution, OccurrenceList } from '../../components/AyahRefs'
 import { RootLetters } from '../../components/RootLetters'
-
-const PAGE = 8
-
-/** Ayahs containing the root, per surah, drawn across the 114 surahs in mushaf order. */
-function Distribution({ perSurah, surahs }: { perSurah: Map<number, number>; surahs: Surah[] }) {
-  const max = Math.max(1, ...perSurah.values())
-  const W = 342
-  const H = 64
-  const bw = W / 114
-  return (
-    <figure className="mt-3">
-      <svg
-        viewBox={`0 0 ${W} ${H + 2}`}
-        className="w-full"
-        role="img"
-        aria-label="توزيع الجذر على السور"
-      >
-        <line x1={0} x2={W} y1={H} y2={H} stroke="#cdb67a" strokeWidth={0.6} />
-        {surahs.map((s, i) => {
-          const v = perSurah.get(s.id) ?? 0
-          if (!v) return null
-          const h = Math.max(1.5, (v / max) * (H - 2))
-          return (
-            <rect
-              key={s.id}
-              // mushaf order flows right-to-left
-              x={W - (i + 1) * bw + 0.25}
-              y={H - h}
-              width={Math.max(bw - 0.5, 0.8)}
-              height={h}
-              fill={s.revelation === 'meccan' ? '#a6852f' : '#3f8a77'}
-            >
-              <title>{`سورة ${s.name}: ${toArabicDigits(v)} آية`}</title>
-            </rect>
-          )
-        })}
-      </svg>
-      <div className="flex justify-between text-xs text-ink-soft" aria-hidden>
-        <span>الفاتحة</span>
-        <span>الناس</span>
-      </div>
-      <figcaption className="mt-1 flex gap-4 text-xs text-ink-soft">
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-sm bg-[#a6852f]" /> سورة مكية
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-sm bg-[#3f8a77]" /> سورة مدنية
-        </span>
-      </figcaption>
-    </figure>
-  )
-}
-
-function Occurrences({ list, byId }: { list: [number, number][]; byId: Map<number, Surah> }) {
-  const [shown, setShown] = useState(PAGE)
-  const visible = list.slice(0, shown)
-  const surahIds = useMemo(() => [...new Set(visible.map(([s]) => s))], [visible])
-  const texts = useAsync(() => Promise.all(surahIds.map(loadSurahText)), surahIds.join(','))
-  const textOf = useMemo(() => {
-    const m = new Map<string, string>()
-    if (texts.status === 'ready')
-      for (const t of texts.data) for (const a of t.ayahs) m.set(`${t.id}:${a.n}`, a.text)
-    return m
-  }, [texts])
-
-  return (
-    <div className="mt-3">
-      <ol className="divide-y divide-[#e0cf9f]">
-        {visible.map(([s, a]) => (
-          <li key={`${s}:${a}`} className="py-3">
-            <Link
-              to={`/surah/${s}`}
-              className="text-sm text-ink-soft hover:text-ink hover:underline"
-            >
-              سورة {byId.get(s)?.name}، الآية {toArabicDigits(a)}
-            </Link>
-            <p className="ayah mt-1 text-[1.3rem] leading-[2.2]">
-              {textOf.get(`${s}:${a}`) ?? '…'} <AyahMark n={a} />
-            </p>
-          </li>
-        ))}
-      </ol>
-      {shown < list.length && (
-        <button
-          type="button"
-          onClick={() => setShown((n) => n + PAGE)}
-          className="mt-2 rounded-full border border-[#cdb67a] px-4 py-1.5 text-sm text-ink hover:bg-vellum-deep"
-        >
-          عرض المزيد ({toArabicDigits(list.length - shown)} آية متبقية)
-        </button>
-      )}
-    </div>
-  )
-}
 
 export function RootPanel({
   node,
@@ -165,9 +70,7 @@ export function RootPanel({
       <dl className="mt-5 grid grid-cols-3 gap-4 border-y border-[#d8c48e] py-4">
         <div>
           <dt className="text-sm text-ink-soft">ورد</dt>
-          <dd className="font-display text-xl font-bold">
-            {formatNumber(node.count)} <span className="font-normal">مرة</span>
-          </dd>
+          <dd className="font-display text-xl font-bold">{countOf(node.count, TIME)}</dd>
         </div>
         <div>
           <dt className="text-sm text-ink-soft">في آيات</dt>
@@ -204,7 +107,9 @@ export function RootPanel({
         <p className="mt-1 text-sm text-ink-soft">
           عدد الآيات التي ورد فيها، من الفاتحة إلى الناس.
         </p>
-        {occ.status === 'ready' && <Distribution perSurah={perSurah} surahs={surahs} />}
+        {occ.status === 'ready' && (
+          <Distribution perSurah={perSurah} surahs={surahs} label="توزيع الجذر على السور" />
+        )}
       </section>
 
       {related.length > 0 && (
@@ -224,9 +129,7 @@ export function RootPanel({
                   className="flex w-full items-baseline justify-between rounded px-1 py-1 text-right hover:bg-vellum-deep"
                 >
                   <RootLetters root={r.root} className="font-display text-xl font-bold" />
-                  <span className="text-sm text-ink-soft">
-                    معاً في {formatNumber(r.together)} آية
-                  </span>
+                  <span className="text-sm text-ink-soft">معاً في {countOf(r.together, AYAH)}</span>
                 </button>
               </li>
             ))}
@@ -240,7 +143,7 @@ export function RootPanel({
         </h3>
         {occ.status === 'loading' && <p className="mt-3 text-ink-soft">جارٍ التحميل…</p>}
         {occ.status === 'error' && <p className="mt-3 text-ink-soft">تعذّر تحميل المواضع.</p>}
-        {occ.status === 'ready' && <Occurrences key={node.root} list={list} byId={byId} />}
+        {occ.status === 'ready' && <OccurrenceList key={node.root} list={list} byId={byId} />}
       </section>
     </article>
   )

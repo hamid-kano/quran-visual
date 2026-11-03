@@ -3,8 +3,15 @@ import { Link } from 'react-router'
 import type { Surah } from '../../data/schemas'
 import { loadSurahText } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
-import { formatNumber, formatPercent, revelationLabel, toArabicDigits } from '../../lib/arabic'
-import { AyahRun } from '../../components/AyahText'
+import {
+  AYAH,
+  countOf,
+  formatNumber,
+  formatPercent,
+  revelationLabel,
+  toArabicDigits,
+} from '../../lib/arabic'
+import { WordExplorer } from '../../components/WordExplorer'
 import { RootLetters } from '../../components/RootLetters'
 import { BASMALA, showsBasmalaHeader } from '../../lib/quran'
 
@@ -123,6 +130,7 @@ export function SurahPanel({
         <h3 id="text" className="font-display text-xl font-bold text-ink">
           {full ? 'نص السورة' : 'مطلع السورة'}
         </h3>
+        <p className="mt-1 text-sm text-ink-soft">اختر أي كلمة لمعرفة جذرها ووزنها.</p>
         {text.status === 'loading' && <p className="mt-3 text-ink-soft">جارٍ تحميل النص…</p>}
         {text.status === 'error' && (
           <p className="mt-3 text-ink-soft">تعذّر تحميل النص. أعد المحاولة لاحقاً.</p>
@@ -130,14 +138,17 @@ export function SurahPanel({
         {text.status === 'ready' && (
           <div className="mt-3">
             {showsBasmalaHeader(surah.id) && <p className="ayah text-center">{BASMALA}</p>}
-            <AyahRun ayahs={full ? text.data.ayahs : text.data.ayahs.slice(0, PREVIEW)} />
+            <WordExplorer
+              surah={surah.id}
+              ayahs={full ? text.data.ayahs : text.data.ayahs.slice(0, PREVIEW)}
+            />
             {text.data.ayahs.length > PREVIEW && (
               <button
                 type="button"
                 onClick={() => setFull((f) => !f)}
                 className="mt-2 rounded-full border border-[#cdb67a] px-4 py-1.5 text-sm text-ink hover:bg-vellum-deep"
               >
-                {full ? 'عرض المطلع فقط' : `عرض السورة كاملة (${toArabicDigits(surah.ayahs)} آية)`}
+                {full ? 'عرض المطلع فقط' : `عرض السورة كاملة (${countOf(surah.ayahs, AYAH)})`}
               </button>
             )}
           </div>

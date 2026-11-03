@@ -2,7 +2,11 @@ import { NavLink, Outlet } from 'react-router'
 
 const links = [
   { to: '/', label: 'مجرّة السور', end: true },
+  { to: '/fingerprints', label: 'بصمات السور', end: false },
+  { to: '/journey', label: 'رحلة النزول', end: false },
   { to: '/roots', label: 'شبكة الجذور', end: false },
+  { to: '/names', label: 'الأعلام', end: false },
+  { to: '/similar', label: 'المتشابهات', end: false },
   { to: '/about', label: 'المنهج والمصادر', end: false },
 ]
 
@@ -16,10 +20,13 @@ export function Shell() {
           aria-label="آيات مرئية، الصفحة الرئيسية"
         >
           <span className="font-display text-2xl font-bold text-gold">آيات مرئية</span>
-          <span className="hidden text-sm text-mist md:inline">استكشاف بصري لكتاب الله</span>
+          <span className="hidden text-sm text-mist xl:inline">استكشاف بصري لكتاب الله</span>
         </NavLink>
-        <nav aria-label="الأقسام">
-          <ul className="flex gap-1 text-[0.95rem]">
+        <nav
+          aria-label="الأقسام"
+          className="-mx-4 min-w-0 max-w-full overflow-x-auto px-4 sm:mx-0 sm:px-0"
+        >
+          <ul className="flex gap-1 whitespace-nowrap text-[0.95rem]">
             {links.map((l) => (
               <li key={l.to}>
                 <NavLink

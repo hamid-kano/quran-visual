@@ -1,5 +1,13 @@
 import type { z } from 'zod'
 import {
+  Fingerprints,
+  NameIndex,
+  SimilarIndex,
+  SurahMorphology,
+  type Fingerprint,
+  type NameIndex as NameIndexT,
+  type SimilarIndex as SimilarIndexT,
+  type SurahMorphology as SurahMorphologyT,
   RootIndex,
   RootOccurrences,
   SurahIndex,
@@ -35,3 +43,9 @@ export const loadSurahText = (id: number): Promise<SurahTextT> =>
 export const loadRoots = (): Promise<RootIndexT> => load('roots.json', RootIndex)
 export const loadRootOccurrences = (): Promise<RootOccurrencesT> =>
   load('root-occurrences.json', RootOccurrences)
+export const loadFingerprints = (): Promise<Fingerprint[]> =>
+  load('fingerprints.json', Fingerprints)
+export const loadNames = (): Promise<NameIndexT> => load('names.json', NameIndex)
+export const loadSimilar = (): Promise<SimilarIndexT> => load('similar.json', SimilarIndex)
+export const loadMorphology = (id: number): Promise<SurahMorphologyT> =>
+  load(`morph/${id}.json`, SurahMorphology)

@@ -18,6 +18,10 @@ import { Loading } from './components/Status'
 const GalaxyPage = lazy(() => import('./features/galaxy/GalaxyPage'))
 const RootsPage = lazy(() => import('./features/roots/RootsPage'))
 const AboutPage = lazy(() => import('./features/about/AboutPage'))
+const FingerprintsPage = lazy(() => import('./features/fingerprints/FingerprintsPage'))
+const JourneyPage = lazy(() => import('./features/journey/JourneyPage'))
+const NamesPage = lazy(() => import('./features/names/NamesPage'))
+const SimilarPage = lazy(() => import('./features/similar/SimilarPage'))
 
 const page = (el: React.ReactNode) => <Suspense fallback={<Loading />}>{el}</Suspense>
 
@@ -30,6 +34,13 @@ const router = createBrowserRouter(
         { path: 'surah/:id', element: page(<GalaxyPage />) },
         { path: 'roots', element: page(<RootsPage />) },
         { path: 'roots/:root', element: page(<RootsPage />) },
+        { path: 'fingerprints', element: page(<FingerprintsPage />) },
+        { path: 'fingerprints/:id', element: page(<FingerprintsPage />) },
+        { path: 'journey', element: page(<JourneyPage />) },
+        { path: 'names', element: page(<NamesPage />) },
+        { path: 'names/:name', element: page(<NamesPage />) },
+        { path: 'similar', element: page(<SimilarPage />) },
+        { path: 'similar/:id', element: page(<SimilarPage />) },
         { path: 'about', element: page(<AboutPage />) },
         { path: '*', element: page(<GalaxyPage />) },
       ],

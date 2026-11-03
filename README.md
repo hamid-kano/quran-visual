@@ -54,6 +54,9 @@ pnpm dev
 - **النص العثماني (حفص)**: [QuranEnc](https://quranenc.com) عبر حزمة [`quran-json`](https://www.npmjs.com/package/quran-json) (CC BY-SA 4.0).
 - **بيانات السور وترتيب النزول**: مشروع [Tanzil](https://tanzil.net) عبر حزمة [`quran-meta`](https://www.npmjs.com/package/quran-meta) (MIT).
 - **الجذور والمداخل**: [Quranic Arabic Corpus](https://corpus.quran.com) v0.4، بنسخة [mustafa0x/quran-morphology](https://github.com/mustafa0x/quran-morphology) المنقّحة (GNU GPL). الملف في `sources/` كما هو دون تعديل.
-- **الخطوط**: Amiri Quran وReem Kufi وNoto Naskh Arabic (SIL OFL).
+- **الخطوط** (SIL OFL)، لكلٍّ منها دور واحد:
+  - **Amiri Quran**: نص القرآن الكريم وحده.
+  - **Amiri**: العناوين والقراءة الطويلة، من عائلة التصميم نفسها.
+  - **IBM Plex Sans Arabic**: الواجهة والأرقام والبيانات.
 
 الشيفرة مرخّصة بـ MIT (انظر `LICENSE`). البيانات المشتقة تخضع لتراخيص مصادرها أعلاه.

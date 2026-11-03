@@ -1,0 +1,92 @@
+@import 'tailwindcss';
+
+/*
+ * Palette drawn from mushaf illumination (التذهيب): lapis ground, gold leaf,
+ * vellum pages, iron-gall ink, and verdigris — the green of old copper pigments.
+ */
+@theme {
+  --color-night: #0d1d33;
+  --color-night-deep: #08142a;
+  --color-lapis: #1f3b66;
+  --color-lapis-soft: #2f5283;
+  --color-gold: #c9a54a;
+  --color-gold-soft: #e6cf8f;
+  --color-vellum: #f3ead6;
+  --color-vellum-deep: #e6d9bb;
+  --color-ink: #2b2318;
+  --color-ink-soft: #5f5340;
+  --color-verdigris: #5aa592;
+  --color-mist: #a9b8cf;
+
+  --font-kufi: 'Reem Kufi', 'Noto Naskh Arabic', serif;
+  --font-naskh: 'Noto Naskh Arabic', 'Amiri Quran', serif;
+  --font-quran: 'Amiri Quran', 'Noto Naskh Arabic', serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-night);
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-naskh);
+    color: var(--color-vellum);
+    background: var(--color-night);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-gold) 45%, transparent);
+  }
+}
+
+@layer components {
+  /* Reem Kufi ships a very narrow space; widen it so words stay distinct. */
+  .font-kufi {
+    word-spacing: 0.18em;
+  }
+
+  /* Ayah text: generous leading so diacritics never collide. */
+  .ayah {
+    font-family: var(--font-quran);
+    font-size: 1.45rem;
+    line-height: 2.35;
+    color: var(--color-ink);
+  }
+  .ayah-mark {
+    font-family: var(--font-quran);
+    color: #8a6a1f;
+    padding-inline: 0.2em;
+  }
+
+  /* A vellum page with a thin gold rule inset, like a mushaf frame. */
+  .page {
+    background: var(--color-vellum);
+    color: var(--color-ink);
+    box-shadow:
+      inset 0 0 0 1px #d8c48e,
+      inset 0 0 0 6px var(--color-vellum),
+      inset 0 0 0 7px #cdb67a,
+      0 24px 60px -20px rgb(0 0 0 / 0.55);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cdb67a transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

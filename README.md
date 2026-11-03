@@ -1,3 +1,59 @@
-# quran-visual
+# آيات مرئية
 
-منصة تحليل بياني ومخططات تفاعلية للقرآن الكريم.
+منصة تحليل بياني ومخططات تفاعلية للقرآن الكريم، تعمل على GitHub Pages.
+
+**الموقع:** https://hamid-kano.github.io/quran-visual/
+
+## الأقسام
+
+- **مجرّة السور**: كل سورة نجم يكبر بعدد آياتها، وتتقارب السور كلما اشتركت في جذورها المميِّزة.
+- **شبكة الجذور**: ٤٥١ جذراً من أكثر الجذور وروداً، تربط بينها الآيات التي تجمعها، مع مواضع كل جذر ومشتقاته وتوزيعه على السور.
+- **المنهج والمصادر**: شرح كيفية حساب كل رقم.
+
+## المبدأ
+
+المنصة تعرض ما يُقاس في النص: العدّ والتوزيع والاقتران. لا تفسّر، ولا تستنبط معنى، ولا تبني على الأرقام دعاوى إعجاز.
+
+## التقنيات
+
+| الطبقة | الأداة |
+|---|---|
+| الواجهة | React 19 + TypeScript (strict) + Vite |
+| التنسيق | Tailwind CSS 4، اتجاه RTL |
+| المجرّة | Three.js عبر React Three Fiber |
+| الشبكة | Sigma.js + Graphology |
+| عقد البيانات | Zod (يُتحقَّق منه عند التوليد وعند التحميل) |
+| الاختبارات | Vitest |
+| النشر | GitHub Actions → GitHub Pages، مع PWA للعمل دون اتصال |
+
+## البنية
+
+```
+sources/          المصادر الخام المعتمدة (مُثبّتة في المستودع)
+scripts/          مولّد البيانات (Node + TypeScript)
+public/data/      ملفات JSON الناتجة (تُولَّد في CI، غير مُتتبَّعة)
+src/data/         عقد البيانات (schemas) والتحميل
+src/features/     المجرّة، الشبكة، المنهج
+tests/            فحوص سلامة البيانات
+```
+
+الواجهة لا تعرف كيف وُلِّدت البيانات، بل تقرأ ملفات مطابقة لـ `src/data/schemas.ts`. أي مولّد مستقبلي (Python، تعلّم آلي…) يكفيه أن يُخرج الشكل نفسه.
+
+## التشغيل محلياً
+
+```bash
+pnpm install
+pnpm data     # يولّد public/data
+pnpm dev
+```
+
+قبل كل نشر: `pnpm test` يتحقق من ١١٤ سورة و٦٢٣٦ آية و٧٧٬٤٢٩ كلمة، ومطابقة النص لبياناته.
+
+## المصادر والتراخيص
+
+- **النص العثماني (حفص)**: [QuranEnc](https://quranenc.com) عبر حزمة [`quran-json`](https://www.npmjs.com/package/quran-json) (CC BY-SA 4.0).
+- **بيانات السور وترتيب النزول**: مشروع [Tanzil](https://tanzil.net) عبر حزمة [`quran-meta`](https://www.npmjs.com/package/quran-meta) (MIT).
+- **الجذور والمداخل**: [Quranic Arabic Corpus](https://corpus.quran.com) v0.4، بنسخة [mustafa0x/quran-morphology](https://github.com/mustafa0x/quran-morphology) المنقّحة (GNU GPL). الملف في `sources/` كما هو دون تعديل.
+- **الخطوط**: Amiri Quran وReem Kufi وNoto Naskh Arabic (SIL OFL).
+
+الشيفرة مرخّصة بـ MIT (انظر `LICENSE`). البيانات المشتقة تخضع لتراخيص مصادرها أعلاه.

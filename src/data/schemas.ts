@@ -154,7 +154,31 @@ export const SearchIndex = z.object({
   surahs: z.array(z.array(z.string().min(1))).length(114),
 })
 
+// ---------- topics (thematic index of Mushaf Al-Tajweed) ----------
+
+export const TopicNode = z.object({
+  id: z.number().int().positive(),
+  label: z.string().min(2),
+  parent: z.number().int().positive().nullable(),
+  depth: z.number().int().min(0).max(6),
+  /** Distinct ayahs under this topic and all its subtopics. */
+  ayahs: z.number().int().positive(),
+  surahs: z.number().int().positive(),
+  /** Ayahs tagged with this topic itself. */
+  direct: z.number().int().min(0),
+})
+
+export const TopicIndex = z.object({
+  version: z.number().int(),
+  source: z.object({ name: z.string(), archive: z.string().url(), commit: z.string() }),
+  nodes: z.array(TopicNode).min(100),
+  /** Topic id → ayahs tagged with it directly, as [surah, ayah]. */
+  tags: z.record(z.string(), z.array(z.tuple([z.number().int(), z.number().int()]))),
+})
+
 export type SearchIndex = z.infer<typeof SearchIndex>
+export type TopicNode = z.infer<typeof TopicNode>
+export type TopicIndex = z.infer<typeof TopicIndex>
 export type Fingerprint = z.infer<typeof Fingerprint>
 export type NameIndex = z.infer<typeof NameIndex>
 export type NameNode = z.infer<typeof NameNode>

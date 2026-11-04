@@ -14,7 +14,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import * as fontkit from 'fontkit'
 import { Resvg } from '@resvg/resvg-js'
-import { Fingerprints, NameIndex, RootIndex, SurahIndex } from '../src/data/schemas.ts'
+import { Fingerprints, NameIndex, RootIndex, SurahIndex, TopicIndex } from '../src/data/schemas.ts'
 import type { Surah } from '../src/data/schemas.ts'
 import {
   AYAH,
@@ -41,6 +41,7 @@ const surahs = SurahIndex.parse(read('surahs.json')).surahs
 const fingerprints = Fingerprints.parse(read('fingerprints.json'))
 const roots = RootIndex.parse(read('roots.json')).roots
 const names = NameIndex.parse(read('names.json')).names
+const topics = TopicIndex.parse(read('topics.json')).nodes
 
 // ---------- text as outlines ----------
 
@@ -224,6 +225,11 @@ const sections: [string, string, string][] = [
     `${countOf(roots.length, ROOT)} في القرآن، وشبكة لأكثرها وروداً تصل بين الجذور التي تجتمع في الآيات.`,
   ],
   [
+    'topics',
+    'خريطة الموضوعات',
+    'موضوعات القرآن الكريم وآياتها، من الفهرس الموضوعي لمصحف التجويد، في شجرة تُفتح موضوعاً موضوعاً.',
+  ],
+  [
     'names',
     'أسماء الأعلام',
     'الأنبياء والأقوام والأماكن والكتب المذكورة في القرآن، ومن ذُكر منها مع من في الآية نفسها.',
@@ -265,6 +271,13 @@ for (const r of roots) {
   pages.set(`roots/${r.root}`, {
     title: titled(`الجذر ${spaced}`),
     description: `ورد الجذر «${spaced}» ${countOf(r.count, TIME)} في ${countOf(r.surahs, SURAH)}. مشتقاته، وتوزيعه على السور، والجذور التي يقترن بها، ومواضعه كلها.`,
+    ...SITE_IMAGE,
+  })
+}
+for (const t of topics) {
+  pages.set(`topics/${t.id}`, {
+    title: titled(t.label),
+    description: `«${t.label}» في القرآن الكريم: ${countOf(t.ayahs, AYAH)} في ${countOf(t.surahs, SURAH)}، من الفهرس الموضوعي لمصحف التجويد.`,
     ...SITE_IMAGE,
   })
 }

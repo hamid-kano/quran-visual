@@ -21,15 +21,15 @@
 
 ## التقنيات
 
-| الطبقة | الأداة |
-|---|---|
-| الواجهة | React 19 + TypeScript (strict) + Vite |
-| التنسيق | Tailwind CSS 4، اتجاه RTL |
-| المجرّة | Three.js عبر React Three Fiber |
-| الشبكة | Sigma.js + Graphology |
-| عقد البيانات | Zod (يُتحقَّق منه عند التوليد وعند التحميل) |
-| الاختبارات | Vitest |
-| النشر | GitHub Actions → GitHub Pages، مع PWA للعمل دون اتصال |
+| الطبقة       | الأداة                                                |
+| ------------ | ----------------------------------------------------- |
+| الواجهة      | React 19 + TypeScript (strict) + Vite                 |
+| التنسيق      | Tailwind CSS 4، اتجاه RTL                             |
+| المجرّة      | Three.js عبر React Three Fiber                        |
+| الشبكة       | Sigma.js + Graphology                                 |
+| عقد البيانات | Zod (يُتحقَّق منه عند التوليد وعند التحميل)           |
+| الاختبارات   | Vitest                                                |
+| النشر        | GitHub Actions → GitHub Pages، مع PWA للعمل دون اتصال |
 
 ## البنية
 

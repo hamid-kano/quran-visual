@@ -11,6 +11,8 @@ import {
   RootIndex,
   RootOccurrences,
   SearchIndex,
+  TopicIndex,
+  type TopicIndex as TopicIndexT,
   SurahIndex,
   SurahText,
   type RootIndex as RootIndexT,
@@ -60,3 +62,5 @@ export function loadSearchIndex(): Promise<string[][][][]> {
   searchCache.catch(() => (searchCache = null))
   return searchCache
 }
+
+export const loadTopics = (): Promise<TopicIndexT> => load('topics.json', TopicIndex)

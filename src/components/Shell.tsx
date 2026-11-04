@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router'
+import { useEffect, useRef } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router'
 
 const links = [
   { to: '/', label: 'مجرّة السور', end: true },
@@ -6,12 +7,21 @@ const links = [
   { to: '/fingerprints', label: 'بصمات السور', end: false },
   { to: '/journey', label: 'رحلة النزول', end: false },
   { to: '/roots', label: 'شبكة الجذور', end: false },
+  { to: '/topics', label: 'الموضوعات', end: false },
   { to: '/names', label: 'الأعلام', end: false },
   { to: '/similar', label: 'المتشابهات', end: false },
   { to: '/about', label: 'المنهج والمصادر', end: false },
 ]
 
 export function Shell() {
+  const nav = useRef<HTMLElement>(null)
+  const { pathname } = useLocation()
+  // on narrow screens the menu scrolls: keep the current section in view
+  useEffect(() => {
+    nav.current
+      ?.querySelector('[aria-current="page"]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [pathname])
   return (
     <div className="flex h-dvh flex-col bg-night">
       <header className="relative z-20 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-gold/20 bg-night-deep/80 px-4 py-3 backdrop-blur sm:px-6">
@@ -24,8 +34,9 @@ export function Shell() {
           <span className="hidden text-sm text-mist xl:inline">استكشاف بصري لكتاب الله</span>
         </NavLink>
         <nav
+          ref={nav}
           aria-label="الأقسام"
-          className="-mx-4 min-w-0 max-w-full overflow-x-auto px-4 sm:mx-0 sm:px-0"
+          className="-mx-4 min-w-0 max-w-full overflow-x-auto px-4 [mask-image:linear-gradient(to_left,black_85%,transparent)] [scrollbar-width:none] sm:mx-0 sm:px-0 lg:[mask-image:none]"
         >
           <ul className="flex gap-1 whitespace-nowrap text-[0.95rem]">
             {links.map((l) => (

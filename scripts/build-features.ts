@@ -2,7 +2,6 @@
  * Second generation pass: fingerprints, names network, similar ayahs, word morphology.
  * Same rules as build-data.ts: vetted sources only, counting only, deterministic output.
  */
-import { createRequire } from 'node:module'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import Graph from 'graphology'
@@ -16,17 +15,18 @@ import {
   type Fingerprint,
   type Segment,
 } from '../src/data/schemas.ts'
-import { ayahWords, commonWords, finalLetter, stripMarks, wordKey } from '../src/lib/quran.ts'
+import {
+  alignWords,
+  ayahWords,
+  commonWords,
+  finalLetter,
+  stripMarks,
+  wordKey,
+} from '../src/lib/quran.ts'
+import { quran } from './quran-text.ts'
 
-const require = createRequire(import.meta.url)
 const OUT = 'public/data'
 const DATA_VERSION = 1
-
-interface QuranJsonSurah {
-  id: number
-  verses: { id: number; text: string }[]
-}
-const quran: QuranJsonSurah[] = require('quran-json/dist/quran.json')
 
 function rng(seed: number) {
   let a = seed >>> 0
@@ -58,7 +58,7 @@ for (const line of readFileSync('sources/quran-morphology.txt', 'utf8').split('\
 // ---------- 1. fingerprints ----------
 const fingerprints: Fingerprint[] = quran.map((q) => ({
   id: q.id,
-  lengths: q.verses.map((v) => morph.get(`${q.id}:${v.id}`)!.length),
+  lengths: q.verses.map((v) => ayahWords(v.text).length),
   endings: q.verses.map((v) => finalLetter(v.text)).join(''),
 }))
 write('fingerprints.json', Fingerprints.parse(fingerprints))
@@ -202,14 +202,9 @@ mkdirSync(join(OUT, 'morph'), { recursive: true })
 let misaligned = 0
 for (const q of quran) {
   const out = q.verses.map((v) => {
-    const words = morph.get(`${q.id}:${v.id}`)!
-    const textWords = ayahWords(v.text)
-    if (textWords.length !== words.length) {
-      misaligned++
-      return null
-    }
-    // drop LEM-less noise? keep everything — the interface chooses what to show
-    return words
+    const aligned = alignWords(ayahWords(v.text), morph.get(`${q.id}:${v.id}`)!)
+    if (!aligned) misaligned++
+    return aligned
   })
   write(`morph/${q.id}.json`, SurahMorphology.parse({ id: q.id, ayahs: out }))
 }

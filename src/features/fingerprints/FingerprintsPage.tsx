@@ -37,8 +37,8 @@ function Gallery({ surahs, fps }: { surahs: Surah[]; fps: Fingerprint[] }) {
       <header className="max-w-3xl">
         <h1 className="font-display text-4xl font-bold text-gold-soft">بصمات السور</h1>
         <p className="mt-3 text-[1.05rem] leading-relaxed text-mist">
-          لكل سورة بصمة من آياتها: كل خط آية، تبدأ من الأعلى وتدور عكس عقارب الساعة. يطول الخط بطول
-          الآية نسبةً إلى أطول آية في السورة نفسها، ولونه الحرف الذي تنتهي به الآية.
+          لكل سورة بصمة من آياتها: كل خط آية، تبدأ من الأعلى وتدور عكس عقارب الساعة. يطول الخط بعدد
+          كلمات الآية نسبةً إلى أطول آية في السورة نفسها، ولونه الحرف الذي تنتهي به الآية.
         </p>
         <div className="mt-4">
           <Legend />

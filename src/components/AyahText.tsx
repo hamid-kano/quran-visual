@@ -2,8 +2,8 @@ import { toArabicDigits } from '../lib/arabic'
 
 export function AyahMark({ n }: { n: number }) {
   return (
-    <span className="ayah-mark" aria-label={`الآية ${toArabicDigits(n)}`}>
-      ﴿{toArabicDigits(n)}﴾
+    <span className="ayah-mark" role="img" aria-label={`الآية ${toArabicDigits(n)}`}>
+      {toArabicDigits(n)}
     </span>
   )
 }

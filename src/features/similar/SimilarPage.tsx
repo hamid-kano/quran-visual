@@ -7,7 +7,7 @@ import { ErrorNote, Loading } from '../../components/Status'
 import { AyahMark } from '../../components/AyahText'
 import { SearchBox, type SearchItem } from '../../components/SearchBox'
 import { AYAH, countOf, formatNumber, formatPercent, toArabicDigits } from '../../lib/arabic'
-import { ayahWords, commonWords, wordKey } from '../../lib/quran'
+import { ayahWords, commonWords, vocalKey, wordKey } from '../../lib/quran'
 
 type Ref = [number, number]
 const key = (s: number, a: number) => `${s}:${a}`
@@ -35,8 +35,21 @@ function useMatches(data: SimilarIndex | null) {
   }, [data])
 }
 
-/** An ayah with the words it does not share with its counterpart marked. */
-function DiffLine({ text, marked, n }: { text: string; marked: Set<number>; n: number }) {
+/**
+ * An ayah with its differences from the counterpart marked: a filled highlight for words it
+ * does not share, a dotted underline for shared words whose vowels differ.
+ */
+function DiffLine({
+  text,
+  marked,
+  vowels,
+  n,
+}: {
+  text: string
+  marked: Set<number>
+  vowels: Set<number>
+  n: number
+}) {
   const words = ayahWords(text)
   return (
     <p className="ayah text-[1.35rem] leading-[2.3]">
@@ -44,6 +57,13 @@ function DiffLine({ text, marked, n }: { text: string; marked: Set<number>; n: n
         <span key={i}>
           {marked.has(i) ? (
             <mark className="rounded bg-[#ead9a8] px-0.5 text-[#6b4a0c]">{w}</mark>
+          ) : vowels.has(i) ? (
+            <span
+              className="underline decoration-[#a6852f] decoration-dotted decoration-2 underline-offset-[10px]"
+              title="الكلمة نفسها بضبط مختلف"
+            >
+              {w}
+            </span>
           ) : (
             w
           )}{' '}
@@ -70,9 +90,12 @@ function Pair({
   if (!a || !b) return <p className="text-ink-soft">…</p>
   const wa = ayahWords(a)
   const wb = ayahWords(b)
-  const [ka, kb] = commonWords(wa.map(wordKey), wb.map(wordKey))
+  const [ka, kb, matched] = commonWords(wa.map(wordKey), wb.map(wordKey))
   const onlyA = new Set(wa.map((_, i) => i).filter((i) => !ka.has(i)))
   const onlyB = new Set(wb.map((_, i) => i).filter((i) => !kb.has(i)))
+  const vowelPairs = matched.filter(([i, j]) => vocalKey(wa[i]!) !== vocalKey(wb[j]!))
+  const vowelsA = new Set(vowelPairs.map(([i]) => i))
+  const vowelsB = new Set(vowelPairs.map(([, j]) => j))
   const [s, n] = match.other
   return (
     <div className="border-t border-[#e0cf9f] pt-3">
@@ -90,9 +113,9 @@ function Pair({
         </p>
       ) : (
         <>
-          <DiffLine text={b} marked={onlyB} n={n} />
+          <DiffLine text={b} marked={onlyB} vowels={vowelsB} n={n} />
           <p className="mt-1 text-xs text-ink-soft">وفي الآية الأصل يختلف:</p>
-          <DiffLine text={a} marked={onlyA} n={base[1]} />
+          <DiffLine text={a} marked={onlyA} vowels={vowelsA} n={base[1]} />
         </>
       )}
     </div>
@@ -208,9 +231,15 @@ export default function SimilarPage() {
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <h1 className="font-display text-4xl font-bold text-gold-soft">المتشابهات اللفظية</h1>
         <p className="mt-3 text-[1.05rem] leading-relaxed text-mist">
-          آيات تتقارب ألفاظها حتى يلتبس بعضها ببعض على الحافظ. تُعرض الآية مع نظائرها، وتُظلَّل
-          الكلمات التي تنفرد بها كل آية عن نظيرتها. القياس لفظي آلي: تُعدّ الآيتان متشابهتين إذا
-          اشتركتا في ستين في المئة من كلماتهما على ترتيبها.
+          آيات تتقارب ألفاظها، تُعرض كل آية مع نظائرها. يُظلَّل ما تنفرد به كل آية من كلمات،
+          ويُسطَّر بنقاط ما اتفقت حروفه واختلف ضبطه. هذه قائمة محسوبة آلياً من الألفاظ، وليست حصراً
+          لما ذكره العلماء في كتب المتشابه.
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-mist">
+          تُعدّ الآيتان متقاربتين إذا اشتركتا في أربع كلمات على الأقل على ترتيبها، وبلغ المشترك ستين
+          في المئة أو أكثر من كلمات أطولهما. وتُعدّ مكرّرة بلفظها إذا كانت من ثلاث كلمات فأكثر
+          واتفقت حروف كلماتها كلها، وقد تختلف علامات الضبط في أولها أو آخرها بحسب ما يتصل بها في
+          التلاوة.
         </p>
         <div className="mt-5 max-w-md">
           <SearchBox
@@ -229,9 +258,10 @@ export default function SimilarPage() {
               السور ونظائرها
             </h2>
             <p className="mt-1 text-sm text-mist">
-              عدد آيات كل سورة التي لها نظير في موضع آخر. {formatNumber(data!.pairs.length)} زوجاً
-              من الآيات المتقاربة، و{formatNumber(data!.repeats.length)} آية تتكرر بلفظها في أكثر من
-              موضع.
+              عدد آيات كل سورة التي لها نظير في موضع آخر. في القرآن كله{' '}
+              {formatNumber(data!.pairs.length)} زوجاً من الآيات المتقاربة، و
+              {formatNumber(data!.repeats.length)} آية تتكرر كل منها بلفظها، فتقع في{' '}
+              {formatNumber(data!.repeats.reduce((n, g) => n + g.length, 0))} موضعاً.
             </p>
             <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
               {surahs.map((s) => {

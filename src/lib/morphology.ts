@@ -4,26 +4,27 @@
  */
 import type { Segment } from '../data/schemas'
 
+/** Most specific first: a word tagged both ACT_PCPL and ADJ is an active participle used as an adjective. */
 const NOUN_KINDS: [string, string][] = [
   ['PN', 'اسم علم'],
-  ['ADJ', 'صفة'],
   ['DEM', 'اسم إشارة'],
   ['REL', 'اسم موصول'],
-  ['T', 'ظرف زمان'],
-  ['LOC', 'ظرف مكان'],
-  ['VN', 'مصدر'],
-  ['ACT_PCPL', 'اسم فاعل'],
-  ['PASS_PCPL', 'اسم مفعول'],
   ['NV', 'اسم فعل'],
   ['INTG', 'اسم استفهام'],
   ['COND', 'اسم شرط'],
+  ['T', 'ظرف زمان'],
+  ['LOC', 'ظرف مكان'],
+  ['ACT_PCPL', 'اسم فاعل'],
+  ['PASS_PCPL', 'اسم مفعول'],
+  ['VN', 'مصدر'],
+  ['ADJ', 'صفة'],
 ]
 
 const PARTICLES: [string, string][] = [
   ['DET', 'أداة تعريف'],
   ['CONJ', 'حرف عطف'],
   ['REM', 'حرف استئناف'],
-  ['CIRC', 'واو الحال'],
+  ['CIRC', 'حرف حال'],
   ['COM', 'واو المعية'],
   ['NEG', 'حرف نفي'],
   ['PRO', 'حرف نهي'],
@@ -63,9 +64,13 @@ const PARTICLES: [string, string][] = [
 const CASE: Record<string, string> = { NOM: 'مرفوع', ACC: 'منصوب', GEN: 'مجرور' }
 const MOOD: Record<string, string> = { IND: 'مرفوع', SUBJ: 'منصوب', JUS: 'مجزوم' }
 const ASPECT: Record<string, string> = { PERF: 'ماضٍ', IMPF: 'مضارع', IMPV: 'أمر' }
+/**
+ * Derived verb patterns (forms II–XII) of a triliteral root. Form I is not given a single
+ * pattern: it may be فَعَلَ, فَعِلَ or فَعُلَ, which the corpus does not distinguish.
+ */
 const FORMS = [
   '',
-  'فَعَلَ',
+  '',
   'فَعَّلَ',
   'فاعَلَ',
   'أَفْعَلَ',
@@ -97,6 +102,19 @@ function personNumberGender(tag: string): string | null {
     .join('، ')
 }
 
+/** Pattern of a verb from the corpus form number and the number of root letters. */
+function verbPattern(rootLetters: number, vf: number): string | null {
+  if (rootLetters === 4) {
+    if (vf === 1) return 'رباعي مجرّد على وزن فَعْلَلَ'
+    if (vf === 2) return 'رباعي مزيد على وزن تَفَعْلَلَ'
+    if (vf === 4) return 'رباعي مزيد على وزن افْعَلَلَّ'
+    return null
+  }
+  if (rootLetters !== 3) return null
+  if (vf === 1) return 'ثلاثي مجرّد'
+  return FORMS[vf] ? `ثلاثي مزيد على وزن ${FORMS[vf]}` : null
+}
+
 export interface SegmentInfo {
   form: string
   label: string
@@ -122,10 +140,19 @@ function describeSegment([form, tag, raw]: Segment): SegmentInfo {
     const mood = f.find((x) => x.startsWith('MOOD:'))?.slice(5)
     if (mood && MOOD[mood]) details.push(MOOD[mood])
     const vf = Number(f.find((x) => x.startsWith('VF:'))?.slice(3))
-    if (vf && FORMS[vf]) details.push(`على وزن ${FORMS[vf]}`)
+    const root = f.find((x) => x.startsWith('ROOT:'))?.slice(5) ?? ''
+    const pattern = verbPattern([...root].length, vf)
+    if (pattern) details.push(pattern)
   } else if (tag === 'N') {
-    if (has('PRON')) label = has('SUFF') ? 'ضمير متصل' : 'ضمير'
-    else label = NOUN_KINDS.find(([k]) => has(k))?.[1] ?? 'اسم'
+    const kinds = NOUN_KINDS.filter(([k]) => has(k)).map(([, v]) => v)
+    if (has('PRON')) label = has('SUFF') ? 'ضمير متصل' : 'ضمير منفصل'
+    else label = kinds[0] ?? 'اسم'
+    if (has('NV')) {
+      const aspect = f.find((x) => ASPECT[x])
+      if (aspect) label = `اسم فعل ${ASPECT[aspect]}`
+    }
+    // a participle or verbal noun used as an adjective keeps both descriptions
+    if (!has('PRON') && kinds.length > 1) details.push(...kinds.slice(1))
     const c = f.find((x) => CASE[x])
     if (c) details.push(CASE[c]!)
     if (has('INDEF')) details.push('نكرة')
@@ -138,7 +165,7 @@ function describeSegment([form, tag, raw]: Segment): SegmentInfo {
   for (const x of f) {
     if (tag === 'P') break
     const png = personNumberGender(x)
-    if (png && !(tag === 'N' && x === 'P')) details.push(png)
+    if (png) details.push(png)
   }
   return { form, label, details }
 }

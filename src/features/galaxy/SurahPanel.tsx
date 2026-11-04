@@ -67,7 +67,7 @@ export function SurahPanel({
       <dl className="mt-5 grid grid-cols-3 gap-x-4 gap-y-3 border-y border-[#d8c48e] py-4">
         <Fact label="النزول" value={revelationLabel(surah.revelation)} />
         <Fact label="ترتيب النزول" value={toArabicDigits(surah.order)} />
-        <Fact label="الجزء" value={toArabicDigits(surah.juz)} />
+        <Fact label="تبدأ في الجزء" value={toArabicDigits(surah.juz)} />
         <Fact label="الآيات" value={toArabicDigits(surah.ayahs)} />
         <Fact label="الكلمات" value={formatNumber(surah.words)} />
       </dl>

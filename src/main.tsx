@@ -1,9 +1,9 @@
 import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
-import '@fontsource/amiri-quran/400.css'
 // Typography by role:
-//   Amiri Quran        — the Quranic text only
+//   KFGQPC HAFS Uthmanic Script — the Quranic text only (public/fonts, the King Fahd
+//                        Complex's own font for its own text encoding)
 //   Amiri              — headings and long-form reading (classical Naskh, same design family)
 //   IBM Plex Sans Arabic — interface, labels, numbers and data
 import '@fontsource/amiri/400.css'

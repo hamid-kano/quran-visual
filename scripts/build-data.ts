@@ -1,13 +1,12 @@
 /**
  * Generates every JSON file the interface reads, from vetted sources only:
- *   - Quran text (Uthmani, Hafs):    npm `quran-json` (text from QuranEnc / KFGQPC)
+ *   - Quran text (Uthmani, Hafs):    sources/kfgqpc-hafs-v18.json (King Fahd Complex), via quran-text.ts
  *   - Surah metadata & order:        npm `quran-meta` (Tanzil metadata)
  *   - Roots & lemmas:                sources/quran-morphology.txt (Quranic Arabic Corpus v0.4, revised)
  *
  * Everything here is counting and measurement. No interpretation of meaning is produced.
  * Output is deterministic: the same inputs always give byte-identical files.
  */
-import { createRequire } from 'node:module'
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { getSurahInfo, findJuz, type Surah as MetaSurah } from 'quran-meta/hafs'
@@ -25,20 +24,11 @@ import {
   type RootEdge,
 } from '../src/data/schemas.ts'
 
-const require = createRequire(import.meta.url)
 const OUT = 'public/data'
 const DATA_VERSION = 1
 
-interface QuranJsonSurah {
-  id: number
-  name: string
-  transliteration: string
-  type: 'meccan' | 'medinan'
-  total_verses: number
-  verses: { id: number; text: string }[]
-}
-
-const quran: QuranJsonSurah[] = require('quran-json/dist/quran.json')
+import { quran } from './quran-text.ts'
+import { ayahWords } from '../src/lib/quran.ts'
 
 // ---------- deterministic PRNG (mulberry32) ----------
 function rng(seed: number) {
@@ -210,6 +200,8 @@ const surahs: Surah[] = quran.map((q) => {
   ]
   if (ayahCount !== q.verses.length) throw new Error(`Ayah count mismatch in surah ${q.id}`)
   if (isMeccan !== (q.type === 'meccan')) throw new Error(`Revelation type mismatch in ${q.id}`)
+  if (findJuz(q.id as MetaSurah, 1 as never) !== q.verses[0]!.juz)
+    throw new Error(`Juz of ${q.id} disagrees between KFGQPC and Tanzil`)
   const keyRoots = [...profiles[q.id]!.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 10)
@@ -222,8 +214,9 @@ const surahs: Surah[] = quran.map((q) => {
     revelation: q.type,
     order,
     ayahs: ayahCount,
-    words: wordsPerSurah.get(q.id)!.size,
-    juz: findJuz(q.id as MetaSurah, 1 as never) as number,
+    // words as the mushaf separates them (the corpus differs in a handful of joins)
+    words: q.verses.reduce((n, v) => n + ayahWords(v.text).length, 0),
+    juz: q.verses[0]!.juz,
     keyRoots,
     neighbors: neighborsOf(q.id).map((o) => ({ surah: o, similarity: round(sim[q.id]![o]!) })),
     position: [round(node.x * scale, 2), round(node.y * scale, 2), round(node.z * scale, 2)],

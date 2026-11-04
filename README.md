@@ -52,16 +52,17 @@ pnpm data     # يولّد public/data
 pnpm dev
 ```
 
-قبل كل نشر: `pnpm test` يتحقق من ١١٤ سورة و٦٢٣٦ آية و٧٧٬٤٢٩ كلمة، ومطابقة النص لبياناته، وسلامة البصمات والمتشابهات والتحليل الصرفي.
+قبل كل نشر: `pnpm test` يتحقق من مطابقة النص لملف المجمع حرفاً حرفاً، وعدد السور والآيات والكلمات، وكل رقم يعرضه الموقع على أنه حقيقة. التفاصيل في `VERIFICATION.md`.
 
 ## المصادر والتراخيص
 
-- **النص العثماني (حفص)**: [QuranEnc](https://quranenc.com) عبر حزمة [`quran-json`](https://www.npmjs.com/package/quran-json) (CC BY-SA 4.0).
+- **النص العثماني (حفص)**: ملف مجمع الملك فهد لطباعة المصحف الشريف، نص حفص الإصدار ١٨ (`sources/kfgqpc-hafs-v18.json`)، كما هو دون تعديل. وقد قورن بنص [QuranEnc](https://quranenc.com) (انظر `VERIFICATION.md`).
+- **أسماء السور بالحروف اللاتينية**: حزمة [`quran-json`](https://www.npmjs.com/package/quran-json) (CC BY-SA 4.0).
 - **بيانات السور وترتيب النزول**: مشروع [Tanzil](https://tanzil.net) عبر حزمة [`quran-meta`](https://www.npmjs.com/package/quran-meta) (MIT).
 - **الجذور والمداخل**: [Quranic Arabic Corpus](https://corpus.quran.com) v0.4، بنسخة [mustafa0x/quran-morphology](https://github.com/mustafa0x/quran-morphology) المنقّحة (GNU GPL). الملف في `sources/` كما هو دون تعديل.
-- **الخطوط** (SIL OFL)، لكلٍّ منها دور واحد:
-  - **Amiri Quran**: نص القرآن الكريم وحده.
-  - **Amiri**: العناوين والقراءة الطويلة، من عائلة التصميم نفسها.
-  - **IBM Plex Sans Arabic**: الواجهة والأرقام والبيانات.
+- **الخطوط**، لكلٍّ منها دور واحد:
+  - **خط المصحف من مجمع الملك فهد** (KFGQPC HAFS Uthmanic Script، الإصدار ١٨): نص القرآن الكريم وحده، لأنه الخط الذي وُضع ترميز النص له. يُوزَّع دون تعديل وفق ترخيصه (`public/fonts/KFGQPC-FONT-LICENSE.txt`)، وليس ترخيصه SIL OFL.
+  - **Amiri** (SIL OFL): العناوين والقراءة الطويلة.
+  - **IBM Plex Sans Arabic** (SIL OFL): الواجهة والأرقام والبيانات.
 
 الشيفرة مرخّصة بـ MIT (انظر `LICENSE`). البيانات المشتقة تخضع لتراخيص مصادرها أعلاه.

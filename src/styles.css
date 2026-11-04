@@ -1,6 +1,18 @@
 @import 'tailwindcss';
 
 /*
+ * The King Fahd Complex's Uthmanic Hafs font, made for the exact encoding of its text file
+ * (open tanween, imala and pause signs, ayah-number circles). It is shipped unmodified with
+ * its licence (public/fonts/KFGQPC-FONT-LICENSE.txt). `block` avoids ever showing the text
+ * in a fallback font that lacks some of its marks.
+ */
+@font-face {
+  font-family: 'KFGQPC Hafs';
+  src: url('/fonts/kfgqpc-hafs-18.woff2') format('woff2');
+  font-display: block;
+}
+
+/*
  * Palette drawn from mushaf illumination (التذهيب): lapis ground, gold leaf,
  * vellum pages, iron-gall ink, and verdigris — the green of old copper pigments.
  */
@@ -19,7 +31,7 @@
   --color-mist: #a9b8cf;
 
   /* Each family has one job; fallbacks are the platforms' own Arabic faces. */
-  --font-quran: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  --font-quran: 'KFGQPC Hafs', 'Amiri', 'Traditional Arabic', serif;
   --font-display: 'Amiri', 'Times New Roman', 'Traditional Arabic', serif;
   --font-ui: 'IBM Plex Sans Arabic', 'Segoe UI', 'Geeza Pro', Tahoma, system-ui, sans-serif;
 }
@@ -52,14 +64,15 @@
   /* Ayah text: generous leading so diacritics never collide. */
   .ayah {
     font-family: var(--font-quran);
-    font-size: 1.45rem;
-    line-height: 2.35;
+    font-size: 1.6rem;
+    line-height: 2.3;
     color: var(--color-ink);
   }
+  /* Arabic-Indic digits in the KFGQPC font draw the mushaf's ayah-end circle. */
   .ayah-mark {
     font-family: var(--font-quran);
     color: #8a6a1f;
-    padding-inline: 0.2em;
+    padding-inline-start: 0.15em;
   }
 
   /* A vellum page with a thin gold rule inset, like a mushaf frame. */

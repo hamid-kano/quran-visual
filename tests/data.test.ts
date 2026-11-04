@@ -5,6 +5,7 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { RootIndex, RootOccurrences, SurahIndex, SurahText } from '../src/data/schemas.ts'
+import { BASMALA } from '../src/lib/quran.ts'
 
 const read = (f: string) => JSON.parse(readFileSync(`public/data/${f}`, 'utf8'))
 const index = SurahIndex.parse(read('surahs.json'))
@@ -20,8 +21,8 @@ describe('surahs', () => {
     expect(index.surahs.reduce((n, s) => n + s.ayahs, 0)).toBe(6236)
   })
 
-  it('counts 77,429 words, matching the Quranic Arabic Corpus', () => {
-    expect(index.surahs.reduce((n, s) => n + s.words, 0)).toBe(77429)
+  it('counts 77,430 words as the mushaf separates them', () => {
+    expect(index.surahs.reduce((n, s) => n + s.words, 0)).toBe(77430)
   })
 
   it('has 86 Meccan and 28 Medinan surahs', () => {
@@ -56,7 +57,7 @@ describe('texts', () => {
 
   it('opens with the basmala in al-Fatiha', () => {
     const t = SurahText.parse(read('surah/1.json'))
-    expect(t.ayahs[0]!.text.startsWith('بِسۡمِ')).toBe(true)
+    expect(t.ayahs[0]!.text).toBe(BASMALA)
   })
 })
 

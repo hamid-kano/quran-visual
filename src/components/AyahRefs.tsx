@@ -40,7 +40,7 @@ export function Distribution({
               height={h}
               fill={s.revelation === 'meccan' ? '#a6852f' : '#3f8a77'}
             >
-              <title>{`سورة ${s.name}: ${toArabicDigits(v)} آية`}</title>
+              <title>{`سورة ${s.name}: ${countOf(v, AYAH)}`}</title>
             </rect>
           )
         })}

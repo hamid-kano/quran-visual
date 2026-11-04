@@ -259,3 +259,17 @@ describe('Quranic words quoted in the documentation', () => {
     }
   })
 })
+
+describe('Arabic number agreement', () => {
+  it('chooses the counted noun by the number', async () => {
+    const { AYAH, PLACE, TIME, countOf } = await import('../src/lib/arabic.ts')
+    expect(countOf(1, AYAH)).toBe('آية واحدة')
+    expect(countOf(2, AYAH)).toBe('آيتان')
+    expect(countOf(3, AYAH)).toBe('٣ آيات')
+    expect(countOf(10, TIME)).toBe('١٠ مرات')
+    expect(countOf(11, PLACE)).toBe('١١ موضعاً')
+    expect(countOf(103, AYAH)).toBe('١٠٣ آيات')
+    expect(countOf(257, PLACE)).toBe('٢٥٧ موضعاً')
+    expect(countOf(300, PLACE)).toBe('٣٠٠ موضع')
+  })
+})

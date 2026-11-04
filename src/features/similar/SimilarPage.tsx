@@ -6,7 +6,15 @@ import type { SimilarIndex, Surah } from '../../data/schemas'
 import { ErrorNote, Loading } from '../../components/Status'
 import { AyahMark } from '../../components/AyahText'
 import { SearchBox, type SearchItem } from '../../components/SearchBox'
-import { AYAH, countOf, formatNumber, formatPercent, toArabicDigits } from '../../lib/arabic'
+import {
+  AYAH,
+  PAIR,
+  PLACE,
+  countOf,
+  formatNumber,
+  formatPercent,
+  toArabicDigits,
+} from '../../lib/arabic'
 import { ayahWords, commonWords, vocalKey, wordKey } from '../../lib/quran'
 
 type Ref = [number, number]
@@ -259,9 +267,13 @@ export default function SimilarPage() {
             </h2>
             <p className="mt-1 text-sm text-mist">
               عدد آيات كل سورة التي لها نظير في موضع آخر. في القرآن كله{' '}
-              {formatNumber(data!.pairs.length)} زوجاً من الآيات المتقاربة، و
-              {formatNumber(data!.repeats.length)} آية تتكرر كل منها بلفظها، فتقع في{' '}
-              {formatNumber(data!.repeats.reduce((n, g) => n + g.length, 0))} موضعاً.
+              {countOf(data!.pairs.length, PAIR)} من الآيات المتقاربة، و
+              {countOf(data!.repeats.length, AYAH)} تتكرر كل منها بلفظها، فتقع في{' '}
+              {countOf(
+                data!.repeats.reduce((n, g) => n + g.length, 0),
+                PLACE,
+              )}
+              .
             </p>
             <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
               {surahs.map((s) => {

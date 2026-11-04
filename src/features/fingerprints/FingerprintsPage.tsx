@@ -97,7 +97,7 @@ function Detail({ surah, fp, surahs }: { surah: Surah; fp: Fingerprint; surahs: 
           size={520}
           active={active}
           onActive={(a) => a && setActive(a)}
-          title={`بصمة سورة ${surah.name}، ${toArabicDigits(surah.ayahs)} آية`}
+          title={`بصمة سورة ${surah.name}، ${countOf(surah.ayahs, AYAH)}`}
         />
         <p className="mt-2 text-center text-sm text-mist">
           مرّر على الخطوط أو انقرها لقراءة الآية.

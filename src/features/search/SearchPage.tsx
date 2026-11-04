@@ -6,7 +6,7 @@ import { useAsync } from '../../data/useAsync'
 import { ErrorNote, Loading } from '../../components/Status'
 import { AyahMark } from '../../components/AyahText'
 import { RootLetters } from '../../components/RootLetters'
-import { formatNumber, toArabicDigits } from '../../lib/arabic'
+import { AYAH, TIME, countOf, formatNumber, toArabicDigits } from '../../lib/arabic'
 import { ayahWords } from '../../lib/quran'
 import { matchAyah, parseQuery, queryKeys, type SearchMode } from '../../lib/search'
 
@@ -47,7 +47,7 @@ function Distribution({ perSurah, surahs }: { perSurah: Map<number, number>; sur
               height={h}
               fill={s.revelation === 'meccan' ? '#e2c46f' : '#5fb7a1'}
             >
-              <title>{`سورة ${s.name}: ${toArabicDigits(v)} آية`}</title>
+              <title>{`سورة ${s.name}: ${countOf(v, AYAH)}`}</title>
             </rect>
           )
         })}
@@ -118,7 +118,7 @@ function Results({ hits, byId }: { hits: Hit[]; byId: Map<number, Surah> }) {
           onClick={() => setShown((n) => n + PAGE)}
           className="mt-2 rounded-full border border-[#cdb67a] px-4 py-1.5 text-sm text-ink hover:bg-vellum-deep"
         >
-          عرض المزيد ({formatNumber(hits.length - shown)} آية متبقية)
+          عرض المزيد (بقي {countOf(hits.length - shown, AYAH)})
         </button>
       )}
     </div>
@@ -328,7 +328,7 @@ export default function SearchPage() {
                     className="inline-flex items-baseline gap-2 rounded-full border border-gold/30 px-3 py-1 hover:bg-gold/10"
                   >
                     <RootLetters root={r.root} className="font-display text-lg text-gold-soft" />
-                    <span className="text-xs">{formatNumber(r.count)} مرة</span>
+                    <span className="text-xs">{countOf(r.count, TIME)}</span>
                   </Link>
                 ))}
               </div>

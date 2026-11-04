@@ -4,7 +4,7 @@ import { loadRoots, loadSurahs } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
 import { ErrorNote, Loading } from '../../components/Status'
 import { SearchBox, type SearchItem } from '../../components/SearchBox'
-import { TIME, countOf, formatNumber, spacedRoot } from '../../lib/arabic'
+import { ROOT, TIME, countOf, spacedRoot } from '../../lib/arabic'
 import { RootPanel } from './RootPanel'
 
 const RootGraph = lazy(() => import('./RootGraph'))
@@ -51,14 +51,14 @@ export default function RootsPage() {
       >
         <h1 className="font-display text-3xl font-bold text-gold-soft">شبكة الجذور</h1>
         <p className="mt-1 text-[0.95rem] leading-relaxed text-mist">
-          {formatNumber(inGraph)} جذراً من أكثر الجذور وروداً. يصل الخط بين جذرين يجتمعان في الآيات
-          أكثر مما تقتضيه الصدفة، وتشترك الجذور المتقاربة في لون واحد.
+          {countOf(inGraph, ROOT)} من أكثر الجذور وروداً. يصل الخط بين جذرين يجتمعان في الآيات أكثر
+          مما تقتضيه الصدفة، وتشترك الجذور المتقاربة في لون واحد.
         </p>
         <div className="mt-3">
           <SearchBox
             items={searchItems}
             label="ابحث عن جذر"
-            placeholder={`ابحث في ${formatNumber(data!.roots.length)} جذراً، مثل: رحم`}
+            placeholder={`ابحث في ${countOf(data!.roots.length, ROOT)}، مثل: رحم`}
             onChoose={select}
           />
         </div>

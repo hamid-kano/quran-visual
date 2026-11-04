@@ -146,6 +146,15 @@ export const SurahMorphology = z.object({
   ayahs: z.array(z.array(z.array(Segment)).nullable()),
 })
 
+// ---------- search ----------
+
+/** Per surah, per ayah: words separated by spaces, a word's alternative keys by "|". */
+export const SearchIndex = z.object({
+  version: z.number().int(),
+  surahs: z.array(z.array(z.string().min(1))).length(114),
+})
+
+export type SearchIndex = z.infer<typeof SearchIndex>
 export type Fingerprint = z.infer<typeof Fingerprint>
 export type NameIndex = z.infer<typeof NameIndex>
 export type NameNode = z.infer<typeof NameNode>

@@ -246,9 +246,13 @@ describe('Quranic words quoted in the documentation', () => {
     // marks used only in the Quranic encoding identify a quoted Quranic word
     // eslint-disable-next-line no-misleading-character-class -- a set of combining marks is the intent
     const quranic = /[ٱٰ۪ۡۢٓٞٗ]/
-    for (const file of ['VERIFICATION.md', 'src/features/about/AboutPage.tsx']) {
+    for (const file of [
+      'VERIFICATION.md',
+      'src/features/about/AboutPage.tsx',
+      'src/features/search/SearchPage.tsx',
+    ]) {
       const words = readFileSync(file, 'utf8')
-        .split(/[\s«»()،.:,]+/)
+        .split(/[\s«»()،.:,<>"=/]+/)
         .filter((w) => quranic.test(w))
       expect(words.length, file).toBeGreaterThan(0)
       for (const w of words) expect(all, `${file}: ${w}`).toContain(w)

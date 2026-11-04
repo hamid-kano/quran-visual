@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router'
 
 const links = [
   { to: '/', label: 'مجرّة السور', end: true },
+  { to: '/search', label: 'البحث', end: false },
   { to: '/fingerprints', label: 'بصمات السور', end: false },
   { to: '/journey', label: 'رحلة النزول', end: false },
   { to: '/roots', label: 'شبكة الجذور', end: false },

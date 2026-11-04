@@ -15,6 +15,7 @@ const routes = [
   'names',
   'similar',
   'about',
+  'search',
   ...surahs.flatMap((s) => [`surah/${s}`, `fingerprints/${s}`, `similar/${s}`]),
   ...roots.map((r) => `roots/${r}`),
   ...names.map((n) => `names/${n}`),

@@ -10,6 +10,7 @@ import {
   type SurahMorphology as SurahMorphologyT,
   RootIndex,
   RootOccurrences,
+  SearchIndex,
   SurahIndex,
   SurahText,
   type RootIndex as RootIndexT,
@@ -49,3 +50,13 @@ export const loadNames = (): Promise<NameIndexT> => load('names.json', NameIndex
 export const loadSimilar = (): Promise<SimilarIndexT> => load('similar.json', SimilarIndex)
 export const loadMorphology = (id: number): Promise<SurahMorphologyT> =>
   load(`morph/${id}.json`, SurahMorphology)
+
+/** Search keys of every word, parsed once into arrays: [surah][ayah][word][key]. */
+let searchCache: Promise<string[][][][]> | null = null
+export function loadSearchIndex(): Promise<string[][][][]> {
+  searchCache ??= load('search.json', SearchIndex).then((ix) =>
+    ix.surahs.map((ayahs) => ayahs.map((a) => a.split(' ').map((w) => w.split('|')))),
+  )
+  searchCache.catch(() => (searchCache = null))
+  return searchCache
+}

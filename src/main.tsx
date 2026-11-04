@@ -22,6 +22,7 @@ const FingerprintsPage = lazy(() => import('./features/fingerprints/Fingerprints
 const JourneyPage = lazy(() => import('./features/journey/JourneyPage'))
 const NamesPage = lazy(() => import('./features/names/NamesPage'))
 const SimilarPage = lazy(() => import('./features/similar/SimilarPage'))
+const SearchPage = lazy(() => import('./features/search/SearchPage'))
 
 const page = (el: React.ReactNode) => <Suspense fallback={<Loading />}>{el}</Suspense>
 
@@ -41,6 +42,7 @@ const router = createBrowserRouter(
         { path: 'names/:name', element: page(<NamesPage />) },
         { path: 'similar', element: page(<SimilarPage />) },
         { path: 'similar/:id', element: page(<SimilarPage />) },
+        { path: 'search', element: page(<SearchPage />) },
         { path: 'about', element: page(<AboutPage />) },
         { path: '*', element: page(<GalaxyPage />) },
       ],

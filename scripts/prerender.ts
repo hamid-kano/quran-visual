@@ -16,6 +16,7 @@ import * as fontkit from 'fontkit'
 import { Resvg } from '@resvg/resvg-js'
 import {
   Fingerprints,
+  Lexicon,
   NameIndex,
   RootIndex,
   SurahIndex,
@@ -25,6 +26,7 @@ import {
 import type { Surah } from '../src/data/schemas.ts'
 import {
   AYAH,
+  ENTRY,
   ROOT,
   SURAH,
   TIME,
@@ -49,6 +51,7 @@ const surahs = SurahIndex.parse(read('surahs.json')).surahs
 const fingerprints = Fingerprints.parse(read('fingerprints.json'))
 const roots = RootIndex.parse(read('roots.json')).roots
 const names = NameIndex.parse(read('names.json')).names
+const lexicon = Lexicon.parse(read('lexicon.json'))
 const topics = TopicIndex.parse(read('topics.json')).nodes
 
 // ---------- text as outlines ----------
@@ -254,6 +257,11 @@ const sections: [string, string, string][] = [
     'آيات تتقارب ألفاظها، تُعرض مع نظائرها وتُبرز الفروق بينها كلمة كلمة.',
   ],
   [
+    'words',
+    'معجم الألفاظ',
+    `ألفاظ القرآن الكريم بمداخلها المعجمية: ${countOf(lexicon.entries.length, ENTRY)}، لكل مدخل عدد وروده وصيغه في المصحف ومواضعه وجذره.`,
+  ],
+  [
     'review',
     'مراجعة أهل الاختصاص',
     'ما نرجو من أهل الاختصاص في علوم القرآن والعربية مراجعته في المنصة قبل إطلاقها العام، وكيف تُرسل الملاحظات.',
@@ -314,6 +322,13 @@ for (const n of names) {
     ...SITE_IMAGE,
   })
 }
+
+for (const e of lexicon.entries)
+  pages.set(`words/${e.slug}`, {
+    title: titled(`${stripTashkeel(e.lemma)} في معجم الألفاظ`),
+    description: `«${e.lemma}» في القرآن الكريم: ورد ${countOf(e.count, TIME)} في ${countOf(e.ayahs, AYAH)} من ${countOf(e.surahs, SURAH)}، مع صيغه في المصحف ومواضعه${e.root ? ` وألفاظ جذره «${spacedRoot(e.root)}»` : ''}.`,
+    ...SITE_IMAGE,
+  })
 
 // ---------- what each page needs first ----------
 //
@@ -422,6 +437,12 @@ function hintsFor(route: string): Hints {
       }
     case 'about':
       return { modules: one(feature('about/AboutPage')), data: [], quranFont: false }
+    case 'words':
+      return {
+        modules: one(feature('words/WordsPage')),
+        data: ['lexicon.json', 'surahs.json', ...(a ? [`lex/${encodeURIComponent(a)}.json`] : [])],
+        quranFont: true,
+      }
     case 'review':
       return { modules: one(feature('review/ReviewPage')), data: [], quranFont: false }
     default:

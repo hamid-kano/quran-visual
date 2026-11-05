@@ -114,6 +114,22 @@ export default function ReviewPage() {
               ]}
             />
           </Ask>
+          <p>
+            ومن المدوّنة نفسها{' '}
+            <Link to="/words" className={a}>
+              معجم الألفاظ
+            </Link>
+            : تُردّ فيه كل كلمة إلى مدخلها، ويُوصف المدخل بالوصف الأغلب على مواضعه. نرجو النظر في
+            وجاهة ذلك في مداخل مثل{' '}
+            <Link to={`/words/${encodeURIComponent('ما-حرف')}`} className={a}>
+              «ما» حرفاً
+            </Link>{' '}
+            و
+            <Link to={`/words/${encodeURIComponent('رَحْمَة')}`} className={a}>
+              «رَحْمَة»
+            </Link>
+            .
+          </p>
         </Part>
 
         <Part n={3} title="خريطة الموضوعات">

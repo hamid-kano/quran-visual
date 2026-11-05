@@ -6,6 +6,7 @@ import { useAsync } from '../data/useAsync'
 import { AYAH, countOf, toArabicDigits } from '../lib/arabic'
 import { AyahMark } from './AyahText'
 import { ayahPath } from '../lib/links'
+import { isWord } from '../lib/quran'
 
 const PAGE = 8
 
@@ -63,12 +64,35 @@ export function Distribution({
 }
 
 /** A paged list of ayahs, each with its reference and text. */
+/** An ayah's text with the words at the given indexes (as counted by ayahWords) marked. */
+function MarkedText({ text, words }: { text: string; words: number[] }) {
+  let n = -1
+  return (
+    <>
+      {text.split(/([ \u00a0]+)/).map((t, i) => {
+        if (!isWord(t)) return t
+        n++
+        return words.includes(n) ? (
+          <mark key={i} className="rounded-sm bg-[#efd98f] px-0.5 text-inherit">
+            {t}
+          </mark>
+        ) : (
+          t
+        )
+      })}
+    </>
+  )
+}
+
 export function OccurrenceList({
   list,
   byId,
+  marks,
 }: {
   list: [number, number][]
   byId: Map<number, Surah>
+  /** Words to mark in each ayah, by "surah:ayah", as indexes into its words. */
+  marks?: Map<string, number[]>
 }) {
   const [shown, setShown] = useState(PAGE)
   const visible = list.slice(0, shown)
@@ -93,7 +117,12 @@ export function OccurrenceList({
               سورة {byId.get(s)?.name}، الآية {toArabicDigits(a)}
             </Link>
             <p className="ayah mt-1 text-[1.3rem] leading-[2.2]">
-              {textOf.get(`${s}:${a}`) ?? '…'} <AyahMark n={a} />
+              {textOf.has(`${s}:${a}`) ? (
+                <MarkedText text={textOf.get(`${s}:${a}`)!} words={marks?.get(`${s}:${a}`) ?? []} />
+              ) : (
+                '…'
+              )}{' '}
+              <AyahMark n={a} />
             </p>
           </li>
         ))}

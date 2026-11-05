@@ -7,6 +7,7 @@ const links = [
   { to: '/fingerprints', label: 'بصمات السور', end: false },
   { to: '/journey', label: 'رحلة النزول', end: false },
   { to: '/roots', label: 'شبكة الجذور', end: false },
+  { to: '/words', label: 'معجم الألفاظ', end: false },
   { to: '/topics', label: 'الموضوعات', end: false },
   { to: '/names', label: 'الأعلام', end: false },
   { to: '/similar', label: 'المتشابهات', end: false },

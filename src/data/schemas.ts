@@ -182,5 +182,37 @@ export type Fingerprint = z.infer<typeof Fingerprint>
 export type NameIndex = z.infer<typeof NameIndex>
 export type NameNode = z.infer<typeof NameNode>
 export type SimilarIndex = z.infer<typeof SimilarIndex>
+export const LexiconIndexEntry = z.object({
+  /** Address in the lexicon: the lemma, with type or root added where lemmas are spelt alike. */
+  slug: z.string().min(1),
+  lemma: z.string().min(1),
+  tag: z.enum(['N', 'V', 'P']),
+  /** The description most of its occurrences carry: اسم، صفة، اسم علم، فعل، حرف جر… */
+  kind: z.string().min(1),
+  root: z.string().nullable(),
+  count: z.number().int().positive(),
+  ayahs: z.number().int().positive(),
+  surahs: z.number().int().positive(),
+})
+export const Lexicon = z.object({
+  /** Words in the mushaf, and how many of them have a lemma (and so are counted here). */
+  words: z.number().int().positive(),
+  counted: z.number().int().positive(),
+  /** Most frequent first. */
+  entries: z.array(LexiconIndexEntry),
+})
+export const LexiconEntry = z.object({
+  /** Every occurrence as [surah, ayah, word index in the ayah], in mushaf order. */
+  occ: z.array(z.tuple([z.number().int(), z.number().int(), z.number().int()])),
+  /** How its occurrences are described, most frequent first: [description, count]. */
+  kinds: z.array(z.tuple([z.string(), z.number().int().positive()])),
+  /** The forms it takes in the mushaf, most frequent first. Pause signs, and marks that depend
+   *  only on the neighbouring word, do not make a form of their own. */
+  forms: z.array(z.tuple([z.string(), z.number().int().positive()])),
+})
+
 export type Segment = z.infer<typeof Segment>
 export type SurahMorphology = z.infer<typeof SurahMorphology>
+export type Lexicon = z.infer<typeof Lexicon>
+export type LexiconIndexEntry = z.infer<typeof LexiconIndexEntry>
+export type LexiconEntry = z.infer<typeof LexiconEntry>

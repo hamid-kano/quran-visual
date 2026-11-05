@@ -1,6 +1,8 @@
 import type { z } from 'zod'
 import {
   Fingerprints,
+  Lexicon,
+  LexiconEntry,
   NameIndex,
   SimilarIndex,
   SurahMorphology,
@@ -64,3 +66,8 @@ export function loadSearchIndex(): Promise<string[][][][]> {
 }
 
 export const loadTopics = (): Promise<TopicIndexT> => load('topics.json', TopicIndex)
+
+export const loadLexicon = (): Promise<z.infer<typeof Lexicon>> => load('lexicon.json', Lexicon)
+/** One lexicon entry's places and forms, by its address (slug). */
+export const loadLexEntry = (slug: string): Promise<z.infer<typeof LexiconEntry>> =>
+  load(`lex/${encodeURIComponent(slug)}.json`, LexiconEntry)

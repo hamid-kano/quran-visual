@@ -1,4 +1,6 @@
 import { useEffect, useMemo } from 'react'
+import { Link } from 'react-router'
+import { rootLemmaPath } from '../../lib/lexicon'
 import type { RootIndex, RootNode, Surah } from '../../data/schemas'
 import { loadRootOccurrences } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
@@ -87,11 +89,17 @@ export function RootPanel({
           <h3 id="lemmas" className="font-display text-xl font-bold">
             ما اشتُقّ منه
           </h3>
+          <p className="mt-1 text-sm text-ink-soft">اختر لفظاً لتراه في معجم الألفاظ.</p>
           <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
             {node.lemmas.map((l) => (
-              <li key={l.lemma} className="flex items-baseline gap-1.5">
-                <span className="font-quran text-2xl text-ink">{l.lemma}</span>
-                <span className="text-xs text-ink-soft">{toArabicDigits(l.count)}</span>
+              <li key={l.lemma}>
+                <Link
+                  to={rootLemmaPath(l.lemma, node.root)}
+                  className="-my-1 inline-flex items-baseline gap-1.5 rounded px-1 py-1 hover:bg-vellum-deep"
+                >
+                  <span className="font-quran text-2xl text-ink">{l.lemma}</span>
+                  <span className="text-xs text-ink-soft">{toArabicDigits(l.count)}</span>
+                </Link>
               </li>
             ))}
           </ul>

@@ -127,7 +127,7 @@ export interface WordInfo {
   segments: SegmentInfo[]
 }
 
-function describeSegment([form, tag, raw]: Segment): SegmentInfo {
+export function describeSegment([form, tag, raw]: Segment): SegmentInfo {
   const f = raw.split('|').filter(Boolean)
   const has = (x: string) => f.includes(x)
   const details: string[] = []

@@ -16,8 +16,10 @@ export const stripMarks = (text: string) => text.replace(MARKS, '')
  * Words of an ayah as written, skipping any standalone sign (۞, ۩ …).
  * Only ordinary and no-break spaces separate words in the KFGQPC text.
  */
-export const ayahWords = (text: string) =>
-  text.split(/[ \u00a0]+/).filter((w) => LETTER.test(stripMarks(w)))
+export const ayahWords = (text: string) => text.split(/[ \u00a0]+/).filter(isWord)
+
+/** Whether a space-separated token of the text is a word (not a standalone sign such as ۞). */
+export const isWord = (token: string) => LETTER.test(stripMarks(token))
 
 /**
  * Comparison key of a word: its letters as pronounced, with spelling variants unified.

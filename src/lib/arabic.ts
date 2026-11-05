@@ -65,6 +65,13 @@ export const TOPIC: Forms = {
   many: 'موضوعاً',
   hundreds: 'موضوع',
 }
+export const ENTRY: Forms = {
+  one: 'مدخل واحد',
+  two: 'مدخلان',
+  few: 'مداخل',
+  many: 'مدخلاً',
+  hundreds: 'مدخل',
+}
 export const PAIR: Forms = {
   one: 'زوج واحد',
   two: 'زوجان',

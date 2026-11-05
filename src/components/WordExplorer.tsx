@@ -6,6 +6,7 @@ import { toArabicDigits } from '../lib/arabic'
 import { describeWord } from '../lib/morphology'
 import { ayahWords } from '../lib/quran'
 import { ayahPath } from '../lib/links'
+import { wordSlug } from '../lib/lexicon'
 import { AyahMark } from './AyahText'
 import { RootLetters } from './RootLetters'
 
@@ -57,6 +58,7 @@ export function WordExplorer({
     : undefined
   const segs = picked && ready ? morph.data.ayahs[picked.ayah - 1]?.[picked.word] : undefined
   const info = segs ? describeWord(segs) : null
+  const slug = segs ? wordSlug(segs) : null
   const unaligned = picked && ready && morph.data.ayahs[picked.ayah - 1] === null
 
   return (
@@ -164,7 +166,18 @@ export function WordExplorer({
                 {info.lemma && (
                   <div className="flex items-baseline gap-2">
                     <dt className="text-sm text-ink-soft">المدخل</dt>
-                    <dd className="font-quran text-xl text-ink">{info.lemma}</dd>
+                    <dd className="font-quran text-xl text-ink">
+                      {slug ? (
+                        <Link
+                          to={`/words/${encodeURIComponent(slug)}`}
+                          className="underline decoration-[#cdb67a] underline-offset-8 hover:decoration-ink"
+                        >
+                          {info.lemma}
+                        </Link>
+                      ) : (
+                        info.lemma
+                      )}
+                    </dd>
                   </div>
                 )}
               </dl>

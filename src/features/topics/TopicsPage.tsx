@@ -14,6 +14,7 @@ import { useAsync } from '../../data/useAsync'
 import { ErrorNote, Loading } from '../../components/Status'
 import { SearchBox, type SearchItem } from '../../components/SearchBox'
 import { Distribution, OccurrenceList } from '../../components/AyahRefs'
+import { ReviewLink } from '../../components/ReviewLink'
 import { AYAH, SURAH, countOf, formatNumber } from '../../lib/arabic'
 
 const useWide = () =>
@@ -221,6 +222,7 @@ function TopicDetail({
           </section>
         </>
       )}
+      <ReviewLink subject={`موضوع «${node.label}»`} />
     </article>
   )
 }

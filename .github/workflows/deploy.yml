@@ -33,6 +33,9 @@ jobs:
           pnpm lint
       - name: Build
         run: pnpm build
+        env:
+          # where reviewers' notes are emailed; set as a repository variable, empty hides the option
+          VITE_REVIEW_EMAIL: ${{ vars.REVIEW_EMAIL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

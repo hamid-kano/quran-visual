@@ -13,6 +13,7 @@ import { useAsync } from '../../data/useAsync'
 import { ErrorNote, Loading } from '../../components/Status'
 import { RootLetters } from '../../components/RootLetters'
 import { WordExplorer } from '../../components/WordExplorer'
+import { ReviewLink } from '../../components/ReviewLink'
 import {
   TIME,
   WORD,
@@ -305,6 +306,7 @@ function AyahView({ surah, ayah, surahs }: { surah: Surah; ayah: number; surahs:
 
       <AyahNames surah={surah.id} ayah={ayah} />
       <AyahSimilar surah={surah.id} ayah={ayah} byId={byId} />
+      <ReviewLink tone="dark" subject={title} />
     </div>
   )
 }

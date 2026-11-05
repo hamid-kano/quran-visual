@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router'
+import { ReviewLink } from '../../components/ReviewLink'
 import { loadFingerprints, loadSurahText, loadSurahs } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
 import type { Fingerprint, Surah } from '../../data/schemas'
@@ -174,6 +175,7 @@ function Detail({ surah, fp, surahs }: { surah: Surah; fp: Fingerprint; surahs: 
         >
           عرض السورة في المجرّة
         </Link>
+        <ReviewLink subject={`بصمة سورة ${surah.name}`} />
       </article>
     </div>
   )

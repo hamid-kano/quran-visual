@@ -1,0 +1,50 @@
+name: ملاحظة مراجعة
+description: ملاحظة من أهل الاختصاص على موضع في الموقع
+title: "ملاحظة: "
+labels: ["مراجعة"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        جزاكم الله خيراً على المراجعة. يكفي أن تُكتب الملاحظة وموضعها، وما بعدهما اختياري.
+  - type: input
+    id: location
+    attributes:
+      label: الموضع
+      description: رابط الصفحة. يُملأ تلقائياً إذا فُتح هذا النموذج من زر «ملاحظة على هذا الموضع».
+      placeholder: https://hamid-kano.github.io/quran-visual/ayah/2/255
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: نوع الملاحظة
+      options:
+        - النص القرآني أو عرضه
+        - التحليل الصرفي أو الجذر
+        - الموضوعات
+        - الأعلام
+        - الأعداد والإحصاءات
+        - المتشابهات
+        - ترتيب النزول أو مكانه
+        - صياغة الشرح
+        - أخرى
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: الملاحظة
+      description: ما الخطأ أو الإشكال، والصواب فيه إن كان معلوماً.
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: المرجع أو الدليل
+      description: اختياري. كتاب أو مصحف أو قول معتمد يُرجع إليه.
+  - type: input
+    id: reviewer
+    attributes:
+      label: صفة المراجِع
+      description: اختياري. مثل «باحث في علوم القرآن» أو «مدرّس تجويد»، ليُعرف وجه الملاحظة.

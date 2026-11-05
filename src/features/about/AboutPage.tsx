@@ -1,3 +1,6 @@
+import { Link } from 'react-router'
+import { ReviewLink } from '../../components/ReviewLink'
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-10">
@@ -216,7 +219,15 @@ export default function AboutPage() {
             </a>
             .
           </p>
+          <p>
+            ويُعرض الموقع على أهل الاختصاص قبل إطلاقه العام، وفي{' '}
+            <Link to="/review" className="text-[#7a5a12] underline underline-offset-4">
+              صفحة المراجعة
+            </Link>{' '}
+            ما نرجو مراجعته وكيف تُرسل الملاحظات.
+          </p>
         </Section>
+        <ReviewLink subject="صفحة المنهج والمصادر" />
       </article>
     </div>
   )

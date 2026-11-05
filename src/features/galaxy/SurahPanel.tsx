@@ -15,6 +15,7 @@ import { WordExplorer } from '../../components/WordExplorer'
 import { RecitationBar } from '../recitation/RecitationBar'
 import { useRecitation } from '../recitation/useRecitation'
 import { RootLetters } from '../../components/RootLetters'
+import { ReviewLink } from '../../components/ReviewLink'
 import { SurahTopics } from '../topics/TopicRefs'
 import { BASMALA, showsBasmalaHeader } from '../../lib/quran'
 
@@ -178,6 +179,7 @@ export function SurahPanel({
           </div>
         )}
       </section>
+      <ReviewLink subject={`سورة ${surah.name}`} />
     </article>
   )
 }

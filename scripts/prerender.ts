@@ -254,6 +254,11 @@ const sections: [string, string, string][] = [
     'آيات تتقارب ألفاظها، تُعرض مع نظائرها وتُبرز الفروق بينها كلمة كلمة.',
   ],
   [
+    'review',
+    'مراجعة أهل الاختصاص',
+    'ما نرجو من أهل الاختصاص في علوم القرآن والعربية مراجعته في المنصة قبل إطلاقها العام، وكيف تُرسل الملاحظات.',
+  ],
+  [
     'about',
     'المنهج والمصادر',
     'مصادر النص والبيانات، وكيف يُحسب كل رقم في المنصة، وما يُتحقَّق منه قبل كل نشر.',
@@ -417,6 +422,8 @@ function hintsFor(route: string): Hints {
       }
     case 'about':
       return { modules: one(feature('about/AboutPage')), data: [], quranFont: false }
+    case 'review':
+      return { modules: one(feature('review/ReviewPage')), data: [], quranFont: false }
     default:
       throw new Error(`prerender: no hints for ${route}`)
   }

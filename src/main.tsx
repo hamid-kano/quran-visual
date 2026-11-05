@@ -26,6 +26,7 @@ const SimilarPage = lazy(() => import('./features/similar/SimilarPage'))
 const SearchPage = lazy(() => import('./features/search/SearchPage'))
 const TopicsPage = lazy(() => import('./features/topics/TopicsPage'))
 const AyahPage = lazy(() => import('./features/ayah/AyahPage'))
+const ReviewPage = lazy(() => import('./features/review/ReviewPage'))
 
 const page = (el: React.ReactNode) => <Suspense fallback={<Loading />}>{el}</Suspense>
 
@@ -54,6 +55,7 @@ const router = createBrowserRouter(
             { path: 'topics', element: page(<TopicsPage />) },
             { path: 'topics/:id', element: page(<TopicsPage />) },
             { path: 'about', element: page(<AboutPage />) },
+            { path: 'review', element: page(<ReviewPage />) },
             { path: '*', element: page(<GalaxyPage />) },
           ],
         },

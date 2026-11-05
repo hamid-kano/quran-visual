@@ -2,6 +2,7 @@ import { Suspense, lazy, useMemo } from 'react'
 import { MapCard } from '../../components/MapCard'
 import { SheetPanel } from '../../components/SheetPanel'
 import { Link, useNavigate, useParams } from 'react-router'
+import { ReviewLink } from '../../components/ReviewLink'
 import { loadNames, loadSurahs } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
 import type { NameIndex, NameNode, Surah } from '../../data/schemas'
@@ -113,6 +114,7 @@ function NamePanel({
         </h3>
         <OccurrenceList key={node.name} list={list} byId={byId} />
       </section>
+      <ReviewLink subject={`العلم «${stripTashkeel(node.name)}»`} />
     </article>
   )
 }

@@ -5,6 +5,7 @@ import { useAsync } from '../../data/useAsync'
 import { AYAH, TIME, countOf, formatNumber, spacedRoot, toArabicDigits } from '../../lib/arabic'
 import { Distribution, OccurrenceList } from '../../components/AyahRefs'
 import { RootLetters } from '../../components/RootLetters'
+import { ReviewLink } from '../../components/ReviewLink'
 
 export function RootPanel({
   node,
@@ -142,6 +143,7 @@ export function RootPanel({
         {occ.status === 'error' && <p className="mt-3 text-ink-soft">تعذّر تحميل المواضع.</p>}
         {occ.status === 'ready' && <OccurrenceList key={node.root} list={list} byId={byId} />}
       </section>
+      <ReviewLink subject={`الجذر «${spacedRoot(node.root)}»`} />
     </article>
   )
 }

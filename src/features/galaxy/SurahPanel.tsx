@@ -12,6 +12,8 @@ import {
   toArabicDigits,
 } from '../../lib/arabic'
 import { WordExplorer } from '../../components/WordExplorer'
+import { RecitationBar } from '../recitation/RecitationBar'
+import { useRecitation } from '../recitation/useRecitation'
 import { RootLetters } from '../../components/RootLetters'
 import { BASMALA, showsBasmalaHeader } from '../../lib/quran'
 
@@ -38,6 +40,7 @@ export function SurahPanel({
   onClose: () => void
 }) {
   const [full, setFull] = useState(false)
+  const recitation = useRecitation(surah.id, surah.name, surah.ayahs)
   const text = useAsync(() => loadSurahText(surah.id), String(surah.id))
 
   return (
@@ -131,16 +134,27 @@ export function SurahPanel({
           {full ? 'نص السورة' : 'مطلع السورة'}
         </h3>
         <p className="mt-1 text-sm text-ink-soft">اختر أي كلمة لمعرفة جذرها ووزنها.</p>
+        <div className="mt-3">
+          <RecitationBar r={recitation} ayahCount={surah.ayahs} />
+        </div>
         {text.status === 'loading' && <p className="mt-3 text-ink-soft">جارٍ تحميل النص…</p>}
         {text.status === 'error' && (
           <p className="mt-3 text-ink-soft">تعذّر تحميل النص. أعد المحاولة لاحقاً.</p>
         )}
         {text.status === 'ready' && (
           <div className="mt-3">
-            {showsBasmalaHeader(surah.id) && <p className="ayah text-center">{BASMALA}</p>}
+            {showsBasmalaHeader(surah.id) && (
+              <p
+                className={`ayah text-center ${recitation.step?.basmala ? 'rounded bg-[#efe0b4]' : ''}`}
+              >
+                {BASMALA}
+              </p>
+            )}
             <WordExplorer
               surah={surah.id}
-              ayahs={full ? text.data.ayahs : text.data.ayahs.slice(0, PREVIEW)}
+              ayahs={full || recitation.step ? text.data.ayahs : text.data.ayahs.slice(0, PREVIEW)}
+              activeAyah={recitation.step && !recitation.step.basmala ? recitation.step.ayah : null}
+              onPlayFrom={recitation.start}
             />
             {text.data.ayahs.length > PREVIEW && (
               <button

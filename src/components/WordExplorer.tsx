@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { loadMorphology } from '../data/load'
 import { useAsync } from '../data/useAsync'
@@ -17,10 +17,22 @@ type Picked = { ayah: number; word: number }
 export function WordExplorer({
   surah,
   ayahs,
+  activeAyah = null,
+  onPlayFrom,
 }: {
   surah: number
   ayahs: { n: number; text: string }[]
+  /** The ayah being recited, highlighted and kept in view. */
+  activeAyah?: number | null
+  /** When given, each ayah number starts the recitation from that ayah. */
+  onPlayFrom?: (ayah: number) => void
 }) {
+  const activeRef = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    if (!activeAyah) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    activeRef.current?.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' })
+  }, [activeAyah])
   const morph = useAsync(() => loadMorphology(surah), String(surah))
   const [picked, setPicked] = useState<Picked | null>(null)
   const ready = morph.status === 'ready'
@@ -36,7 +48,14 @@ export function WordExplorer({
     <div>
       <p className="ayah text-justify">
         {ayahs.map((a) => (
-          <span key={a.n}>
+          <span
+            key={a.n}
+            ref={a.n === activeAyah ? activeRef : undefined}
+            className={
+              a.n === activeAyah ? 'rounded bg-[#efe0b4] [box-decoration-break:clone]' : undefined
+            }
+            aria-current={a.n === activeAyah ? 'true' : undefined}
+          >
             {ayahWords(a.text).map((w, i) => {
               const on = picked?.ayah === a.n && picked.word === i
               return (
@@ -55,7 +74,19 @@ export function WordExplorer({
                 </span>
               )
             })}
-            <AyahMark n={a.n} />{' '}
+            {onPlayFrom ? (
+              <button
+                type="button"
+                onClick={() => onPlayFrom(a.n)}
+                aria-label={`استمع من الآية ${toArabicDigits(a.n)}`}
+                title={`استمع من الآية ${toArabicDigits(a.n)}`}
+                className="rounded-full hover:bg-vellum-deep"
+              >
+                <AyahMark n={a.n} />
+              </button>
+            ) : (
+              <AyahMark n={a.n} />
+            )}{' '}
           </span>
         ))}
       </p>

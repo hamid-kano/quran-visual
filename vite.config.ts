@@ -31,7 +31,10 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.includes('/data/'),
+            // Only this site's own data. The pattern is written into the service worker as a regular
+            // expression, and Workbox applies one to other origins only when it matches from the
+            // start of the address, so recitation audio (everyayah.com/data/…) is never cached here.
+            urlPattern: new RegExp(`${base.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}data/`),
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'quran-data' },
           },

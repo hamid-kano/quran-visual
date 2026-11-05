@@ -8,15 +8,14 @@ import {
   type NameIndex as NameIndexT,
   type SimilarIndex as SimilarIndexT,
   type SurahMorphology as SurahMorphologyT,
+  AyahList,
   RootIndex,
-  RootOccurrences,
   SearchIndex,
   TopicIndex,
   type TopicIndex as TopicIndexT,
   SurahIndex,
   SurahText,
   type RootIndex as RootIndexT,
-  type RootOccurrences as RootOccurrencesT,
   type SurahIndex as SurahIndexT,
   type SurahText as SurahTextT,
 } from './schemas'
@@ -44,8 +43,9 @@ export const loadSurahs = (): Promise<SurahIndexT> => load('surahs.json', SurahI
 export const loadSurahText = (id: number): Promise<SurahTextT> =>
   load(`surah/${id}.json`, SurahText)
 export const loadRoots = (): Promise<RootIndexT> => load('roots.json', RootIndex)
-export const loadRootOccurrences = (): Promise<RootOccurrencesT> =>
-  load('root-occurrences.json', RootOccurrences)
+/** The ayahs one root occurs in, as [surah, ayah] in mushaf order. */
+export const loadRootOccurrences = (root: string): Promise<[number, number][]> =>
+  load(`occ/${encodeURIComponent(root)}.json`, AyahList)
 export const loadFingerprints = (): Promise<Fingerprint[]> =>
   load('fingerprints.json', Fingerprints)
 export const loadNames = (): Promise<NameIndexT> => load('names.json', NameIndex)

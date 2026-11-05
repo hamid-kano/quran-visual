@@ -8,6 +8,7 @@ import { toArabicDigits } from '../../lib/arabic'
 import { useReducedMotion } from '../../lib/useReducedMotion'
 import { MECCAN, MEDINAN, orderGradient, type ColorMode } from './colors'
 import { SurahPanel } from './SurahPanel'
+import { GalaxyPreview } from './GalaxyPreview'
 import { MapCard } from '../../components/MapCard'
 import { SheetPanel } from '../../components/SheetPanel'
 
@@ -44,6 +45,7 @@ export default function GalaxyPage() {
   const [colorMode, setColorMode] = useState<ColorMode>('revelation')
   const [showLinks, setShowLinks] = useState(false)
   const [showNames, setShowNames] = useState(false)
+  const [sceneReady, setSceneReady] = useState(false)
 
   const selected = id && /^\d+$/.test(id) && +id >= 1 && +id <= 114 ? +id : null
   const select = (s: number | null) =>
@@ -68,8 +70,10 @@ export default function GalaxyPage() {
 
   return (
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#183459_0%,#0d1d33_55%,#08142a_100%)]">
-      <Suspense fallback={<Loading label="جارٍ رسم المجرّة" />}>
+      <GalaxyPreview surahs={surahs} hidden={sceneReady} />
+      <Suspense fallback={null}>
         <GalaxyScene
+          onReady={() => setSceneReady(true)}
           surahs={surahs}
           selected={selected}
           onSelect={select}

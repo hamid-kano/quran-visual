@@ -19,12 +19,9 @@ export function RootPanel({
   onSelect: (r: string) => void
   onClose: () => void
 }) {
-  const occ = useAsync(loadRootOccurrences, 'occ')
+  const occ = useAsync(() => loadRootOccurrences(node.root), node.root)
   const byId = useMemo(() => new Map(surahs.map((s) => [s.id, s])), [surahs])
-  const list = useMemo(
-    () => (occ.status === 'ready' ? (occ.data[node.root] ?? []) : []),
-    [occ, node.root],
-  )
+  const list = useMemo(() => (occ.status === 'ready' ? occ.data : []), [occ])
   const perSurah = useMemo(() => {
     const m = new Map<number, number>()
     for (const [s] of list) m.set(s, (m.get(s) ?? 0) + 1)

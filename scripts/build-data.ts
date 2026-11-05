@@ -316,6 +316,9 @@ const occ: Record<string, [number, number][]> = {}
 for (const r of roots)
   occ[r] = [...rootAyahs.get(r)!.values()].sort((x, y) => x[0] - y[0] || x[1] - y[1])
 write('root-occurrences.json', RootOccurrences.parse(occ))
+// one small file per root, so a root's page loads only its own ayahs
+mkdirSync(join(OUT, 'occ'), { recursive: true })
+for (const [r, list] of Object.entries(RootOccurrences.parse(occ))) write(`occ/${r}.json`, list)
 
 console.log(
   `surahs: 114 · ayahs: ${quran.reduce((n, q) => n + q.verses.length, 0)} · roots: ${roots.length}` +

@@ -9,11 +9,12 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
 import '@fontsource/amiri/400.css'
 import '@fontsource/amiri/700.css'
 import '@fontsource/ibm-plex-sans-arabic/400.css'
-import '@fontsource/ibm-plex-sans-arabic/500.css'
 import '@fontsource/ibm-plex-sans-arabic/600.css'
 import './styles.css'
 import { Shell } from './components/Shell'
 import { Loading } from './components/Status'
+import { RouteError } from './components/RouteError'
+import { reloadOnce } from './lib/reload'
 
 const GalaxyPage = lazy(() => import('./features/galaxy/GalaxyPage'))
 const RootsPage = lazy(() => import('./features/roots/RootsPage'))
@@ -33,28 +34,39 @@ const router = createBrowserRouter(
     {
       element: <Shell />,
       children: [
-        { index: true, element: page(<GalaxyPage />) },
-        { path: 'surah/:id', element: page(<GalaxyPage />) },
-        { path: 'ayah/:surah/:ayah', element: page(<AyahPage />) },
-        { path: 'roots', element: page(<RootsPage />) },
-        { path: 'roots/:root', element: page(<RootsPage />) },
-        { path: 'fingerprints', element: page(<FingerprintsPage />) },
-        { path: 'fingerprints/:id', element: page(<FingerprintsPage />) },
-        { path: 'journey', element: page(<JourneyPage />) },
-        { path: 'names', element: page(<NamesPage />) },
-        { path: 'names/:name', element: page(<NamesPage />) },
-        { path: 'similar', element: page(<SimilarPage />) },
-        { path: 'similar/:id', element: page(<SimilarPage />) },
-        { path: 'search', element: page(<SearchPage />) },
-        { path: 'topics', element: page(<TopicsPage />) },
-        { path: 'topics/:id', element: page(<TopicsPage />) },
-        { path: 'about', element: page(<AboutPage />) },
-        { path: '*', element: page(<GalaxyPage />) },
+        {
+          // a page that fails keeps the site's header and menu around its error
+          errorElement: <RouteError />,
+          children: [
+            { index: true, element: page(<GalaxyPage />) },
+            { path: 'surah/:id', element: page(<GalaxyPage />) },
+            { path: 'ayah/:surah/:ayah', element: page(<AyahPage />) },
+            { path: 'roots', element: page(<RootsPage />) },
+            { path: 'roots/:root', element: page(<RootsPage />) },
+            { path: 'fingerprints', element: page(<FingerprintsPage />) },
+            { path: 'fingerprints/:id', element: page(<FingerprintsPage />) },
+            { path: 'journey', element: page(<JourneyPage />) },
+            { path: 'names', element: page(<NamesPage />) },
+            { path: 'names/:name', element: page(<NamesPage />) },
+            { path: 'similar', element: page(<SimilarPage />) },
+            { path: 'similar/:id', element: page(<SimilarPage />) },
+            { path: 'search', element: page(<SearchPage />) },
+            { path: 'topics', element: page(<TopicsPage />) },
+            { path: 'topics/:id', element: page(<TopicsPage />) },
+            { path: 'about', element: page(<AboutPage />) },
+            { path: '*', element: page(<GalaxyPage />) },
+          ],
+        },
       ],
     },
   ],
   { basename: import.meta.env.BASE_URL.replace(/\/$/, '') },
 )
+
+// a lazily loaded page whose code was replaced by a newer deploy: load the new site once
+window.addEventListener('vite:preloadError', (e) => {
+  if (reloadOnce()) e.preventDefault()
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

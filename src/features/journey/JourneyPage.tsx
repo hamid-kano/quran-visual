@@ -276,11 +276,11 @@ export default function JourneyPage() {
           <table className="mt-3 w-full text-sm">
             <thead className="text-mist">
               <tr>
-                <th className="py-1 text-right font-medium">ترتيب النزول</th>
-                <th className="py-1 text-right font-medium">السورة</th>
-                <th className="py-1 text-right font-medium">النزول</th>
-                <th className="py-1 text-right font-medium">الآيات</th>
-                <th className="py-1 text-right font-medium">متوسط الآية</th>
+                <th className="py-1 text-right font-semibold">ترتيب النزول</th>
+                <th className="py-1 text-right font-semibold">السورة</th>
+                <th className="py-1 text-right font-semibold">النزول</th>
+                <th className="py-1 text-right font-semibold">الآيات</th>
+                <th className="py-1 text-right font-semibold">متوسط الآية</th>
               </tr>
             </thead>
             <tbody>

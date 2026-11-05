@@ -81,10 +81,9 @@ export const RootIndex = z.object({
 })
 
 /** Occurrences per root as "surah:ayah" pairs packed into [surah, ayah] tuples. */
-export const RootOccurrences = z.record(
-  Root,
-  z.array(z.tuple([z.number().int(), z.number().int()])),
-)
+/** Ayahs as [surah, ayah], in mushaf order. */
+export const AyahList = z.array(z.tuple([z.number().int(), z.number().int()]))
+export const RootOccurrences = z.record(Root, AyahList)
 
 export type Surah = z.infer<typeof Surah>
 export type SurahIndex = z.infer<typeof SurahIndex>

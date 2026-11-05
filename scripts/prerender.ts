@@ -10,7 +10,7 @@
  * Images are drawn as SVG and rendered with resvg. Arabic text is shaped with fontkit and
  * written as outlines, so the image does not depend on fonts installed on the build machine.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import * as fontkit from 'fontkit'
 import { Resvg } from '@resvg/resvg-js'
@@ -310,6 +310,144 @@ for (const n of names) {
   })
 }
 
+// ---------- what each page needs first ----------
+//
+// The app's code for a page, and the data it fetches, are otherwise found only after the main
+// script has run. Naming them in the page's HTML lets the browser fetch them at once.
+
+const BASE = process.env.BASE_PATH ?? '/quran-visual/'
+interface Chunk {
+  file: string
+  imports?: string[]
+}
+const manifest = JSON.parse(readFileSync('dist/.vite/manifest.json', 'utf8')) as Record<
+  string,
+  Chunk
+>
+/** A source module's chunk with the chunks it imports, leaving out the main entry. */
+function chunksOf(src: string, out = new Set<string>()): Set<string> {
+  const c = manifest[src]
+  if (!c) throw new Error(`prerender: ${src} is not in the build manifest`)
+  if (src === 'index.html' || out.has(c.file)) return out
+  out.add(c.file)
+  for (const i of c.imports ?? []) chunksOf(i, out)
+  return out
+}
+const feature = (f: string) => `src/features/${f}.tsx`
+
+interface Hints {
+  modules: string[]
+  data: string[]
+  quranFont: boolean
+  /** Reading pages preload the interface fonts. Pages led by a map or a large index do not, so
+   *  the fonts (shown meanwhile in a fallback face) do not hold the map or the index back. */
+  uiFonts?: boolean
+}
+/** The page's code, its data files (as the app names them) and whether it opens on Quran text. */
+function hintsFor(route: string): Hints {
+  const [section = '', a] = route.split('/')
+  const one = (...src: string[]) => [...new Set(src.flatMap((x) => [...chunksOf(x)]))]
+  switch (section) {
+    case '':
+      return {
+        // Not the 3D scene: a still preview stands in for it at once. This page is also what the
+        // installed service worker serves for every address, so its hints must suit any page.
+        modules: one(feature('galaxy/GalaxyPage')),
+        data: ['surahs.json'],
+        quranFont: false,
+        uiFonts: false,
+      }
+    case 'surah':
+      return {
+        // the surah's panel comes first; the galaxy behind it follows
+        modules: one(feature('galaxy/GalaxyPage')),
+        data: ['surahs.json', `surah/${a}.json`],
+        quranFont: true,
+      }
+    case 'ayah':
+      return {
+        modules: one(feature('ayah/AyahPage')),
+        data: ['surahs.json', `surah/${a}.json`],
+        quranFont: true,
+      }
+    case 'roots':
+      return {
+        modules: one(feature('roots/RootsPage'), feature('roots/RootGraph')),
+        data: ['roots.json', 'surahs.json', ...(a ? [`occ/${encodeURIComponent(a)}.json`] : [])],
+        quranFont: !!a,
+        uiFonts: false,
+      }
+    case 'names':
+      return {
+        modules: one(feature('names/NamesPage'), 'src/components/NetworkGraph.tsx'),
+        data: ['names.json', 'surahs.json'],
+        quranFont: !!a,
+        uiFonts: false,
+      }
+    case 'fingerprints':
+      return {
+        modules: one(feature('fingerprints/FingerprintsPage')),
+        data: ['surahs.json', 'fingerprints.json', ...(a ? [`surah/${a}.json`] : [])],
+        quranFont: !!a,
+      }
+    case 'similar':
+      return {
+        modules: one(feature('similar/SimilarPage')),
+        data: ['similar.json', 'surahs.json', ...(a ? [`surah/${a}.json`] : [])],
+        quranFont: !!a,
+      }
+    case 'topics':
+      return {
+        modules: one(feature('topics/TopicsPage')),
+        data: ['topics.json', ...(a ? ['surahs.json'] : [])],
+        quranFont: !!a,
+      }
+    case 'search':
+      return {
+        modules: one(feature('search/SearchPage')),
+        data: ['search.json', 'surahs.json', 'roots.json'],
+        quranFont: false,
+        uiFonts: false,
+      }
+    case 'journey':
+      return {
+        modules: one(feature('journey/JourneyPage')),
+        data: ['surahs.json'],
+        quranFont: false,
+      }
+    case 'about':
+      return { modules: one(feature('about/AboutPage')), data: [], quranFont: false }
+    default:
+      throw new Error(`prerender: no hints for ${route}`)
+  }
+}
+
+/**
+ * The interface's two faces that reading pages open with: the body text and the headings. The
+ * stylesheet names them only after the main script has rendered the page.
+ */
+const UI_FONTS = [
+  /^ibm-plex-sans-arabic-arabic-400-normal-.*\.woff2$/,
+  /^amiri-arabic-700-normal-.*\.woff2$/,
+].map((re) => {
+  const f = readdirSync('dist/assets').filter((x) => re.test(x))
+  if (f.length !== 1) throw new Error(`prerender: expected one font matching ${re}`)
+  return `assets/${f[0]}`
+})
+
+const fontTag = (href: string) =>
+  `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin />`
+
+function hintTags({ modules, data, quranFont, uiFonts = true }: Hints) {
+  return [
+    ...modules.map((f) => `<link rel="modulepreload" crossorigin href="${BASE}${f}" />`),
+    ...(uiFonts ? UI_FONTS : []).map((f) => fontTag(BASE + f)),
+    ...(quranFont ? [fontTag(`${BASE}fonts/kfgqpc-hafs-18.woff2`)] : []),
+    // fetch() requests are same-origin CORS requests, so the preloads say so to be reused
+    ...data.map((f) => `<link rel="preload" href="${BASE}data/${f}" as="fetch" crossorigin />`),
+  ].join('\n    ')
+}
+
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const urlOf = (route: string) => SITE + route.split('/').map(encodeURIComponent).join('/')
@@ -332,6 +470,7 @@ function head(route: string, m: Meta) {
     <meta property="og:image:height" content="${H}" />
     <meta property="og:image:alt" content="${esc(m.imageAlt)}" />
     <meta name="twitter:card" content="summary_large_image" />
+    ${hintTags(hintsFor(route))}
     <!-- /page-meta -->`
 }
 
@@ -347,4 +486,5 @@ for (const [route, meta] of pages) {
 }
 // an unknown address keeps the site's default title and description, with no canonical link
 writeFileSync('dist/404.html', template)
+rmSync('dist/.vite', { recursive: true, force: true })
 console.log(`prerender: ${pages.size} pages, ${surahs.length + 1} preview images`)

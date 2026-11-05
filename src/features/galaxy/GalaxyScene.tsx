@@ -4,6 +4,7 @@ import { Line, OrbitControls, Stars } from '@react-three/drei'
 import { AdditiveBlending, CanvasTexture, Vector3 } from 'three'
 import type { Surah } from '../../data/schemas'
 import { surahColor, starRadius, type ColorMode } from './colors'
+import { CAMERA, FOV } from './projection'
 
 interface Props {
   showNames: boolean
@@ -13,6 +14,8 @@ interface Props {
   colorMode: ColorMode
   showLinks: boolean
   reducedMotion: boolean
+  /** Called once the first frame has been drawn. */
+  onReady?: () => void
 }
 
 type StarState = 'idle' | 'selected' | 'near' | 'dim'
@@ -122,6 +125,18 @@ function LabelProjector({
       el.style.visibility = behind ? 'hidden' : ''
       el.style.transform = `translate(-50%, -50%) translate(${((v.x + 1) / 2) * size.width}px, ${((1 - v.y) / 2) * size.height}px)`
     }
+  })
+  return null
+}
+
+/** Reports the first drawn frame, so a stand-in shown while loading can step aside. */
+function FirstFrame({ onReady }: { onReady?: () => void }) {
+  const done = useRef(false)
+  useFrame(() => {
+    if (done.current) return
+    done.current = true
+    // this runs just before the frame is drawn; report on the next tick
+    requestAnimationFrame(() => onReady?.())
   })
   return null
 }
@@ -278,12 +293,13 @@ export default function GalaxyScene(props: Props) {
   return (
     <div className="absolute inset-0">
       <Canvas
-        camera={{ position: [0, 8, 105], fov: 45, near: 0.5, far: 600 }}
+        camera={{ position: [...CAMERA], fov: FOV, near: 0.5, far: 600 }}
         dpr={[1, 2]}
         onPointerMissed={() => props.onSelect(null)}
         aria-label="مجرّة السور: كل نجم سورة، والقرب بين النجوم يعكس تشابه جذورها"
         role="img"
       >
+        <FirstFrame onReady={props.onReady} />
         <Scene
           {...props}
           byId={byId}
@@ -307,7 +323,7 @@ export default function GalaxyScene(props: Props) {
                 if (el) labels.current.set(s.id, el)
                 else labels.current.delete(s.id)
               }}
-              className={`absolute left-0 top-0 whitespace-nowrap font-medium select-none ${LABEL_CLASS[state]} ${shown ? '' : 'hidden'}`}
+              className={`absolute left-0 top-0 whitespace-nowrap font-semibold select-none ${LABEL_CLASS[state]} ${shown ? '' : 'hidden'}`}
             >
               {s.name}
             </span>

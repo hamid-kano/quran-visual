@@ -92,3 +92,37 @@ describe('similar ayahs of one ayah', () => {
     expect(list).toHaveLength(30)
   })
 })
+
+describe('the galaxy preview', () => {
+  it('draws each star where the 3D scene’s opening camera shows it', async () => {
+    const { PerspectiveCamera, Vector3 } = await import('three')
+    const { CAMERA, FOV, project } = await import('../src/features/galaxy/projection.ts')
+    for (const [w, h] of [
+      [1280, 800],
+      [390, 844],
+    ] as const) {
+      const cam = new PerspectiveCamera(FOV, w / h, 0.5, 600)
+      cam.position.set(...CAMERA)
+      cam.lookAt(0, 0, 0)
+      cam.updateMatrixWorld()
+      for (const s of surahs) {
+        const v = new Vector3(...s.position).project(cam)
+        const p = project(s.position, w, h)
+        expect(p.x).toBeCloseTo(((v.x + 1) / 2) * w, 6)
+        expect(p.y).toBeCloseTo(((1 - v.y) / 2) * h, 6)
+      }
+    }
+  })
+})
+
+describe('per-root occurrence files', () => {
+  it('hold exactly each root’s list from the full index', async () => {
+    const { readdirSync } = await import('node:fs')
+    const { RootOccurrences, AyahList } = await import('../src/data/schemas.ts')
+    const all = RootOccurrences.parse(read('root-occurrences.json'))
+    const files = readdirSync('public/data/occ')
+    expect(files).toHaveLength(Object.keys(all).length)
+    for (const [root, list] of Object.entries(all))
+      expect(AyahList.parse(read(`occ/${root}.json`))).toEqual(list)
+  })
+})

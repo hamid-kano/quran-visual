@@ -37,7 +37,18 @@ export function WordExplorer({
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     activeRef.current?.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' })
   }, [activeAyah])
-  const morph = useAsync(() => loadMorphology(surah), String(surah))
+  // The analysis is fetched once the reader reaches for the text, or after the page settles,
+  // so it never competes with the text itself on a slow connection.
+  const [wanted, setWanted] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setWanted(true), 2500)
+    return () => clearTimeout(t)
+  }, [])
+  const want = () => setWanted(true)
+  const morph = useAsync(
+    () => (wanted ? loadMorphology(surah) : new Promise<never>(() => {})),
+    wanted ? String(surah) : '',
+  )
   const [picked, setPicked] = useState<Picked | null>(null)
   const ready = morph.status === 'ready'
 
@@ -50,7 +61,7 @@ export function WordExplorer({
 
   return (
     <div>
-      <p className="ayah text-justify">
+      <p className="ayah text-justify" onPointerOver={want} onTouchStart={want} onFocus={want}>
         {ayahs.map((a) => (
           <span
             key={a.n}
@@ -66,7 +77,6 @@ export function WordExplorer({
                 <span key={i}>
                   <button
                     type="button"
-                    disabled={!ready}
                     onClick={() => setPicked(on ? null : { ayah: a.n, word: i })}
                     aria-pressed={on}
                     className={`rounded px-px transition-colors ${
@@ -125,6 +135,11 @@ export function WordExplorer({
               إغلاق
             </button>
           </div>
+          {picked && !ready && (
+            <p className="text-sm text-ink-soft">
+              {morph.status === 'error' ? 'تعذّر تحميل التحليل الصرفي.' : 'جارٍ تحميل التحليل…'}
+            </p>
+          )}
           {unaligned && (
             <p className="text-sm text-ink-soft">
               تقسيم الكلمات في هذه الآية يختلف بين النص والمدوّنة الصرفية، فلا يُعرض تحليلها.

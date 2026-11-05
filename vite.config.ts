@@ -44,6 +44,8 @@ export default defineConfig({
   ],
   build: {
     target: 'es2022',
+    // read by scripts/prerender.ts to point each page at the code it needs, then deleted
+    manifest: true,
     chunkSizeWarningLimit: 1200,
   },
 })

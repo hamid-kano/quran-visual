@@ -167,6 +167,12 @@ export function SurahPanel({
               activeAyah={recitation.step && !recitation.step.basmala ? recitation.step.ayah : null}
               onPlayFrom={recitation.start}
             />
+            <Link
+              to={`/read/${surah.id}`}
+              className="mt-2 me-2 inline-flex rounded-full bg-[#ead9a8] px-4 py-1.5 text-sm text-ink hover:bg-[#e2cd92]"
+            >
+              اقرأ السورة في صفحة القراءة
+            </Link>
             {text.data.ayahs.length > PREVIEW && (
               <button
                 type="button"

@@ -22,6 +22,9 @@ export function WordExplorer({
   activeAyah = null,
   onPlayFrom,
   linkAyahs = true,
+  fontSize,
+  anchors = false,
+  cardClass = '-mx-6 px-6',
 }: {
   surah: number
   ayahs: { n: number; text: string }[]
@@ -31,6 +34,12 @@ export function WordExplorer({
   onPlayFrom?: (ayah: number) => void
   /** Link the chosen word's ayah to its own page (off on that page itself). */
   linkAyahs?: boolean
+  /** The text's size, when not the default. */
+  fontSize?: string
+  /** Give each ayah an id («a255») so an address can point at it. */
+  anchors?: boolean
+  /** Spacing that makes the word card span the page it sits in. */
+  cardClass?: string
 }) {
   const activeRef = useRef<HTMLSpanElement>(null)
   useEffect(() => {
@@ -63,13 +72,26 @@ export function WordExplorer({
 
   return (
     <div>
-      <p className="ayah text-justify" onPointerOver={want} onTouchStart={want} onFocus={want}>
+      <p
+        className="ayah text-justify"
+        style={fontSize ? { fontSize } : undefined}
+        onPointerOver={want}
+        onTouchStart={want}
+        onFocus={want}
+      >
         {ayahs.map((a) => (
           <span
             key={a.n}
+            id={anchors ? `a${a.n}` : undefined}
             ref={a.n === activeAyah ? activeRef : undefined}
             className={
-              a.n === activeAyah ? 'rounded bg-[#efe0b4] [box-decoration-break:clone]' : undefined
+              [
+                a.n === activeAyah && 'rounded bg-[#efe0b4] [box-decoration-break:clone]',
+                // clear of the reading page's player bar, which stays in view on wide screens
+                anchors && 'scroll-mt-4 sm:scroll-mt-36',
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined
             }
             aria-current={a.n === activeAyah ? 'true' : undefined}
           >
@@ -109,7 +131,7 @@ export function WordExplorer({
 
       {picked && (
         <div
-          className="sticky bottom-0 -mx-6 mt-3 border-t border-[#cdb67a] bg-vellum px-6 pb-2 pt-3 shadow-[0_-12px_24px_-16px_rgba(0,0,0,0.35)]"
+          className={`sticky bottom-0 mt-3 border-t border-[#cdb67a] bg-vellum pb-2 pt-3 shadow-[0_-12px_24px_-16px_rgba(0,0,0,0.35)] ${cardClass}`}
           aria-live="polite"
         >
           <div className="flex items-start justify-between gap-3">

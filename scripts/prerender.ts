@@ -257,6 +257,11 @@ const sections: [string, string, string][] = [
     'آيات تتقارب ألفاظها، تُعرض مع نظائرها وتُبرز الفروق بينها كلمة كلمة.',
   ],
   [
+    'read',
+    'القراءة',
+    'القرآن الكريم سورةً سورة بخط مجمع الملك فهد، مع تلاوة تتابع الآية المقروءة بصوت من تختار من القرّاء.',
+  ],
+  [
     'words',
     'معجم الألفاظ',
     `ألفاظ القرآن الكريم بمداخلها المعجمية: ${countOf(lexicon.entries.length, ENTRY)}، لكل مدخل عدد وروده وصيغه في المصحف ومواضعه وجذره.`,
@@ -322,6 +327,13 @@ for (const n of names) {
     ...SITE_IMAGE,
   })
 }
+
+for (const s of surahs)
+  pages.set(`read/${s.id}`, {
+    title: titled(`سورة ${s.name} · القراءة`),
+    description: `سورة ${s.name} كاملة بخط مجمع الملك فهد، ${revelationLabel(s.revelation)}، ${countOf(s.ayahs, AYAH)}، مع تلاوتها بصوت من تختار من القرّاء.`,
+    ...surahImageOf(s),
+  })
 
 for (const e of lexicon.entries)
   pages.set(`words/${e.slug}`, {
@@ -437,6 +449,12 @@ function hintsFor(route: string): Hints {
       }
     case 'about':
       return { modules: one(feature('about/AboutPage')), data: [], quranFont: false }
+    case 'read':
+      return {
+        modules: one(feature('read/ReadPage')),
+        data: ['surahs.json', ...(a ? [`surah/${a}.json`] : [])],
+        quranFont: !!a,
+      }
     case 'words':
       return {
         modules: one(feature('words/WordsPage')),

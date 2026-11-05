@@ -278,7 +278,12 @@ function AyahView({ surah, ayah, surahs }: { surah: Surah; ayah: number; surahs:
             <WordExplorer surah={surah.id} ayahs={[line]} linkAyahs={false} />
           </div>
         )}
-        <p className="mt-2 text-sm text-ink-soft">اختر أي كلمة لمعرفة جذرها ووزنها.</p>
+        <p className="mt-2 text-sm text-ink-soft">
+          اختر أي كلمة لمعرفة جذرها ووزنها.{' '}
+          <Link to={`/read/${surah.id}#${ayah}`} className="underline underline-offset-4">
+            اقرأها في سياقها من السورة
+          </Link>
+        </p>
       </article>
 
       <nav aria-label="الآيات المجاورة" className="mt-4 flex justify-between gap-3">

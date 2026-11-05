@@ -15,6 +15,7 @@ import { WordExplorer } from '../../components/WordExplorer'
 import { RecitationBar } from '../recitation/RecitationBar'
 import { useRecitation } from '../recitation/useRecitation'
 import { RootLetters } from '../../components/RootLetters'
+import { SurahTopics } from '../topics/TopicRefs'
 import { BASMALA, showsBasmalaHeader } from '../../lib/quran'
 
 const PREVIEW = 5
@@ -97,6 +98,13 @@ export function SurahPanel({
         </ul>
       </section>
 
+      <section className="mt-6" aria-labelledby="surah-topics">
+        <h3 id="surah-topics" className="font-display text-xl font-bold text-ink">
+          موضوعاتها
+        </h3>
+        <SurahTopics surah={surah.id} ayahCount={surah.ayahs} />
+      </section>
+
       <section className="mt-6" aria-labelledby="near">
         <h3 id="near" className="font-display text-xl font-bold text-ink">
           أقرب السور إليها في المعجم
@@ -133,7 +141,9 @@ export function SurahPanel({
         <h3 id="text" className="font-display text-xl font-bold text-ink">
           {full ? 'نص السورة' : 'مطلع السورة'}
         </h3>
-        <p className="mt-1 text-sm text-ink-soft">اختر أي كلمة لمعرفة جذرها ووزنها.</p>
+        <p className="mt-1 text-sm text-ink-soft">
+          اختر أي كلمة لمعرفة جذرها ووزنها، ومنها تنتقل إلى صفحة آيتها.
+        </p>
         <div className="mt-3">
           <RecitationBar r={recitation} ayahCount={surah.ayahs} />
         </div>

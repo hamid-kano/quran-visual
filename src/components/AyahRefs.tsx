@@ -5,6 +5,7 @@ import { loadSurahText } from '../data/load'
 import { useAsync } from '../data/useAsync'
 import { AYAH, countOf, toArabicDigits } from '../lib/arabic'
 import { AyahMark } from './AyahText'
+import { ayahPath } from '../lib/links'
 
 const PAGE = 8
 
@@ -86,7 +87,7 @@ export function OccurrenceList({
         {visible.map(([s, a]) => (
           <li key={`${s}:${a}`} className="py-3">
             <Link
-              to={`/surah/${s}`}
+              to={ayahPath(s, a)}
               className="-my-3 inline-block py-3 text-sm text-ink-soft hover:text-ink hover:underline"
             >
               سورة {byId.get(s)?.name}، الآية {toArabicDigits(a)}

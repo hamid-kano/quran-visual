@@ -1,5 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
+import { ayahPath } from '../../lib/links'
 import { loadRoots, loadSearchIndex, loadSurahText, loadSurahs } from '../../data/load'
 import type { RootNode, Surah } from '../../data/schemas'
 import { useAsync } from '../../data/useAsync'
@@ -66,7 +67,7 @@ function Result({ hit, surah, text }: { hit: Hit; surah: Surah; text: string | u
   return (
     <li className="py-4">
       <Link
-        to={`/surah/${hit.surah}`}
+        to={ayahPath(hit.surah, hit.ayah)}
         className="-my-3 inline-block py-3 text-sm text-ink-soft hover:text-ink hover:underline"
       >
         سورة {surah.name}، الآية {toArabicDigits(hit.ayah)}

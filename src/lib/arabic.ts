@@ -58,6 +58,13 @@ export const ROOT: Forms = {
   many: 'جذراً',
   hundreds: 'جذر',
 }
+export const TOPIC: Forms = {
+  one: 'موضوع واحد',
+  two: 'موضوعان',
+  few: 'موضوعات',
+  many: 'موضوعاً',
+  hundreds: 'موضوع',
+}
 export const PAIR: Forms = {
   one: 'زوج واحد',
   two: 'زوجان',

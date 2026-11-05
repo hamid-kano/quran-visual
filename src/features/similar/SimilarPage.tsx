@@ -2,136 +2,14 @@ import { useMemo } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import { loadSimilar, loadSurahText, loadSurahs } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
-import type { SimilarIndex, Surah } from '../../data/schemas'
+import type { Surah } from '../../data/schemas'
 import { ErrorNote, Loading } from '../../components/Status'
 import { AyahMark } from '../../components/AyahText'
 import { SearchBox, type SearchItem } from '../../components/SearchBox'
-import {
-  AYAH,
-  PAIR,
-  PLACE,
-  countOf,
-  formatNumber,
-  formatPercent,
-  toArabicDigits,
-} from '../../lib/arabic'
-import { ayahWords, commonWords, vocalKey, wordKey } from '../../lib/quran'
-
-type Ref = [number, number]
-const key = (s: number, a: number) => `${s}:${a}`
-
-interface Match {
-  other: Ref
-  score: number | null // null: repeated word for word
-}
-
-/** For every ayah, the ayahs similar to it. */
-function useMatches(data: SimilarIndex | null) {
-  return useMemo(() => {
-    const m = new Map<string, Match[]>()
-    const add = (from: Ref, match: Match) =>
-      m.set(key(...from), [...(m.get(key(...from)) ?? []), match])
-    if (!data) return m
-    for (const [s1, a1, s2, a2, score] of data.pairs) {
-      add([s1, a1], { other: [s2, a2], score: score / 100 })
-      add([s2, a2], { other: [s1, a1], score: score / 100 })
-    }
-    for (const group of data.repeats)
-      for (const r of group)
-        for (const o of group) if (o !== r) add(r as Ref, { other: o as Ref, score: null })
-    return m
-  }, [data])
-}
-
-/**
- * An ayah with its differences from the counterpart marked: a filled highlight for words it
- * does not share, a dotted underline for shared words whose vowels differ.
- */
-function DiffLine({
-  text,
-  marked,
-  vowels,
-  n,
-}: {
-  text: string
-  marked: Set<number>
-  vowels: Set<number>
-  n: number
-}) {
-  const words = ayahWords(text)
-  return (
-    <p className="ayah text-[1.35rem] leading-[2.3]">
-      {words.map((w, i) => (
-        <span key={i}>
-          {marked.has(i) ? (
-            <mark className="rounded bg-[#ead9a8] px-0.5 text-[#6b4a0c]">{w}</mark>
-          ) : vowels.has(i) ? (
-            <span
-              className="underline decoration-[#a6852f] decoration-dotted decoration-2 underline-offset-[10px]"
-              title="الكلمة نفسها بضبط مختلف"
-            >
-              {w}
-            </span>
-          ) : (
-            w
-          )}{' '}
-        </span>
-      ))}
-      <AyahMark n={n} />
-    </p>
-  )
-}
-
-function Pair({
-  base,
-  match,
-  texts,
-  byId,
-}: {
-  base: Ref
-  match: Match
-  texts: Map<string, string>
-  byId: Map<number, Surah>
-}) {
-  const a = texts.get(key(...base))
-  const b = texts.get(key(...match.other))
-  if (!a || !b) return <p className="text-ink-soft">…</p>
-  const wa = ayahWords(a)
-  const wb = ayahWords(b)
-  const [ka, kb, matched] = commonWords(wa.map(wordKey), wb.map(wordKey))
-  const onlyA = new Set(wa.map((_, i) => i).filter((i) => !ka.has(i)))
-  const onlyB = new Set(wb.map((_, i) => i).filter((i) => !kb.has(i)))
-  const vowelPairs = matched.filter(([i, j]) => vocalKey(wa[i]!) !== vocalKey(wb[j]!))
-  const vowelsA = new Set(vowelPairs.map(([i]) => i))
-  const vowelsB = new Set(vowelPairs.map(([, j]) => j))
-  const [s, n] = match.other
-  return (
-    <div className="border-t border-[#e0cf9f] pt-3">
-      <p className="flex flex-wrap items-baseline justify-between gap-2 text-sm text-ink-soft">
-        <Link
-          to={`/similar/${s}`}
-          className="-my-3 inline-block py-3 hover:text-ink hover:underline"
-        >
-          سورة {byId.get(s)?.name}، الآية {toArabicDigits(n)}
-        </Link>
-        <span>
-          {match.score === null ? 'مكرّرة بلفظها' : `تطابق ${formatPercent(match.score)}`}
-        </span>
-      </p>
-      {match.score === null ? (
-        <p className="ayah text-[1.35rem] leading-[2.3]">
-          {b} <AyahMark n={n} />
-        </p>
-      ) : (
-        <>
-          <DiffLine text={b} marked={onlyB} vowels={vowelsB} n={n} />
-          <p className="mt-1 text-xs text-ink-soft">وفي الآية الأصل يختلف:</p>
-          <DiffLine text={a} marked={onlyA} vowels={vowelsA} n={base[1]} />
-        </>
-      )}
-    </div>
-  )
-}
+import { AYAH, PAIR, PLACE, countOf, formatNumber, toArabicDigits } from '../../lib/arabic'
+import { ayahPath } from '../../lib/links'
+import { key, useMatches, type Match } from './matches'
+import { Pair } from './Pair'
 
 function SurahView({
   surah,
@@ -182,7 +60,12 @@ function SurahView({
           )
           return (
             <li key={a} className="page rounded-md px-5 py-4 sm:px-7">
-              <p className="text-sm text-ink-soft">الآية {toArabicDigits(a)}</p>
+              <Link
+                to={ayahPath(surah.id, a)}
+                className="-my-3 inline-block py-3 text-sm text-ink-soft hover:text-ink hover:underline"
+              >
+                الآية {toArabicDigits(a)}
+              </Link>
               <p className="ayah text-[1.4rem] leading-[2.3]">
                 {texts.get(key(surah.id, a)) ?? '…'} <AyahMark n={a} />
               </p>

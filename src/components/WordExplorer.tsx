@@ -5,6 +5,7 @@ import { useAsync } from '../data/useAsync'
 import { toArabicDigits } from '../lib/arabic'
 import { describeWord } from '../lib/morphology'
 import { ayahWords } from '../lib/quran'
+import { ayahPath } from '../lib/links'
 import { AyahMark } from './AyahText'
 import { RootLetters } from './RootLetters'
 
@@ -19,6 +20,7 @@ export function WordExplorer({
   ayahs,
   activeAyah = null,
   onPlayFrom,
+  linkAyahs = true,
 }: {
   surah: number
   ayahs: { n: number; text: string }[]
@@ -26,6 +28,8 @@ export function WordExplorer({
   activeAyah?: number | null
   /** When given, each ayah number starts the recitation from that ayah. */
   onPlayFrom?: (ayah: number) => void
+  /** Link the chosen word's ayah to its own page (off on that page itself). */
+  linkAyahs?: boolean
 }) {
   const activeRef = useRef<HTMLSpanElement>(null)
   useEffect(() => {
@@ -99,7 +103,17 @@ export function WordExplorer({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs text-ink-soft">
-                الكلمة {toArabicDigits(picked.word + 1)} من الآية {toArabicDigits(picked.ayah)}
+                الكلمة {toArabicDigits(picked.word + 1)} من{' '}
+                {linkAyahs ? (
+                  <Link
+                    to={ayahPath(surah, picked.ayah)}
+                    className="-my-2 inline-block py-2 text-ink underline decoration-[#cdb67a] underline-offset-4"
+                  >
+                    الآية {toArabicDigits(picked.ayah)}
+                  </Link>
+                ) : (
+                  <>الآية {toArabicDigits(picked.ayah)}</>
+                )}
               </p>
               <p className="font-quran text-3xl leading-[1.8] text-ink">{pickedText}</p>
             </div>

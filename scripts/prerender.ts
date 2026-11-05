@@ -14,7 +14,14 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import * as fontkit from 'fontkit'
 import { Resvg } from '@resvg/resvg-js'
-import { Fingerprints, NameIndex, RootIndex, SurahIndex, TopicIndex } from '../src/data/schemas.ts'
+import {
+  Fingerprints,
+  NameIndex,
+  RootIndex,
+  SurahIndex,
+  SurahText,
+  TopicIndex,
+} from '../src/data/schemas.ts'
 import type { Surah } from '../src/data/schemas.ts'
 import {
   AYAH,
@@ -25,6 +32,7 @@ import {
   revelationLabel,
   spacedRoot,
   stripTashkeel,
+  toArabicDigits,
 } from '../src/lib/arabic.ts'
 import { fingerprintGeometry } from '../src/features/fingerprints/geometry.ts'
 
@@ -195,6 +203,12 @@ const surahImageOf = (s: Surah) => ({
   imageAlt: `بصمة سورة ${s.name}`,
 })
 const titled = (t: string) => `${t} | ${SITE_NAME}`
+/** The ayah's opening words, whole words only, marked as cut where they stop short of its end. */
+function excerpt(text: string, max = 110) {
+  if (text.length <= max) return `﴿${text}﴾`
+  const cut = text.slice(0, max + 1)
+  return `﴿${cut.slice(0, cut.lastIndexOf(' '))}…﴾`
+}
 
 const pages = new Map<string, Meta>()
 pages.set('', {
@@ -255,6 +269,12 @@ for (const s of surahs) {
     description: `سورة ${s.name}، ${facts}. موقعها في مجرّة السور، وأقرب السور إليها في المعجم، وجذورها المميِّزة، ونصها بالرسم العثماني.`,
     ...surahImageOf(s),
   })
+  for (const a of SurahText.parse(read(`surah/${s.id}.json`)).ayahs)
+    pages.set(`ayah/${s.id}/${a.n}`, {
+      title: titled(`سورة ${s.name}، الآية ${toArabicDigits(a.n)}`),
+      description: `${excerpt(a.text)} — جذور كلماتها وموضوعاتها ونظائرها اللفظية، وتلاوتها.`,
+      ...surahImageOf(s),
+    })
   pages.set(`fingerprints/${s.id}`, {
     title: titled(`بصمة سورة ${s.name}`),
     description: `سورة ${s.name}، ${facts}: خط لكل آية، يطول بعدد كلماتها ويتلوّن بالحرف الذي تنتهي به.`,

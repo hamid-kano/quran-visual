@@ -288,7 +288,10 @@ export default function JourneyPage() {
                 <tr key={s.id} className="border-t border-gold/10">
                   <td className="py-1">{toArabicDigits(s.order)}</td>
                   <td className="py-1">
-                    <Link to={`/surah/${s.id}`} className="hover:text-gold-soft">
+                    <Link
+                      to={`/surah/${s.id}`}
+                      className="-my-3 inline-block py-3 hover:text-gold-soft"
+                    >
                       {s.name}
                     </Link>
                   </td>

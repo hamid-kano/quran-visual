@@ -369,7 +369,7 @@ export default function TopicsPage() {
           <button
             type="button"
             onClick={() => open(null)}
-            className={`rounded-full px-3 py-1 ${focus ? 'text-mist hover:text-vellum' : 'bg-gold/15 text-gold-soft'}`}
+            className={`min-h-11 rounded-full px-3 ${focus ? 'text-mist hover:text-vellum' : 'bg-gold/15 text-gold-soft'}`}
           >
             كل الأقسام
           </button>
@@ -382,7 +382,7 @@ export default function TopicsPage() {
                 type="button"
                 onClick={() => open(c.id)}
                 aria-current={c.id === focus ? 'page' : undefined}
-                className={`rounded-full px-3 py-1 ${c.id === focus ? 'bg-gold/15 text-gold-soft' : 'text-mist hover:text-vellum'}`}
+                className={`min-h-11 rounded-full px-3 ${c.id === focus ? 'bg-gold/15 text-gold-soft' : 'text-mist hover:text-vellum'}`}
               >
                 {c.label}
               </button>

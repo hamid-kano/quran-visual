@@ -108,7 +108,10 @@ function Pair({
   return (
     <div className="border-t border-[#e0cf9f] pt-3">
       <p className="flex flex-wrap items-baseline justify-between gap-2 text-sm text-ink-soft">
-        <Link to={`/similar/${s}`} className="hover:text-ink hover:underline">
+        <Link
+          to={`/similar/${s}`}
+          className="-my-3 inline-block py-3 hover:text-ink hover:underline"
+        >
           سورة {byId.get(s)?.name}، الآية {toArabicDigits(n)}
         </Link>
         <span>

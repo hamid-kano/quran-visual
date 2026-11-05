@@ -61,7 +61,7 @@ export function RootPanel({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full px-3 py-1 text-sm text-ink-soft hover:bg-vellum-deep hover:text-ink"
+          className="min-h-11 rounded-full px-3 text-sm text-ink-soft hover:bg-vellum-deep hover:text-ink"
         >
           إغلاق
         </button>

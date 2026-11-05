@@ -8,6 +8,8 @@ import { toArabicDigits } from '../../lib/arabic'
 import { useReducedMotion } from '../../lib/useReducedMotion'
 import { MECCAN, MEDINAN, orderGradient, type ColorMode } from './colors'
 import { SurahPanel } from './SurahPanel'
+import { MapCard } from '../../components/MapCard'
+import { SheetPanel } from '../../components/SheetPanel'
 
 const GalaxyScene = lazy(() => import('./GalaxyScene'))
 
@@ -78,26 +80,23 @@ export default function GalaxyPage() {
         />
       </Suspense>
 
-      <section
-        aria-label="أدوات المجرّة"
-        className="absolute inset-x-3 top-3 z-10 rounded-2xl border border-gold/20 bg-night-deep/75 p-4 backdrop-blur sm:inset-x-auto sm:right-5 sm:top-5 sm:w-[22rem]"
-      >
-        <h1 className="font-display text-3xl font-bold text-gold-soft">مجرّة السور</h1>
-        <p
-          className={`mt-1 text-[0.95rem] leading-relaxed text-mist ${current ? 'hidden sm:block' : ''}`}
-        >
-          كل نجم سورة، يكبر بعدد آياتها. وتتقارب السور كلما اشتركت في جذور كلماتها المميِّزة.
-        </p>
-        <div className="mt-3">
+      <MapCard
+        title="مجرّة السور"
+        label="أدوات المجرّة"
+        search={
           <SearchBox
             items={searchItems}
             label="ابحث عن سورة"
             placeholder="ابحث باسم السورة أو رقمها"
             onChoose={(k) => select(+k)}
           />
-        </div>
+        }
+      >
+        <p className="mt-3 text-[0.95rem] leading-relaxed text-mist">
+          كل نجم سورة، يكبر بعدد آياتها. وتتقارب السور كلما اشتركت في جذور كلماتها المميِّزة.
+        </p>
         <div
-          className={`mt-3 flex-wrap items-center gap-1 ${current ? 'hidden sm:flex' : 'flex'}`}
+          className="mt-3 flex flex-wrap items-center gap-1"
           role="group"
           aria-label="طريقة العرض"
         >
@@ -115,10 +114,7 @@ export default function GalaxyPage() {
             كل الأسماء
           </Toggle>
         </div>
-        <div
-          className={`mt-3 text-sm text-mist ${current ? 'hidden sm:block' : ''}`}
-          aria-live="polite"
-        >
+        <div className="mt-3 text-sm text-mist" aria-live="polite">
           {colorMode === 'revelation' ? (
             <div className="flex gap-5">
               <span className="flex items-center gap-2">
@@ -138,13 +134,10 @@ export default function GalaxyPage() {
             </div>
           )}
         </div>
-      </section>
+      </MapCard>
 
       {current && (
-        <aside
-          aria-label={`تفاصيل سورة ${current.name}`}
-          className="absolute inset-x-2 bottom-2 z-10 h-[58%] sm:inset-x-auto sm:bottom-5 sm:left-5 sm:top-5 sm:h-auto sm:w-[27rem]"
-        >
+        <SheetPanel label={`تفاصيل سورة ${current.name}`}>
           <SurahPanel
             key={current.id}
             surah={current}
@@ -152,7 +145,7 @@ export default function GalaxyPage() {
             onSelect={select}
             onClose={() => select(null)}
           />
-        </aside>
+        </SheetPanel>
       )}
     </div>
   )

@@ -1,4 +1,6 @@
 import { Suspense, lazy, useMemo } from 'react'
+import { MapCard } from '../../components/MapCard'
+import { SheetPanel } from '../../components/SheetPanel'
 import { Link, useNavigate, useParams } from 'react-router'
 import { loadNames, loadSurahs } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
@@ -56,7 +58,7 @@ function NamePanel({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full px-3 py-1 text-sm text-ink-soft hover:bg-vellum-deep hover:text-ink"
+          className="min-h-11 rounded-full px-3 text-sm text-ink-soft hover:bg-vellum-deep hover:text-ink"
         >
           إغلاق
         </button>
@@ -173,40 +175,34 @@ export default function NamesPage() {
         />
       </Suspense>
 
-      <section
-        aria-label="أدوات الشبكة"
-        className="absolute inset-x-3 top-3 z-10 rounded-2xl border border-gold/20 bg-night-deep/75 p-4 backdrop-blur sm:inset-x-auto sm:right-5 sm:top-5 sm:w-[22rem]"
-      >
-        <h1 className="font-display text-3xl font-bold text-gold-soft">أسماء الأعلام</h1>
-        <p
-          className={`mt-1 text-[0.95rem] leading-relaxed text-mist ${node ? 'hidden sm:block' : ''}`}
-        >
-          الكلمات التي وسمتها المدوّنة القرآنية أسماءَ أعلام: أنبياء وأقوام وأماكن وكتب، وأسماء
-          للجنة والنار وغير ذلك. يصل الخط بين اسمين ذُكرا في آية واحدة، ويكبر الاسم بعدد مرات ذكره.
-          ولم يُدرج لفظ الجلالة: ورد في ١٨٢٥ آية، ويجتمع في الآيات مع ٦٤ اسماً من هذه الأسماء، فلو
-          أُدرج لتوسّط الشبكة وغلب على الروابط بين بقية الأسماء.
-        </p>
-        <div className="mt-3">
+      <MapCard
+        title="أسماء الأعلام"
+        label="أدوات الشبكة"
+        search={
           <SearchBox
             items={items}
             label="ابحث عن اسم"
             placeholder="ابحث عن اسم، مثل: موسى"
             onChoose={select}
           />
-        </div>
-        <p className={`mt-2 text-xs text-mist ${node ? 'hidden sm:block' : ''}`}>
+        }
+      >
+        <p className="mt-3 text-[0.95rem] leading-relaxed text-mist">
+          الكلمات التي وسمتها المدوّنة القرآنية أسماءَ أعلام: أنبياء وأقوام وأماكن وكتب، وأسماء
+          للجنة والنار وغير ذلك. يصل الخط بين اسمين ذُكرا في آية واحدة، ويكبر الاسم بعدد مرات ذكره.
+          ولم يُدرج لفظ الجلالة: ورد في ١٨٢٥ آية، ويجتمع في الآيات مع ٦٤ اسماً من هذه الأسماء، فلو
+          أُدرج لتوسّط الشبكة وغلب على الروابط بين بقية الأسماء.
+        </p>
+        <p className="mt-2 text-xs text-mist">
           الأسماء التي لم تجتمع مع غيرها في آية تظهر في البحث فقط.{' '}
           <Link to="/about" className="underline underline-offset-4">
             المنهج
           </Link>
         </p>
-      </section>
+      </MapCard>
 
       {node && (
-        <aside
-          aria-label={`تفاصيل ${plain(node.name)}`}
-          className="absolute inset-x-2 bottom-2 z-10 h-[58%] sm:inset-x-auto sm:bottom-5 sm:left-5 sm:top-5 sm:h-auto sm:w-[27rem]"
-        >
+        <SheetPanel label={`تفاصيل ${plain(node.name)}`}>
           <NamePanel
             key={node.name}
             node={node}
@@ -215,7 +211,7 @@ export default function NamesPage() {
             onSelect={select}
             onClose={() => select(null)}
           />
-        </aside>
+        </SheetPanel>
       )}
     </div>
   )

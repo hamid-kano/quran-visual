@@ -6,6 +6,8 @@ import { ErrorNote, Loading } from '../../components/Status'
 import { SearchBox, type SearchItem } from '../../components/SearchBox'
 import { ROOT, TIME, countOf, spacedRoot } from '../../lib/arabic'
 import { RootPanel } from './RootPanel'
+import { MapCard } from '../../components/MapCard'
+import { SheetPanel } from '../../components/SheetPanel'
 
 const RootGraph = lazy(() => import('./RootGraph'))
 
@@ -45,30 +47,26 @@ export default function RootsPage() {
         <RootGraph data={data!} selected={selected} onSelect={select} />
       </Suspense>
 
-      <section
-        aria-label="أدوات الشبكة"
-        className="absolute inset-x-3 top-3 z-10 rounded-2xl border border-gold/20 bg-night-deep/75 p-4 backdrop-blur sm:inset-x-auto sm:right-5 sm:top-5 sm:w-[22rem]"
-      >
-        <h1 className="font-display text-3xl font-bold text-gold-soft">شبكة الجذور</h1>
-        <p className="mt-1 text-[0.95rem] leading-relaxed text-mist">
-          {countOf(inGraph, ROOT)} من أكثر الجذور وروداً. يصل الخط بين جذرين يجتمعان في الآيات أكثر
-          مما تقتضيه الصدفة، وتشترك الجذور المتقاربة في لون واحد.
-        </p>
-        <div className="mt-3">
+      <MapCard
+        title="شبكة الجذور"
+        label="أدوات الشبكة"
+        search={
           <SearchBox
             items={searchItems}
             label="ابحث عن جذر"
             placeholder={`ابحث في ${countOf(data!.roots.length, ROOT)}، مثل: رحم`}
             onChoose={select}
           />
-        </div>
-      </section>
+        }
+      >
+        <p className="mt-3 text-[0.95rem] leading-relaxed text-mist">
+          {countOf(inGraph, ROOT)} من أكثر الجذور وروداً. يصل الخط بين جذرين يجتمعان في الآيات أكثر
+          مما تقتضيه الصدفة، وتشترك الجذور المتقاربة في لون واحد.
+        </p>
+      </MapCard>
 
       {node && (
-        <aside
-          aria-label={`تفاصيل الجذر ${spacedRoot(node.root)}`}
-          className="absolute inset-x-2 bottom-2 z-10 h-[58%] sm:inset-x-auto sm:bottom-5 sm:left-5 sm:top-5 sm:h-auto sm:w-[27rem]"
-        >
+        <SheetPanel label={`تفاصيل الجذر ${spacedRoot(node.root)}`}>
           <RootPanel
             key={node.root}
             node={node}
@@ -77,7 +75,7 @@ export default function RootsPage() {
             onSelect={select}
             onClose={() => select(null)}
           />
-        </aside>
+        </SheetPanel>
       )}
     </div>
   )

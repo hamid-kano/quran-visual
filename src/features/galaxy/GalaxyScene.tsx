@@ -293,7 +293,7 @@ export default function GalaxyScene(props: Props) {
           labels={labels}
         />
       </Canvas>
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      <div className="pointer-events-none absolute inset-0 isolate overflow-hidden" aria-hidden>
         {surahs.map((s) => {
           const state = stateOf(s.id, selected, hovered, near)
           const shown =

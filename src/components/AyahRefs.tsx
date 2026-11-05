@@ -87,7 +87,7 @@ export function OccurrenceList({
           <li key={`${s}:${a}`} className="py-3">
             <Link
               to={`/surah/${s}`}
-              className="text-sm text-ink-soft hover:text-ink hover:underline"
+              className="-my-3 inline-block py-3 text-sm text-ink-soft hover:text-ink hover:underline"
             >
               سورة {byId.get(s)?.name}، الآية {toArabicDigits(a)}
             </Link>

@@ -67,7 +67,7 @@ function Result({ hit, surah, text }: { hit: Hit; surah: Surah; text: string | u
     <li className="py-4">
       <Link
         to={`/surah/${hit.surah}`}
-        className="text-sm text-ink-soft hover:text-ink hover:underline"
+        className="-my-3 inline-block py-3 text-sm text-ink-soft hover:text-ink hover:underline"
       >
         سورة {surah.name}، الآية {toArabicDigits(hit.ayah)}
       </Link>

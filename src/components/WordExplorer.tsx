@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { loadMorphology } from '../data/load'
 import { useAsync } from '../data/useAsync'
 import { toArabicDigits } from '../lib/arabic'
 import { describeWord } from '../lib/morphology'
-import { ayahWords } from '../lib/quran'
+import { ayahWords, tokens } from '../lib/quran'
 import { ayahPath } from '../lib/links'
 import { wordSlug } from '../lib/lexicon'
 import { AyahMark } from './AyahText'
@@ -25,6 +25,7 @@ export function WordExplorer({
   fontSize,
   anchors = false,
   cardClass = '-mx-6 px-6',
+  before,
 }: {
   surah: number
   ayahs: { n: number; text: string }[]
@@ -40,6 +41,8 @@ export function WordExplorer({
   anchors?: boolean
   /** Spacing that makes the word card span the page it sits in. */
   cardClass?: string
+  /** Anything to show just before an ayah, such as where a mushaf page begins. */
+  before?: (ayah: number) => React.ReactNode
 }) {
   const activeRef = useRef<HTMLSpanElement>(null)
   useEffect(() => {
@@ -80,52 +83,61 @@ export function WordExplorer({
         onFocus={want}
       >
         {ayahs.map((a) => (
-          <span
-            key={a.n}
-            id={anchors ? `a${a.n}` : undefined}
-            ref={a.n === activeAyah ? activeRef : undefined}
-            className={
-              [
-                a.n === activeAyah && 'rounded bg-[#efe0b4] [box-decoration-break:clone]',
-                // clear of the reading page's player bar, which stays in view on wide screens
-                anchors && 'scroll-mt-4 sm:scroll-mt-36',
-              ]
-                .filter(Boolean)
-                .join(' ') || undefined
-            }
-            aria-current={a.n === activeAyah ? 'true' : undefined}
-          >
-            {ayahWords(a.text).map((w, i) => {
-              const on = picked?.ayah === a.n && picked.word === i
-              return (
-                <span key={i}>
-                  <button
-                    type="button"
-                    onClick={() => setPicked(on ? null : { ayah: a.n, word: i })}
-                    aria-pressed={on}
-                    className={`rounded px-px transition-colors ${
-                      on ? 'bg-[#ead9a8] text-[#6b4a0c]' : 'hover:bg-vellum-deep'
-                    }`}
-                  >
-                    {w}
-                  </button>{' '}
-                </span>
-              )
-            })}
-            {onPlayFrom ? (
-              <button
-                type="button"
-                onClick={() => onPlayFrom(a.n)}
-                aria-label={`استمع من الآية ${toArabicDigits(a.n)}`}
-                title={`استمع من الآية ${toArabicDigits(a.n)}`}
-                className="rounded-full hover:bg-vellum-deep"
-              >
+          <Fragment key={a.n}>
+            {before?.(a.n)}
+            <span
+              id={anchors ? `a${a.n}` : undefined}
+              ref={a.n === activeAyah ? activeRef : undefined}
+              className={
+                [
+                  a.n === activeAyah && 'rounded bg-[#efe0b4] [box-decoration-break:clone]',
+                  // clear of the reading page's player bar, which stays in view on wide screens
+                  anchors && 'scroll-mt-4 sm:scroll-mt-36',
+                ]
+                  .filter(Boolean)
+                  .join(' ') || undefined
+              }
+              aria-current={a.n === activeAyah ? 'true' : undefined}
+            >
+              {tokens(a.text).map(({ text: w, word: i }, k) => {
+                // a sign standing alone in the text, such as ۞ where a quarter of a hizb begins
+                if (i === null)
+                  return (
+                    <span key={k} className="text-[#8a6a1f]">
+                      {w}{' '}
+                    </span>
+                  )
+                const on = picked?.ayah === a.n && picked.word === i
+                return (
+                  <span key={k}>
+                    <button
+                      type="button"
+                      onClick={() => setPicked(on ? null : { ayah: a.n, word: i })}
+                      aria-pressed={on}
+                      className={`rounded px-px transition-colors ${
+                        on ? 'bg-[#ead9a8] text-[#6b4a0c]' : 'hover:bg-vellum-deep'
+                      }`}
+                    >
+                      {w}
+                    </button>{' '}
+                  </span>
+                )
+              })}
+              {onPlayFrom ? (
+                <button
+                  type="button"
+                  onClick={() => onPlayFrom(a.n)}
+                  aria-label={`استمع من الآية ${toArabicDigits(a.n)}`}
+                  title={`استمع من الآية ${toArabicDigits(a.n)}`}
+                  className="rounded-full hover:bg-vellum-deep"
+                >
+                  <AyahMark n={a.n} />
+                </button>
+              ) : (
                 <AyahMark n={a.n} />
-              </button>
-            ) : (
-              <AyahMark n={a.n} />
-            )}{' '}
-          </span>
+              )}{' '}
+            </span>
+          </Fragment>
         ))}
       </p>
 

@@ -72,6 +72,20 @@ export const ENTRY: Forms = {
   many: 'مدخلاً',
   hundreds: 'مدخل',
 }
+export const DAY: Forms = {
+  one: 'يوم واحد',
+  two: 'يومان',
+  few: 'أيام',
+  many: 'يوماً',
+  hundreds: 'يوم',
+}
+export const PAGE: Forms = {
+  one: 'صفحة واحدة',
+  two: 'صفحتان',
+  few: 'صفحات',
+  many: 'صفحة',
+  hundreds: 'صفحة',
+}
 export const PAIR: Forms = {
   one: 'زوج واحد',
   two: 'زوجان',

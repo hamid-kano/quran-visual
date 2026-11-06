@@ -182,6 +182,15 @@ export type Fingerprint = z.infer<typeof Fingerprint>
 export type NameIndex = z.infer<typeof NameIndex>
 export type NameNode = z.infer<typeof NameNode>
 export type SimilarIndex = z.infer<typeof SimilarIndex>
+const Ref = z.tuple([z.number().int().min(1).max(114), z.number().int().min(1)])
+/** The first ayah of each page, juz and quarter of a hizb of the Madinah mushaf, in order. */
+export const Mushaf = z.object({
+  pages: z.array(Ref).length(604),
+  juz: z.array(Ref).length(30),
+  quarters: z.array(Ref).length(240),
+})
+export type Mushaf = z.infer<typeof Mushaf>
+
 export const LexiconIndexEntry = z.object({
   /** Address in the lexicon: the lemma, with type or root added where lemmas are spelt alike. */
   slug: z.string().min(1),

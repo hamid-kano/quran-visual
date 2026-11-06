@@ -1,6 +1,7 @@
 import type { z } from 'zod'
 import {
   Fingerprints,
+  Mushaf,
   Lexicon,
   LexiconEntry,
   NameIndex,
@@ -71,3 +72,5 @@ export const loadLexicon = (): Promise<z.infer<typeof Lexicon>> => load('lexicon
 /** One lexicon entry's places and forms, by its address (slug). */
 export const loadLexEntry = (slug: string): Promise<z.infer<typeof LexiconEntry>> =>
   load(`lex/${encodeURIComponent(slug)}.json`, LexiconEntry)
+
+export const loadMushaf = (): Promise<z.infer<typeof Mushaf>> => load('mushaf.json', Mushaf)

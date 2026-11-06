@@ -262,6 +262,11 @@ const sections: [string, string, string][] = [
     'القرآن الكريم سورةً سورة بخط مجمع الملك فهد، مع تلاوة تتابع الآية المقروءة بصوت من تختار من القرّاء.',
   ],
   [
+    'khatma',
+    'خطة الختمة',
+    'قسّم المصحف الشريف على عدد الأيام الذي تختاره بصفحات مصحف المدينة الكاملة، وتابع ورد كل يوم.',
+  ],
+  [
     'words',
     'معجم الألفاظ',
     `ألفاظ القرآن الكريم بمداخلها المعجمية: ${countOf(lexicon.entries.length, ENTRY)}، لكل مدخل عدد وروده وصيغه في المصحف ومواضعه وجذره.`,
@@ -452,8 +457,14 @@ function hintsFor(route: string): Hints {
     case 'read':
       return {
         modules: one(feature('read/ReadPage')),
-        data: ['surahs.json', ...(a ? [`surah/${a}.json`] : [])],
+        data: ['surahs.json', ...(a ? [`surah/${a}.json`, 'mushaf.json'] : [])],
         quranFont: !!a,
+      }
+    case 'khatma':
+      return {
+        modules: one(feature('read/KhatmaPage')),
+        data: ['mushaf.json', 'surahs.json'],
+        quranFont: false,
       }
     case 'words':
       return {

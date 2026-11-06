@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router'
 import type { Surah } from '../../data/schemas'
-import { loadSurahText, loadSurahs } from '../../data/load'
+import { loadMushaf, loadSurahText, loadSurahs } from '../../data/load'
+import { juzName, marksByAyah, ordinals, pageOf, quarterName } from '../../lib/mushaf'
 import { useAsync } from '../../data/useAsync'
 import { ErrorNote, Loading } from '../../components/Status'
 import { WordExplorer } from '../../components/WordExplorer'
@@ -21,6 +22,8 @@ const SIZES = [
 type Size = (typeof SIZES)[number][0]
 const SIZE_KEY = 'qv.readSize'
 const LAST_KEY = 'qv.lastRead'
+const PAGES_KEY = 'qv.readPages'
+const isBool = (v: unknown): v is boolean => typeof v === 'boolean'
 
 function stored<T>(key: string, ok: (v: unknown) => v is T): T | null {
   try {
@@ -64,8 +67,15 @@ function Index({ surahs }: { surahs: Surah[] }) {
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <h1 className="font-display text-4xl font-bold text-gold-soft">القراءة</h1>
       <p className="mt-3 max-w-3xl leading-relaxed text-mist">
-        السورة كاملة بخط مجمع الملك فهد، مع التلاوة بصوت من تختار من القرّاء، تتابع الآية المقروءة.
+        السورة كاملة بخط مجمع الملك فهد وعلى صفحات مصحف المدينة، مع التلاوة بصوت من تختار من
+        القرّاء، تتابع الآية المقروءة.
       </p>
+      <Link
+        to="/khatma"
+        className="mt-5 me-2 inline-flex min-h-11 items-center rounded-full border border-gold/40 px-5 text-vellum hover:bg-gold/10"
+      >
+        خطة الختمة
+      </Link>
       {lastSurah && last && (
         <Link
           to={`/read/${lastSurah.id}${last.ayah > 1 ? `#${last.ayah}` : ''}`}
@@ -110,6 +120,48 @@ function Reader({ surah, surahs }: { surah: Surah; surahs: Surah[] }) {
   const [size, setSize] = useState<Size>(() => stored(SIZE_KEY, isSize) ?? 'متوسط')
   const fontSize = SIZES.find(([s]) => s === size)![1]
   const reciting = recitation.step && !recitation.step.basmala ? recitation.step.ayah : null
+  const [showPages, setShowPages] = useState(() => stored(PAGES_KEY, isBool) ?? true)
+  const mushaf = useAsync(loadMushaf, 'mushaf')
+  const where = useMemo(() => {
+    if (mushaf.status !== 'ready') return null
+    const ord = ordinals(surahs.map((x) => x.ayahs))
+    return {
+      marks: marksByAyah(mushaf.data),
+      firstPage: pageOf(mushaf.data, ord, [surah.id, 1]),
+      lastPage: pageOf(mushaf.data, ord, [surah.id, surah.ayahs]),
+    }
+  }, [mushaf, surahs, surah])
+  /** Where a page, juz or quarter of a hizb begins, shown just before its ayah. */
+  const before = (n: number) => {
+    const m = where?.marks.get(`${surah.id}:${n}`)
+    if (!m || !showPages) return null
+    const parts = [m.juz && juzName(m.juz), m.quarter && quarterName(m.quarter)].filter(Boolean)
+    if (m.page && n > 1)
+      return (
+        <span
+          role="separator"
+          aria-label={`صفحة ${toArabicDigits(m.page)}`}
+          className="my-2 flex items-center gap-3 font-[family-name:var(--font-ui)] text-sm leading-normal text-ink-soft"
+          style={{ fontSize: '0.85rem' }}
+        >
+          <span className="h-px flex-1 bg-[#d8c48e]" aria-hidden />
+          <span>
+            صفحة {toArabicDigits(m.page)}
+            {parts.length > 0 && ` · ${parts.join(' · ')}`}
+          </span>
+          <span className="h-px flex-1 bg-[#d8c48e]" aria-hidden />
+        </span>
+      )
+    if (parts.length === 0 || n === 1) return null
+    return (
+      <span
+        className="mx-1 inline-block rounded bg-vellum-deep px-1.5 align-middle font-[family-name:var(--font-ui)] leading-normal text-ink-soft"
+        style={{ fontSize: '0.75rem' }}
+      >
+        {parts.join(' · ')}
+      </span>
+    )
+  }
   const prev = surahs[surah.id - 2]
   const next = surahs[surah.id]
 
@@ -162,26 +214,41 @@ function Reader({ surah, surahs }: { surah: Surah; surahs: Surah[] }) {
             سورة {surah.name}
           </span>
         </span>
-        <span role="group" aria-label="حجم الخط" className="flex items-center">
-          {SIZES.map(([s], i) => (
-            <button
-              key={s}
-              type="button"
-              aria-pressed={size === s}
-              aria-label={`خط ${s}`}
-              title={`خط ${s}`}
-              onClick={() => {
-                setSize(s)
-                store(SIZE_KEY, s)
-              }}
-              className={`grid min-h-11 min-w-11 place-items-center rounded-full font-quran leading-none ${
-                size === s ? 'bg-gold/20 text-gold-soft' : 'text-mist hover:text-vellum'
-              }`}
-              style={{ fontSize: `${0.85 + i * 0.3}rem` }}
-            >
-              <span aria-hidden>أ</span>
-            </button>
-          ))}
+        <span className="flex items-center">
+          <button
+            type="button"
+            aria-pressed={showPages}
+            onClick={() => {
+              setShowPages(!showPages)
+              store(PAGES_KEY, !showPages)
+            }}
+            className={`min-h-11 rounded-full px-3 ${
+              showPages ? 'bg-gold/20 text-gold-soft' : 'text-mist hover:text-vellum'
+            }`}
+          >
+            حدود الصفحات
+          </button>
+          <span role="group" aria-label="حجم الخط" className="flex items-center">
+            {SIZES.map(([s], i) => (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={size === s}
+                aria-label={`خط ${s}`}
+                title={`خط ${s}`}
+                onClick={() => {
+                  setSize(s)
+                  store(SIZE_KEY, s)
+                }}
+                className={`grid min-h-11 min-w-11 place-items-center rounded-full font-quran leading-none ${
+                  size === s ? 'bg-gold/20 text-gold-soft' : 'text-mist hover:text-vellum'
+                }`}
+                style={{ fontSize: `${0.85 + i * 0.3}rem` }}
+              >
+                <span aria-hidden>أ</span>
+              </button>
+            ))}
+          </span>
         </span>
       </nav>
 
@@ -197,6 +264,15 @@ function Reader({ surah, surahs }: { surah: Surah; surahs: Surah[] }) {
             {revelationLabel(surah.revelation)} · {countOf(surah.ayahs, AYAH)} · رقمها في المصحف{' '}
             {toArabicDigits(surah.id)}
           </p>
+          {where && (
+            <p className="text-sm text-ink-soft">
+              {where.firstPage === where.lastPage
+                ? `في الصفحة ${toArabicDigits(where.firstPage)}`
+                : `من الصفحة ${toArabicDigits(where.firstPage)} إلى ${toArabicDigits(where.lastPage)}`}
+              {where.marks.get(`${surah.id}:1`)?.juz &&
+                `، وبها يبدأ ${juzName(where.marks.get(`${surah.id}:1`)!.juz!)}`}
+            </p>
+          )}
         </header>
 
         {text.status === 'loading' && (
@@ -223,6 +299,7 @@ function Reader({ surah, surahs }: { surah: Surah; surahs: Surah[] }) {
               fontSize={fontSize}
               anchors
               cardClass="-mx-5 px-5 sm:-mx-12 sm:px-12"
+              before={before}
             />
           </div>
         )}

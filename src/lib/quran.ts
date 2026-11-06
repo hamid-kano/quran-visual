@@ -22,6 +22,18 @@ export const ayahWords = (text: string) => text.split(/[ \u00a0]+/).filter(isWor
 export const isWord = (token: string) => LETTER.test(stripMarks(token))
 
 /**
+ * The text's space-separated tokens in order, each with its index among the ayah's words (as
+ * ayahWords counts them), or null for a sign standing alone such as ۞.
+ */
+export function tokens(text: string): { text: string; word: number | null }[] {
+  let n = 0
+  return text
+    .split(/[ \u00a0]+/)
+    .filter(Boolean)
+    .map((t) => ({ text: t, word: isWord(t) ? n++ : null }))
+}
+
+/**
  * Comparison key of a word: its letters as pronounced, with spelling variants unified.
  * The dagger alif (ٰ) is a letter that is read, so it counts as alif — except over alif
  * maqsura (ىٰ), where it only marks how ى is read. This keeps مَٰلِك and مَلِك apart.

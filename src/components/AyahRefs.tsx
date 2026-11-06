@@ -6,6 +6,7 @@ import { useAsync } from '../data/useAsync'
 import { AYAH, countOf, toArabicDigits } from '../lib/arabic'
 import { AyahMark } from './AyahText'
 import { ayahPath } from '../lib/links'
+import { PAGE_MECCAN, PAGE_MEDINAN } from '../lib/colors'
 import { isWord } from '../lib/quran'
 
 const PAGE = 8
@@ -40,7 +41,7 @@ export function Distribution({
               y={H - h}
               width={Math.max(bw - 0.5, 0.8)}
               height={h}
-              fill={s.revelation === 'meccan' ? '#a6852f' : '#3f8a77'}
+              fill={s.revelation === 'meccan' ? PAGE_MECCAN : PAGE_MEDINAN}
             >
               <title>{`سورة ${s.name}: ${countOf(v, AYAH)}`}</title>
             </rect>
@@ -53,10 +54,10 @@ export function Distribution({
       </div>
       <figcaption className="mt-1 flex gap-4 text-xs text-ink-soft">
         <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-sm bg-[#a6852f]" /> سورة مكية
+          <span className="size-2 rounded-sm" style={{ background: PAGE_MECCAN }} /> سورة مكية
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-sm bg-[#3f8a77]" /> سورة مدنية
+          <span className="size-2 rounded-sm" style={{ background: PAGE_MEDINAN }} /> سورة مدنية
         </span>
       </figcaption>
     </figure>

@@ -195,6 +195,35 @@ export type Mushaf = z.infer<typeof Mushaf>
 export const Fawasil = z.object({ letters: z.array(z.string()).length(114) })
 export type Fawasil = z.infer<typeof Fawasil>
 
+const WordRef = z.tuple([z.number().int(), z.number().int(), z.number().int()])
+/** Every stop sign as [surah, ayah, index of the word it follows], by kind, in mushaf order. */
+export const Waqf = z.object({
+  lazim: z.array(WordRef),
+  jaiz: z.array(WordRef),
+  sila: z.array(WordRef),
+  qila: z.array(WordRef),
+  muanaqa: z.array(WordRef),
+  sakt: z.array(WordRef),
+})
+export type Waqf = z.infer<typeof Waqf>
+
+/** Vocatives grouped by the one called, most frequent first. */
+export const Nida = z.object({
+  groups: z.array(
+    z.object({
+      /** The lemmas of the one called. */
+      key: z.string().min(1),
+      /** The call as the mushaf most often writes it. */
+      label: z.string().min(1),
+      /** [surah, ayah, first word, number of words], in mushaf order. */
+      places: z.array(
+        z.tuple([z.number().int(), z.number().int(), z.number().int(), z.number().int()]),
+      ),
+    }),
+  ),
+})
+export type Nida = z.infer<typeof Nida>
+
 export const LexiconIndexEntry = z.object({
   /** Address in the lexicon: the lemma, with type or root added where lemmas are spelt alike. */
   slug: z.string().min(1),

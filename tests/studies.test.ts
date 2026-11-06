@@ -38,3 +38,78 @@ describe('fawasil', () => {
     expect(letterCounts(all)[0]).toEqual(['ن', 3124])
   })
 })
+
+describe('stop signs', async () => {
+  const { Waqf } = await import('../src/data/schemas.ts')
+  const { waqfIn, WAQF_KINDS, WAQF_SIGN } = await import('../src/lib/waqf.ts')
+  const { ayahWords } = await import('../src/lib/quran.ts')
+  const w = Waqf.parse(read('waqf.json'))
+
+  it('account for every sign in the text: each counted once, the in-word seen left out', () => {
+    for (const k of WAQF_KINDS) {
+      const inText = texts.reduce(
+        (n, t) => n + t.ayahs.reduce((m, a) => m + a.text.split(WAQF_SIGN[k]).length - 1, 0),
+        0,
+      )
+      // three small seens sit inside a word (يَبۡصُۜطُ، بَصۜۡطَةٗ، ٱلۡمُصَۜيۡطِرُونَ) and are no stop
+      expect(w[k].length, k).toBe(k === 'sakt' ? inText - 3 : inText)
+    }
+  })
+
+  it('attach each sign to the word it is written on', () => {
+    for (const k of WAQF_KINDS)
+      for (const [s, a, i] of w[k]) expect(ayahWords(ayah(s, a))[i]).toContain(WAQF_SIGN[k])
+  })
+
+  it('find the known places', () => {
+    // «إِنَّمَا يَسۡتَجِيبُ ٱلَّذِينَ يَسۡمَعُونَۘ وَٱلۡمَوۡتَىٰ…» (al-An‘am 36)
+    expect(w.lazim).toContainEqual([6, 36, 3])
+    // «لَا رَيۡبَۛ فِيهِۛ» (al-Baqarah 2)
+    expect(w.muanaqa.filter(([s, a]) => s === 2 && a === 2).map(([, , i]) => i)).toEqual([3, 4])
+    // the saktahs: عِوَجَاۜ، مَّرۡقَدِنَاۜۗ، مَالِيَهۡۜ، مَنۡۜ رَاقٖ، بَلۡۜ رَانَ
+    expect(w.sakt.map(([s, a]) => `${s}:${a}`)).toEqual([
+      '18:1',
+      '36:52',
+      '69:28',
+      '75:27',
+      '83:14',
+    ])
+    expect(waqfIn(ayah(2, 245)).some((m) => m.kind === 'sakt')).toBe(false)
+  })
+})
+
+describe('vocatives', async () => {
+  const { Nida, SurahMorphology } = await import('../src/data/schemas.ts')
+  const { ayahWords } = await import('../src/lib/quran.ts')
+  const n = Nida.parse(read('nida.json'))
+  const count = (label: string) =>
+    n.groups.find((g) => g.label.normalize('NFC') === label.normalize('NFC'))?.places.length
+
+  it('count every vocative the corpus marks, once', () => {
+    let marked = 0
+    for (const s of surahs) {
+      const m = SurahMorphology.parse(read(`morph/${s.id}.json`))
+      for (const a of m.ayahs)
+        for (const w of a!) if (w.some(([, , f]) => f.split('|').includes('VOC'))) marked++
+    }
+    expect(n.groups.reduce((t, g) => t + g.places.length, 0)).toBe(marked)
+    expect(marked).toBe(366)
+  })
+
+  it('agree with the well-known counts', () => {
+    expect(count('يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ')).toBe(89)
+    expect(count('يَٰٓأَيُّهَا ٱلنَّاسُ')).toBe(20)
+    expect(count('يَٰبَنِيٓ إِسۡرَٰٓءِيلَ')).toBe(6)
+    expect(count('ٱللَّهُمَّ')).toBe(5)
+  })
+
+  it('point at the words of the call as written, the first carrying the vocative', () => {
+    const morph = surahs.map((x) => SurahMorphology.parse(read(`morph/${x.id}.json`)))
+    for (const g of n.groups)
+      for (const [s, a, w, span] of g.places) {
+        expect(ayahWords(ayah(s, a)).slice(w, w + span)).toHaveLength(span)
+        const word = morph[s - 1]!.ayahs[a - 1]![w]!
+        expect(word.some(([, , f]) => f.split('|').includes('VOC'))).toBe(true)
+      }
+  })
+})

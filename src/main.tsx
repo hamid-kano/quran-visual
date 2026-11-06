@@ -31,6 +31,8 @@ const WordsPage = lazy(() => import('./features/words/WordsPage'))
 const ReadPage = lazy(() => import('./features/read/ReadPage'))
 const KhatmaPage = lazy(() => import('./features/read/KhatmaPage'))
 const FawasilPage = lazy(() => import('./features/fawasil/FawasilPage'))
+const WaqfPage = lazy(() => import('./features/waqf/WaqfPage'))
+const NidaPage = lazy(() => import('./features/nida/NidaPage'))
 
 const page = (el: React.ReactNode) => <Suspense fallback={<Loading />}>{el}</Suspense>
 
@@ -63,6 +65,8 @@ const router = createBrowserRouter(
             { path: 'khatma', element: page(<KhatmaPage />) },
             { path: 'fawasil', element: page(<FawasilPage />) },
             { path: 'fawasil/:id', element: page(<FawasilPage />) },
+            { path: 'waqf', element: page(<WaqfPage />) },
+            { path: 'nida', element: page(<NidaPage />) },
             { path: 'words', element: page(<WordsPage />) },
             { path: 'words/:slug', element: page(<WordsPage />) },
             { path: 'about', element: page(<AboutPage />) },

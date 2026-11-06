@@ -267,6 +267,16 @@ const sections: [string, string, string][] = [
     'الحرف الأخير من كل آية في القرآن الكريم كما رُسم في المصحف: إيقاع كل سورة في شريط، وتوزيع الفواصل على الحروف.',
   ],
   [
+    'waqf',
+    'الوقف والابتداء',
+    'علامات الوقف في مصحف المدينة: معنى كل علامة وعددها وتوزيعها على السور، ومواضع الوقف اللازم والتعانق والسكت.',
+  ],
+  [
+    'nida',
+    'النداء في القرآن',
+    'مواضع النداء في القرآن الكريم مجموعة بحسب المنادى، كما كُتبت في المصحف، مع توزيعها على السور المكية والمدنية.',
+  ],
+  [
     'khatma',
     'خطة الختمة',
     'قسّم المصحف الشريف على عدد الأيام الذي تختاره بصفحات مصحف المدينة الكاملة، وتابع ورد كل يوم.',
@@ -475,6 +485,18 @@ function hintsFor(route: string): Hints {
       return {
         modules: one(feature('fawasil/FawasilPage')),
         data: ['surahs.json', 'fawasil.json', ...(a ? [`surah/${a}.json`] : [])],
+        quranFont: true,
+      }
+    case 'waqf':
+      return {
+        modules: one(feature('waqf/WaqfPage')),
+        data: ['surahs.json', 'waqf.json'],
+        quranFont: true,
+      }
+    case 'nida':
+      return {
+        modules: one(feature('nida/NidaPage')),
+        data: ['surahs.json', 'nida.json'],
         quranFont: true,
       }
     case 'khatma':

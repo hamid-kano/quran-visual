@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 import {
+  Fawasil,
   Fingerprints,
   Mushaf,
   Lexicon,
@@ -74,3 +75,4 @@ export const loadLexEntry = (slug: string): Promise<z.infer<typeof LexiconEntry>
   load(`lex/${encodeURIComponent(slug)}.json`, LexiconEntry)
 
 export const loadMushaf = (): Promise<z.infer<typeof Mushaf>> => load('mushaf.json', Mushaf)
+export const loadFawasil = (): Promise<z.infer<typeof Fawasil>> => load('fawasil.json', Fawasil)

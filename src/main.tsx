@@ -30,6 +30,7 @@ const ReviewPage = lazy(() => import('./features/review/ReviewPage'))
 const WordsPage = lazy(() => import('./features/words/WordsPage'))
 const ReadPage = lazy(() => import('./features/read/ReadPage'))
 const KhatmaPage = lazy(() => import('./features/read/KhatmaPage'))
+const FawasilPage = lazy(() => import('./features/fawasil/FawasilPage'))
 
 const page = (el: React.ReactNode) => <Suspense fallback={<Loading />}>{el}</Suspense>
 
@@ -60,6 +61,8 @@ const router = createBrowserRouter(
             { path: 'read', element: page(<ReadPage />) },
             { path: 'read/:id', element: page(<ReadPage />) },
             { path: 'khatma', element: page(<KhatmaPage />) },
+            { path: 'fawasil', element: page(<FawasilPage />) },
+            { path: 'fawasil/:id', element: page(<FawasilPage />) },
             { path: 'words', element: page(<WordsPage />) },
             { path: 'words/:slug', element: page(<WordsPage />) },
             { path: 'about', element: page(<AboutPage />) },

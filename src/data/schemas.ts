@@ -191,6 +191,10 @@ export const Mushaf = z.object({
 })
 export type Mushaf = z.infer<typeof Mushaf>
 
+/** The last letter of every ayah: one string per surah, one letter per ayah. */
+export const Fawasil = z.object({ letters: z.array(z.string()).length(114) })
+export type Fawasil = z.infer<typeof Fawasil>
+
 export const LexiconIndexEntry = z.object({
   /** Address in the lexicon: the lemma, with type or root added where lemmas are spelt alike. */
   slug: z.string().min(1),

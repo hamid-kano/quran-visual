@@ -262,6 +262,11 @@ const sections: [string, string, string][] = [
     'القرآن الكريم سورةً سورة بخط مجمع الملك فهد، مع تلاوة تتابع الآية المقروءة بصوت من تختار من القرّاء.',
   ],
   [
+    'fawasil',
+    'الفواصل',
+    'الحرف الأخير من كل آية في القرآن الكريم كما رُسم في المصحف: إيقاع كل سورة في شريط، وتوزيع الفواصل على الحروف.',
+  ],
+  [
     'khatma',
     'خطة الختمة',
     'قسّم المصحف الشريف على عدد الأيام الذي تختاره بصفحات مصحف المدينة الكاملة، وتابع ورد كل يوم.',
@@ -333,6 +338,12 @@ for (const n of names) {
   })
 }
 
+for (const s of surahs)
+  pages.set(`fawasil/${s.id}`, {
+    title: titled(`فواصل سورة ${s.name}`),
+    description: `آخر كلمة في كل آية من سورة ${s.name} وحرفها الأخير كما رُسم في المصحف، مع توزيع فواصل السورة على الحروف.`,
+    ...surahImageOf(s),
+  })
 for (const s of surahs)
   pages.set(`read/${s.id}`, {
     title: titled(`سورة ${s.name} · القراءة`),
@@ -459,6 +470,12 @@ function hintsFor(route: string): Hints {
         modules: one(feature('read/ReadPage')),
         data: ['surahs.json', ...(a ? [`surah/${a}.json`, 'mushaf.json'] : [])],
         quranFont: !!a,
+      }
+    case 'fawasil':
+      return {
+        modules: one(feature('fawasil/FawasilPage')),
+        data: ['surahs.json', 'fawasil.json', ...(a ? [`surah/${a}.json`] : [])],
+        quranFont: true,
       }
     case 'khatma':
       return {

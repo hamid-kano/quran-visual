@@ -86,6 +86,13 @@ export const PAGE: Forms = {
   many: 'صفحة',
   hundreds: 'صفحة',
 }
+export const LETTER: Forms = {
+  one: 'حرف واحد',
+  two: 'حرفان',
+  few: 'أحرف',
+  many: 'حرفاً',
+  hundreds: 'حرف',
+}
 export const PAIR: Forms = {
   one: 'زوج واحد',
   two: 'زوجان',

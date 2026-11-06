@@ -277,6 +277,16 @@ const sections: [string, string, string][] = [
     'مواضع النداء في القرآن الكريم مجموعة بحسب المنادى، كما كُتبت في المصحف، مع توزيعها على السور المكية والمدنية.',
   ],
   [
+    'anbiya',
+    'الأنبياء في القرآن',
+    'ذكر الأنبياء والرسل الخمسة والعشرين بأسمائهم في سور القرآن الكريم: عدد مرات ذكر كل نبي ومواضعه، بترتيب المصحف وبترتيب النزول.',
+  ],
+  [
+    'studies',
+    'علوم القرآن',
+    'أبواب من علوم القرآن محسوبة من نص المصحف نفسه: الفواصل، والوقف والابتداء، والنداء، وذكر الأنبياء، وخطة الختمة.',
+  ],
+  [
     'khatma',
     'خطة الختمة',
     'قسّم المصحف الشريف على عدد الأيام الذي تختاره بصفحات مصحف المدينة الكاملة، وتابع ورد كل يوم.',
@@ -499,6 +509,14 @@ function hintsFor(route: string): Hints {
         data: ['surahs.json', 'nida.json'],
         quranFont: true,
       }
+    case 'anbiya':
+      return {
+        modules: one(feature('anbiya/AnbiyaPage')),
+        data: ['surahs.json', 'prophets.json'],
+        quranFont: false,
+      }
+    case 'studies':
+      return { modules: one(feature('studies/StudiesPage')), data: [], quranFont: false }
     case 'khatma':
       return {
         modules: one(feature('read/KhatmaPage')),

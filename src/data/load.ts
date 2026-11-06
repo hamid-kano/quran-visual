@@ -1,6 +1,7 @@
 import type { z } from 'zod'
 import {
   Fawasil,
+  Prophets,
   Nida,
   Waqf,
   Fingerprints,
@@ -80,3 +81,4 @@ export const loadMushaf = (): Promise<z.infer<typeof Mushaf>> => load('mushaf.js
 export const loadFawasil = (): Promise<z.infer<typeof Fawasil>> => load('fawasil.json', Fawasil)
 export const loadWaqf = (): Promise<z.infer<typeof Waqf>> => load('waqf.json', Waqf)
 export const loadNida = (): Promise<z.infer<typeof Nida>> => load('nida.json', Nida)
+export const loadProphets = (): Promise<z.infer<typeof Prophets>> => load('prophets.json', Prophets)

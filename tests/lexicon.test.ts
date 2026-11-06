@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { Lexicon, LexiconEntry, RootIndex, SurahMorphology } from '../src/data/schemas.ts'
-import { rootLemmaPath, wordSlug } from '../src/lib/lexicon.ts'
+import { continuesToken, rootLemmaPath, wordSlug } from '../src/lib/lexicon.ts'
 import { filterLexicon, lexKey } from '../src/lib/lexiconSearch.ts'
 
 const read = (f: string) => JSON.parse(readFileSync(`public/data/${f}`, 'utf8'))
@@ -20,18 +20,23 @@ describe('the lexicon', () => {
     // corpus gives no lemma, and the opening letters of 29 surahs (30 ayahs)
     let pron = 0
     let opening = 0
+    let split = 0
     for (const m of morph)
       for (const a of m.ayahs)
-        for (const w of a!)
-          if (!wordSlug(w)) {
+        a!.forEach((w, i) => {
+          if (continuesToken(a!, i)) split++
+          else if (!wordSlug(w)) {
             if (w.some(([, , f]) => f.startsWith('INL'))) opening++
             else if (
               w.filter(([, , f]) => !f.includes('PREF')).every(([, , f]) => f.includes('PRON'))
             )
               pron++
           }
+        })
     expect(opening).toBe(30)
-    expect(pron + opening).toBe(lex.words - lex.counted)
+    // «إِلۡ يَاسِينَ» is one name written as two words, counted once
+    expect(split).toBe(1)
+    expect(pron + opening + split).toBe(lex.words - lex.counted)
   })
 
   it('gives each entry a unique address', () => {
@@ -41,6 +46,8 @@ describe('the lexicon', () => {
   it('agrees with the corpus on well-known counts', () => {
     expect(bySlug.get('اللَّه'.normalize('NFC'))!.count).toBe(2699)
     expect(bySlug.get('رَحْمٰن'.normalize('NFC'))!.count).toBe(57)
+    // إلياس three times, «إِلۡ يَاسِينَ» among them once
+    expect(bySlug.get('إِلْياس'.normalize('NFC'))!.count).toBe(3)
   })
 
   it('keeps apart lemmas spelt alike: ما as a noun and as a particle', () => {

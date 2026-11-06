@@ -42,7 +42,7 @@ const LETTER = /[ء-يٱ]/u
 
 /**
  * The stop signs in an ayah, each with the index of the word it follows (as ayahWords counts).
- * The small seen is the sign of saktah only at the very end of a word; inside a word (يَبۡصُۜطُ)
+ * The small seen is the sign of saktah only at the very end of a word; inside a word (يَبۡصُۜطُ)
  * it notes that the letter is read as seen, and is not a stop sign.
  */
 export function waqfIn(ayahText: string): { kind: WaqfKind; word: number }[] {

@@ -93,6 +93,13 @@ export const LETTER: Forms = {
   many: 'حرفاً',
   hundreds: 'حرف',
 }
+export const PROPHET: Forms = {
+  one: 'نبي واحد',
+  two: 'نبيّان',
+  few: 'أنبياء',
+  many: 'نبياً',
+  hundreds: 'نبي',
+}
 export const PAIR: Forms = {
   one: 'زوج واحد',
   two: 'زوجان',

@@ -67,3 +67,16 @@ export function rootLemmaPath(lemma: string, root: string) {
   if (AMBIGUOUS[lemma] === 'type') return `/words?q=${encodeURIComponent(lemma)}`
   return `/words/${encodeURIComponent(lexSlug(lemma, 'N', root))}`
 }
+
+/**
+ * Whether word i is the second mushaf word of one corpus token written as two words: the corpus
+ * reads «إِلۡ يَاسِينَ» (al-Saffat 130) as the single name إلياس. Its analysis repeats the word
+ * before it, and it is not counted a second time.
+ */
+export function continuesToken(words: Segment[][], i: number) {
+  return (
+    i > 0 &&
+    words[i]!.some(([text]) => text.includes(' ')) &&
+    JSON.stringify(words[i]) === JSON.stringify(words[i - 1])
+  )
+}

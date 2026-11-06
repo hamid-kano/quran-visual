@@ -9,7 +9,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Lexicon, LexiconEntry, SurahMorphology, type Segment } from '../src/data/schemas.ts'
 import { describeSegment } from '../src/lib/morphology.ts'
-import { AMBIGUOUS, lemmaOf, lexSlug, rootOf, stemOf } from '../src/lib/lexicon.ts'
+import { AMBIGUOUS, continuesToken, lemmaOf, lexSlug, rootOf, stemOf } from '../src/lib/lexicon.ts'
 import { ayahWords, vocalKey } from '../src/lib/quran.ts'
 import { quran } from './quran-text.ts'
 
@@ -44,6 +44,7 @@ for (const q of quran) {
     if (!segs) throw new Error(`lexicon: ${q.id}:${i + 1} is not aligned`)
     if (segs.length !== words.length) throw new Error(`lexicon: ${q.id}:${i + 1} word count`)
     segs.forEach((word, w) => {
+      if (continuesToken(segs, w)) return
       const stem = stemOf(word)
       if (!stem) return
       counted++

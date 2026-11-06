@@ -51,7 +51,7 @@ describe('stop signs', async () => {
         (n, t) => n + t.ayahs.reduce((m, a) => m + a.text.split(WAQF_SIGN[k]).length - 1, 0),
         0,
       )
-      // three small seens sit inside a word (يَبۡصُۜطُ، بَصۜۡطَةٗ، ٱلۡمُصَۜيۡطِرُونَ) and are no stop
+      // three small seens sit inside a word (يَبۡصُۜطُ، بَصۜۡطَةٗ، ٱلۡمُصَۜيۡطِرُونَ) and are no stop
       expect(w[k].length, k).toBe(k === 'sakt' ? inText - 3 : inText)
     }
   })
@@ -111,5 +111,50 @@ describe('vocatives', async () => {
         const word = morph[s - 1]!.ayahs[a - 1]![w]!
         expect(word.some(([, , f]) => f.split('|').includes('VOC'))).toBe(true)
       }
+  })
+})
+
+describe('the prophets named', async () => {
+  const { Prophets } = await import('../src/data/schemas.ts')
+  const { ayahWords } = await import('../src/lib/quran.ts')
+  const p = Prophets.parse(read('prophets.json'))
+  const count = Object.fromEntries(p.prophets.map((x) => [x.name, x.places.length]))
+
+  it('are counted as commonly known', () => {
+    expect(count).toEqual({
+      آدم: 25,
+      إدريس: 2,
+      نوح: 43,
+      هود: 7,
+      صالح: 9,
+      إبراهيم: 69,
+      لوط: 27,
+      إسماعيل: 12,
+      إسحاق: 17,
+      يعقوب: 16,
+      يوسف: 27,
+      أيوب: 4,
+      شعيب: 11,
+      موسى: 136,
+      هارون: 20,
+      'ذو الكفل': 2,
+      داود: 16,
+      سليمان: 17,
+      إلياس: 3,
+      اليسع: 2,
+      يونس: 4,
+      زكريا: 7,
+      يحيى: 5,
+      عيسى: 25,
+      'محمد ﷺ': 5,
+    })
+  })
+
+  it('point at the very word of each mention', () => {
+    for (const x of p.prophets)
+      for (const [s, a, w] of x.places) expect(ayahWords(ayah(s, a))[w]).toBeDefined()
+    const zul = p.prophets.find((x) => x.name === 'ذو الكفل')!
+    expect(zul.places.map(([s, a]) => `${s}:${a}`)).toEqual(['21:85', '38:48'])
+    expect(p.prophets.find((x) => x.name === 'هود')!.places.some(([s]) => s === 2)).toBe(false)
   })
 })

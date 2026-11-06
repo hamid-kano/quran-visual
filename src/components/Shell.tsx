@@ -1,9 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 
-const links = [
+const links: { to: string; label: string; end: boolean; also?: string[] }[] = [
   { to: '/', label: 'مجرّة السور', end: true },
-  { to: '/read', label: 'القراءة', end: false },
+  { to: '/read', label: 'القراءة', end: false, also: ['/khatma'] },
+  {
+    to: '/studies',
+    label: 'علوم القرآن',
+    end: false,
+    also: ['/fawasil', '/waqf', '/nida', '/anbiya'],
+  },
   { to: '/search', label: 'البحث', end: false },
   { to: '/fingerprints', label: 'بصمات السور', end: false },
   { to: '/journey', label: 'رحلة النزول', end: false },
@@ -18,10 +24,12 @@ const links = [
 export function Shell() {
   const nav = useRef<HTMLElement>(null)
   const { pathname } = useLocation()
+  const within = (paths?: string[]) =>
+    !!paths?.some((p) => pathname === p || pathname.startsWith(`${p}/`))
   // on narrow screens the menu scrolls: keep the current section in view
   useEffect(() => {
     nav.current
-      ?.querySelector('[aria-current="page"]')
+      ?.querySelector('[aria-current="page"], [data-current]')
       ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
   }, [pathname])
   return (
@@ -46,9 +54,13 @@ export function Shell() {
                 <NavLink
                   to={l.to}
                   end={l.end}
+                  // a section's own pages light it up too (the khatma under reading, …)
+                  data-current={within(l.also) || undefined}
                   className={({ isActive }) =>
                     `block rounded-full px-3 py-1.5 transition-colors ${
-                      isActive ? 'bg-gold/15 text-gold-soft' : 'text-mist hover:text-vellum'
+                      isActive || within(l.also)
+                        ? 'bg-gold/15 text-gold-soft'
+                        : 'text-mist hover:text-vellum'
                     }`
                   }
                 >

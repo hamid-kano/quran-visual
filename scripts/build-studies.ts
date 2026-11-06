@@ -3,12 +3,15 @@
  *   - fawasil.json: the last letter of every ayah, a string per surah.
  *   - waqf.json: every stop sign of the mushaf, with the word it follows.
  *   - nida.json: every vocative the corpus marks, grouped by the one called.
+ *   - prophets.json: every mention by name of the twenty-five prophets.
  *
  * The rules live in src/lib so the site and the tests use the very same definitions.
  */
 import { writeFileSync } from 'node:fs'
 import { readFileSync } from 'node:fs'
-import { Fawasil, Nida, SurahMorphology, Waqf } from '../src/data/schemas.ts'
+import { Fawasil, Nida, Prophets, SurahMorphology, Waqf } from '../src/data/schemas.ts'
+import { continuesToken, lemmaOf, stemOf } from '../src/lib/lexicon.ts'
+import { PROPHETS } from '../src/lib/prophets.ts'
 import { vocativesIn } from '../src/lib/nida.ts'
 import { ayahWords } from '../src/lib/quran.ts'
 import { WAQF_KINDS, waqfIn, type WaqfKind } from '../src/lib/waqf.ts'
@@ -86,3 +89,52 @@ write('nida.json', Nida.parse({ groups }))
 console.log(
   `nida: ${groups.reduce((n, g) => n + g.places.length, 0)} calls in ${groups.length} groups`,
 )
+
+// ---------- prophets ----------
+const lemmaOwner = new Map<string, number>()
+PROPHETS.forEach((p, i) => p.lemmas.forEach((l) => lemmaOwner.set(l.normalize('NFC'), i)))
+const mentions = PROPHETS.map(() => [] as [number, number, number][])
+for (const s of quran) {
+  const morph = SurahMorphology.parse(
+    JSON.parse(readFileSync(`public/data/morph/${s.id}.json`, 'utf8')),
+  )
+  morph.ayahs.forEach((words, i) => {
+    words!.forEach((w, k) => {
+      if (continuesToken(words!, k)) return
+      const stem = stemOf(w)
+      if (!stem) return
+      const lemma = lemmaOf(stem).normalize('NFC')
+      // ذو الكفل: the title ذا followed by ٱلۡكِفۡلِ
+      if (lemma === 'ذُو'.normalize('NFC')) {
+        const next = words![k + 1] && stemOf(words![k + 1]!)
+        if (next && lemmaOf(next).normalize('NFC') === 'كِفْل'.normalize('NFC'))
+          mentions[PROPHETS.findIndex((p) => p.name === 'ذو الكفل')]!.push([s.id, i + 1, k])
+        return
+      }
+      const owner = lemmaOwner.get(lemma)
+      if (owner === undefined || !stem[2].split('|').includes('PN')) return
+      const ex = PROPHETS[owner]!.except?.places ?? []
+      if (ex.some(([es, ea]) => es === s.id && ea === i + 1)) return
+      mentions[owner]!.push([s.id, i + 1, k])
+    })
+  })
+}
+// every exception must have been a real mention of that name, so none is stale
+for (const p of PROPHETS)
+  for (const [es, ea] of p.except?.places ?? []) {
+    const m = SurahMorphology.parse(
+      JSON.parse(readFileSync(`public/data/morph/${es}.json`, 'utf8')),
+    )
+    if (
+      !m.ayahs[ea - 1]!.some((w) => {
+        const st = stemOf(w)
+        return !!st && p.lemmas.includes(lemmaOf(st).normalize('NFC'))
+      })
+    )
+      throw new Error(`prophets: ${p.name} is not named in ${es}:${ea}`)
+  }
+write(
+  'prophets.json',
+  Prophets.parse({ prophets: PROPHETS.map((p, i) => ({ name: p.name, places: mentions[i]! })) }),
+)
+console.log(`prophets: ${PROPHETS.map((p, i) => `${p.name} ${mentions[i]!.length}`).join('، ')}`)

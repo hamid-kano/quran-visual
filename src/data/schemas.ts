@@ -224,6 +224,12 @@ export const Nida = z.object({
 })
 export type Nida = z.infer<typeof Nida>
 
+/** Every mention by name of each prophet, as [surah, ayah, word], in the order of PROPHETS. */
+export const Prophets = z.object({
+  prophets: z.array(z.object({ name: z.string().min(1), places: z.array(WordRef) })).length(25),
+})
+export type Prophets = z.infer<typeof Prophets>
+
 export const LexiconIndexEntry = z.object({
   /** Address in the lexicon: the lemma, with type or root added where lemmas are spelt alike. */
   slug: z.string().min(1),

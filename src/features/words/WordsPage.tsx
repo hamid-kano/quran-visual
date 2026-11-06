@@ -83,7 +83,7 @@ function Index({ lex }: { lex: Lexicon }) {
         {countOf(lex.entries.length, ENTRY)} تشمل {countOf(lex.counted, WORD)} من كلمات المصحف
         البالغة {countOf(lex.words, WORD)}. أما الباقي فلا تنسبه المدوّنة إلى مدخل: الكلمات التي
         أصلها ضمير، مثل «<Q>هُمۡ</Q>» و«<Q>لَهُمۡ</Q>» و«<Q>فَهُوَ</Q>»، والحروف المقطّعة في أوائل
-        السور.
+        السور. وتُعدّ «<Q>إِلۡ يَاسِينَ</Q>» اسماً واحداً وإن كُتب كلمتين.
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">

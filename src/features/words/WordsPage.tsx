@@ -74,7 +74,7 @@ function Index({ lex }: { lex: Lexicon }) {
   )
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 2xl:max-w-7xl">
       <h1 className="font-display text-4xl font-bold text-gold-soft">معجم الألفاظ</h1>
       <p className="mt-3 max-w-3xl leading-relaxed text-mist">
         ألفاظ القرآن الكريم بمداخلها المعجمية كما في المدوّنة القرآنية العربية: كل كلمة تُردّ إلى
@@ -117,7 +117,7 @@ function Index({ lex }: { lex: Lexicon }) {
       <p className="mt-4 text-sm text-mist" aria-live="polite">
         {list.length ? countOf(list.length, ENTRY) : 'لا مدخل يطابق البحث.'}
       </p>
-      <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+      <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
         {list.slice(0, shown).map((e) => (
           <li key={e.slug}>
             <Link

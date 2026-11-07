@@ -278,7 +278,7 @@ export default function TopicsPage() {
 
   return (
     <div className="absolute inset-0 overflow-y-auto">
-      <div id="topics-top" className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div id="topics-top" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 2xl:max-w-7xl">
         <h1 className="font-display text-4xl font-bold text-gold-soft">خريطة الموضوعات</h1>
         <p className="mt-3 max-w-3xl text-[1.05rem] leading-relaxed text-mist">
           موضوعات القرآن الكريم وآياتها، من الفهرس الموضوعي لـ«مصحف التجويد» الذي أعدّه الدكتور محمد

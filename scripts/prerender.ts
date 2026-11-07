@@ -17,6 +17,7 @@ import { Resvg } from '@resvg/resvg-js'
 import {
   Fingerprints,
   Lexicon,
+  Mushaf,
   NameIndex,
   RootIndex,
   SurahIndex,
@@ -37,6 +38,8 @@ import {
   toArabicDigits,
 } from '../src/lib/arabic.ts'
 import { fingerprintGeometry } from '../src/features/fingerprints/geometry.ts'
+import { juzName, ordinals } from '../src/lib/mushaf.ts'
+import { divisionAt, pageRuns } from '../src/lib/mushafPage.ts'
 
 const SITE = (process.env.SITE_URL ?? 'https://hamid-kano.github.io/quran-visual/').replace(
   /\/?$/,
@@ -53,6 +56,8 @@ const roots = RootIndex.parse(read('roots.json')).roots
 const names = NameIndex.parse(read('names.json')).names
 const lexicon = Lexicon.parse(read('lexicon.json'))
 const topics = TopicIndex.parse(read('topics.json')).nodes
+const mushaf = Mushaf.parse(read('mushaf.json'))
+const ord = ordinals(surahs.map((s) => s.ayahs))
 
 // ---------- text as outlines ----------
 
@@ -371,6 +376,32 @@ for (const s of surahs)
     ...surahImageOf(s),
   })
 
+pages.set('mushaf', {
+  title: titled('المصحف'),
+  description:
+    'المصحف الشريف بخط مجمع الملك فهد، صفحةً صفحة على صفحات مصحف المدينة، وعددها ٦٠٤ صفحات، مع فهرس السور والأجزاء.',
+  ...SITE_IMAGE,
+})
+for (let p = 1; p <= mushaf.pages.length; p++) {
+  const runs = pageRuns(
+    mushaf,
+    ord,
+    surahs.map((s) => s.ayahs),
+    p,
+  )
+  const where = runs
+    .map(
+      (r) =>
+        `سورة ${surahs[r.surah - 1]!.name} ${r.from === r.to ? `الآية ${toArabicDigits(r.from)}` : `من الآية ${toArabicDigits(r.from)} إلى ${toArabicDigits(r.to)}`}`,
+    )
+    .join('، و')
+  pages.set(`mushaf/${p}`, {
+    title: titled(`الصفحة ${toArabicDigits(p)} · المصحف`),
+    description: `الصفحة ${toArabicDigits(p)} من مصحف المدينة (${juzName(divisionAt(mushaf.juz, ord, mushaf.pages[p - 1]!))}): ${where}.`,
+    ...SITE_IMAGE,
+  })
+}
+
 for (const e of lexicon.entries)
   pages.set(`words/${e.slug}`, {
     title: titled(`${stripTashkeel(e.lemma)} في معجم الألفاظ`),
@@ -517,6 +548,21 @@ function hintsFor(route: string): Hints {
       }
     case 'studies':
       return { modules: one(feature('studies/StudiesPage')), data: [], quranFont: false }
+    case 'mushaf': {
+      const runs = a
+        ? pageRuns(
+            mushaf,
+            ord,
+            surahs.map((s) => s.ayahs),
+            Number(a),
+          )
+        : []
+      return {
+        modules: one(feature('mushaf/MushafPage')),
+        data: ['mushaf.json', 'surahs.json', ...runs.map((r) => `surah/${r.surah}.json`)],
+        quranFont: !!a,
+      }
+    }
     case 'khatma':
       return {
         modules: one(feature('read/KhatmaPage')),

@@ -35,6 +35,7 @@ const WaqfPage = lazy(() => import('./features/waqf/WaqfPage'))
 const NidaPage = lazy(() => import('./features/nida/NidaPage'))
 const AnbiyaPage = lazy(() => import('./features/anbiya/AnbiyaPage'))
 const StudiesPage = lazy(() => import('./features/studies/StudiesPage'))
+const MushafPage = lazy(() => import('./features/mushaf/MushafPage'))
 
 const page = (el: React.ReactNode) => <Suspense fallback={<Loading />}>{el}</Suspense>
 
@@ -65,6 +66,8 @@ const router = createBrowserRouter(
             { path: 'read', element: page(<ReadPage />) },
             { path: 'read/:id', element: page(<ReadPage />) },
             { path: 'khatma', element: page(<KhatmaPage />) },
+            { path: 'mushaf', element: page(<MushafPage />) },
+            { path: 'mushaf/:page', element: page(<MushafPage />) },
             { path: 'fawasil', element: page(<FawasilPage />) },
             { path: 'fawasil/:id', element: page(<FawasilPage />) },
             { path: 'waqf', element: page(<WaqfPage />) },

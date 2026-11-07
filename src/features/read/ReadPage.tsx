@@ -64,12 +64,26 @@ function Index({ surahs }: { surahs: Surah[] }) {
   }, [])
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 2xl:max-w-7xl">
       <h1 className="font-display text-4xl font-bold text-gold-soft">القراءة</h1>
       <p className="mt-3 max-w-3xl leading-relaxed text-mist">
-        السورة كاملة بخط مجمع الملك فهد وعلى صفحات مصحف المدينة، مع التلاوة بصوت من تختار من
-        القرّاء، تتابع الآية المقروءة.
+        اقرأ في المصحف صفحةً صفحة، أو اختر سورة لتقرأها كاملة بخط مجمع الملك فهد مع التلاوة بصوت من
+        تختار من القرّاء، تتابع الآية المقروءة.
       </p>
+      <Link
+        to="/mushaf"
+        className="page mt-5 flex items-center justify-between gap-4 rounded-md px-5 py-4 hover:ring-2 hover:ring-gold/50"
+      >
+        <span>
+          <span className="block font-display text-2xl font-bold text-ink">المصحف</span>
+          <span className="block text-sm text-ink-soft">
+            مصحف المدينة في ٦٠٤ صفحات، في كل صفحة آياتها كما في المصحف المطبوع، تقلّبها صفحةً صفحة.
+          </span>
+        </span>
+        <span aria-hidden className="text-2xl text-ink-soft">
+          ←
+        </span>
+      </Link>
       <Link
         to="/khatma"
         className="mt-5 me-2 inline-flex min-h-11 items-center rounded-full border border-gold/40 px-5 text-vellum hover:bg-gold/10"
@@ -85,7 +99,7 @@ function Index({ surahs }: { surahs: Surah[] }) {
           {last.ayah > 1 && <>، الآية {toArabicDigits(last.ayah)}</>}
         </Link>
       )}
-      <ol className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+      <ol className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
         {surahs.map((s) => (
           <li key={s.id}>
             <Link

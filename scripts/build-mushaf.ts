@@ -10,7 +10,7 @@
  *
  * Writes public/data/mushaf.json.
  */
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { getRubAlHizbMeta, type RubAlHizbId } from 'quran-meta/hafs'
 import { Mushaf } from '../src/data/schemas.ts'
 import { quran } from './quran-text.ts'
@@ -53,6 +53,28 @@ if (quarters.length !== 240 || new Set(quarters.map((q) => q.join(':'))).size !=
   throw new Error(`mushaf: ${quarters.length} quarters, not 240`)
 if (quarters[0]!.join(':') !== '1:1')
   throw new Error('mushaf: the first quarter must open the mushaf')
+
+/*
+ * The page reader puts a surah's heading (its name, then the basmala) on the page of its first
+ * ayah, just before it. Check that against the lines the file gives every ayah (1–15 on its
+ * page): from page 3 on, the lines no ayah occupies must be exactly the heading lines of the
+ * surahs opening on that page — one for al-Tawba, which has no basmala, two for the others.
+ */
+const raw: { sora: number; aya_no: number; page: number; line_start: number; line_end: number }[] =
+  JSON.parse(readFileSync('sources/kfgqpc-hafs-v18.json', 'utf8'))
+for (let p = 3; p <= 604; p++) {
+  const rows = raw.filter((r) => r.page === p)
+  const used = new Set(rows.flatMap((r) => range(r.line_start, r.line_end)))
+  const free = range(1, 15).filter((l) => !used.has(l))
+  const heading = rows
+    .filter((r) => r.aya_no === 1)
+    .flatMap((r) => range(r.line_start - (r.sora === 9 ? 1 : 2), r.line_start - 1))
+  if (free.join() !== heading.join())
+    throw new Error(`mushaf: page ${p} has free lines ${free} but headings at ${heading}`)
+}
+function range(a: number, b: number) {
+  return Array.from({ length: b - a + 1 }, (_, i) => a + i)
+}
 
 writeFileSync('public/data/mushaf.json', JSON.stringify(Mushaf.parse({ pages, juz, quarters })))
 console.log(`mushaf: ${pages.length} pages, ${juz.length} juz, ${quarters.length} quarters`)

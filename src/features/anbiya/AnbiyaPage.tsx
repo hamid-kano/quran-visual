@@ -154,7 +154,7 @@ export default function AnbiyaPage() {
 
   return (
     <div className="absolute inset-0 overflow-y-auto">
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 xl:max-w-6xl">
         <h1 className="font-display text-4xl font-bold text-gold-soft">الأنبياء في القرآن</h1>
         <div className="mt-3 max-w-3xl space-y-2 leading-relaxed text-mist">
           <p>

@@ -86,6 +86,66 @@
       0 24px 60px -20px rgb(0 0 0 / 0.55);
   }
 
+  /*
+   * Side drawer (a modal <dialog>) sliding in from the right edge, the start side in Arabic.
+   * Browsers without @starting-style simply show and hide it without the slide.
+   */
+  .drawer {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    width: min(21rem, 86vw);
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    background: var(--color-night-deep);
+    color: var(--color-vellum);
+    box-shadow: -12px 0 40px rgb(0 0 0 / 0.45);
+    translate: 0 0;
+    transition:
+      translate 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+      overlay 0.25s allow-discrete,
+      display 0.25s allow-discrete;
+  }
+  .drawer:not([open]) {
+    translate: 100% 0;
+  }
+  @starting-style {
+    .drawer[open] {
+      translate: 100% 0;
+    }
+  }
+  .drawer::backdrop {
+    background: rgb(4 10 22 / 0.6);
+    transition:
+      background-color 0.25s,
+      overlay 0.25s allow-discrete,
+      display 0.25s allow-discrete;
+  }
+  @starting-style {
+    .drawer[open]::backdrop {
+      background: transparent;
+    }
+  }
+
+  /* Taps on controls: no grey flash, no double-tap zoom wait. */
+  .tap {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: #cdb67a transparent;
@@ -99,4 +159,15 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* A surah's heading on a mushaf page: a gilded band across the line it takes. */
+.mushaf-title {
+  margin-block: 0;
+  background:
+    linear-gradient(var(--color-vellum-deep), var(--color-vellum-deep)) padding-box,
+    linear-gradient(90deg, #b8994f, #e2c77f, #b8994f) border-box;
+  border: 3px double transparent;
+  border-radius: 6px;
+  box-sizing: border-box;
 }

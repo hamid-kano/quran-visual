@@ -109,7 +109,7 @@ function Index({ surahs, letters }: { surahs: Surah[]; letters: string[] }) {
   }, [])
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 2xl:max-w-7xl">
       <h1 className="font-display text-4xl font-bold text-gold-soft">الفواصل</h1>
       <div className="mt-3 max-w-3xl space-y-2 leading-relaxed text-mist">
         <p>

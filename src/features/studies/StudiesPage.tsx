@@ -43,13 +43,13 @@ export default function StudiesPage() {
   }, [])
   return (
     <div className="absolute inset-0 overflow-y-auto">
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 2xl:max-w-6xl">
         <h1 className="font-display text-4xl font-bold text-gold-soft">علوم القرآن</h1>
         <p className="mt-3 max-w-3xl leading-relaxed text-mist">
           أبواب من علوم القرآن تُعرض من النص نفسه، بلا إضافة: كل ما فيها محسوب من نص المصحف الذي
           نشره مجمع الملك فهد ومن وسوم المدوّنة القرآنية العربية، والقواعد مشروحة في كل صفحة.
         </p>
-        <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+        <ul className="mt-6 grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
           {STUDIES.map((s) => (
             <li key={s.to}>
               <Link

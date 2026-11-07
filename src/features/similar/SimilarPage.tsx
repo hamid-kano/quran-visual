@@ -122,7 +122,7 @@ export default function SimilarPage() {
 
   return (
     <div className="absolute inset-0 overflow-y-auto">
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 2xl:max-w-6xl">
         <h1 className="font-display text-4xl font-bold text-gold-soft">المتشابهات اللفظية</h1>
         <p className="mt-3 text-[1.05rem] leading-relaxed text-mist">
           آيات تتقارب ألفاظها، تُعرض كل آية مع نظائرها. يُظلَّل ما تنفرد به كل آية من كلمات،
@@ -161,7 +161,7 @@ export default function SimilarPage() {
               )}
               .
             </p>
-            <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+            <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-6">
               {surahs.map((s) => {
                 const n = perSurah.get(s.id) ?? 0
                 return (

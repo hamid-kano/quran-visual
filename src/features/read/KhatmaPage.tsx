@@ -6,52 +6,21 @@ import { useAsync } from '../../data/useAsync'
 import { ErrorNote, Loading } from '../../components/Status'
 import { DAY, PAGE, countOf, toArabicDigits } from '../../lib/arabic'
 import { khatma, ordinals, type Portion } from '../../lib/mushaf'
+import {
+  dateOf,
+  daysBetween,
+  localDay,
+  savePlan,
+  storedPlan,
+  type Plan,
+} from '../../lib/khatmaPlan'
 
-const PLAN_KEY = 'qv.khatma'
 const PRESETS = [3, 7, 10, 15, 30, 60]
 
-interface Plan {
-  days: number
-  /** The first day, as YYYY-MM-DD in the reader's own calendar day. */
-  start: string
-}
-const isPlan = (v: unknown): v is Plan =>
-  typeof v === 'object' &&
-  v !== null &&
-  Number.isInteger((v as Plan).days) &&
-  (v as Plan).days >= 1 &&
-  (v as Plan).days <= 604 &&
-  /^\d{4}-\d{2}-\d{2}$/.test((v as Plan).start)
-
-const localDay = (d = new Date()) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-/** Calendar days from one local date to another (both YYYY-MM-DD). */
-const daysBetween = (a: string, b: string) =>
-  Math.round((Date.parse(`${b}T12:00:00`) - Date.parse(`${a}T12:00:00`)) / 86_400_000)
-const dateOf = (start: string, offset: number) => {
-  const d = new Date(`${start}T12:00:00`)
-  d.setDate(d.getDate() + offset)
-  return d
-}
 const ONE_DECIMAL = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 1 })
 const DATE = new Intl.DateTimeFormat('ar-SY', { weekday: 'long', day: 'numeric', month: 'long' })
 
-function load(): Plan {
-  try {
-    const v: unknown = JSON.parse(localStorage.getItem(PLAN_KEY) ?? 'null')
-    if (isPlan(v)) return v
-  } catch {
-    // no storage: a fresh plan
-  }
-  return { days: 30, start: localDay() }
-}
-function save(p: Plan) {
-  try {
-    localStorage.setItem(PLAN_KEY, JSON.stringify(p))
-  } catch {
-    // the plan still works for this visit
-  }
-}
+const load = (): Plan => storedPlan() ?? { days: 30, start: localDay() }
 
 function Ref({ r, byId }: { r: [number, number]; byId: Map<number, Surah> }) {
   return (
@@ -83,7 +52,7 @@ export default function KhatmaPage() {
   const [custom, setCustom] = useState('')
   const update = (p: Plan) => {
     setPlan(p)
-    save(p)
+    savePlan(p)
   }
 
   useEffect(() => {
@@ -218,7 +187,7 @@ export default function KhatmaPage() {
               {pagesLabel(today)}، <PortionText p={today} byId={byId} />
             </p>
             <Link
-              to={`/read/${today.from[0]}${today.from[1] > 1 ? `#${today.from[1]}` : ''}`}
+              to={`/mushaf/${today.fromPage}`}
               className="mt-3 inline-flex min-h-11 items-center rounded-full bg-gold/25 px-5 text-gold-soft hover:bg-gold/35"
             >
               ابدأ القراءة

@@ -12,13 +12,17 @@ import {
   IconForward,
   IconInfo,
   IconMenu,
+  IconPause,
   IconPlay,
+  IconStop,
 } from '../../components/icons'
-import { toArabicDigits } from '../../lib/arabic'
+import { TIME, countOf, toArabicDigits } from '../../lib/arabic'
 import { juzName, khatma, ordinals, pageOf } from '../../lib/mushaf'
 import { PAGE_COUNT, divisionAt, parsePage, spreadOf, spreadPages } from '../../lib/mushafPage'
 import { daysBetween, localDay, storedPlan } from '../../lib/khatmaPlan'
 import { LINE, PAGE_CHROME, Sheet, type Picked } from './Sheet'
+import { RECITERS } from '../recitation/reciters'
+import { useMushafRecitation } from '../recitation/useMushafRecitation'
 
 type Ord = ReturnType<typeof ordinals>
 
@@ -106,8 +110,11 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
   const [large, setLarge] = useState(() => stored(LARGE_KEY) === true)
   const [menu, setMenu] = useState(false)
   const [picked, setPicked] = useState<Picked | null>(null)
-  // a tap on the page hides the bars for a larger page, and another brings them back
-  const [bars, setBars] = useState(true)
+  // on a phone or tablet the mushaf opens on the whole screen; a tap on the page brings the
+  // bars, another hides them
+  const [bars, setBars] = useState(
+    () => !(typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches),
+  )
 
   // the pager's size decides one page or two, and the size of the text
   const scroller = useRef<HTMLDivElement>(null)
@@ -143,6 +150,22 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
     },
     [indexOf],
   )
+  const showRef = useRef(show)
+  const spreadRef = useRef(spread)
+  useEffect(() => {
+    showRef.current = show
+    spreadRef.current = spread
+  })
+  // the recitation turns the pages: the ayah being recited is always in view
+  const rec = useMushafRecitation(surahs, (s) => {
+    if (!s) return
+    const p = pageOf(mushaf, ord, [s.surah, s.ayah])
+    const now = pageRef.current
+    const open = spreadRef.current ? spreadPages(spreadOf(now)) : [now]
+    if (!open.includes(p)) showRef.current(p, true)
+  })
+  const reading =
+    rec.step && !rec.step.basmala ? { surah: rec.step.surah, ayah: rec.step.ayah } : null
   const step = useCallback(
     (dir: 1 | -1) => {
       const p = pageRef.current
@@ -214,6 +237,12 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
   const first = mushaf.pages[right - 1]!
   const surahHere = surahs[first[0] - 1]!
   const juz = divisionAt(mushaf.juz, ord, first)
+  const listenFrom = (s: number, a: number) => {
+    setPicked(null)
+    setMenu(false)
+    rec.start(s, a)
+  }
+
   const close = () => {
     if (window.history.state?.idx > 0) navigate(-1)
     else navigate('/')
@@ -233,6 +262,7 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
         ord={ord}
         surahs={surahs}
         picked={picked}
+        reading={reading}
         onPick={setPicked}
         onBackground={() => (picked ? setPicked(null) : setBars(!bars))}
       />
@@ -276,7 +306,14 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
 
       {/* the pages, in a row read from right to left: swiping towards the right turns forward */}
       <div
-        className={`relative min-h-0 flex-1 ${bars ? '' : 'pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]'}`}
+        className={`relative min-h-0 flex-1 ${bars ? '' : 'pt-[env(safe-area-inset-top)]'} ${
+          // the player sits under the pages, never over the ayah being recited
+          rec.status !== 'idle' && !picked
+            ? 'pb-[calc(3.5rem+env(safe-area-inset-bottom))]'
+            : bars
+              ? ''
+              : 'pb-[env(safe-area-inset-bottom)]'
+        }`}
       >
         <div
           ref={scroller}
@@ -333,7 +370,29 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
           </>
         )}
 
-        {picked && <AyahSheet picked={picked} surahs={surahs} onClose={() => setPicked(null)} />}
+        {picked ? (
+          <AyahSheet
+            picked={picked}
+            surahs={surahs}
+            onListen={() => listenFrom(picked.surah, picked.ayah)}
+            onClose={() => setPicked(null)}
+          />
+        ) : (
+          rec.status !== 'idle' && <Player rec={rec} surahs={surahs} />
+        )}
+
+        {/* on the whole screen, the one way in: the menu, at the page's lower corner */}
+        {!bars && !picked && (
+          <button
+            type="button"
+            onClick={() => setMenu(true)}
+            aria-haspopup="dialog"
+            aria-label="القائمة: الفهرس والتلاوة والإعدادات"
+            className="tap absolute bottom-[max(0.375rem,env(safe-area-inset-bottom))] right-2 z-30 grid size-11 place-items-center rounded-full border border-gold/30 bg-night-deep/70 text-gold-soft shadow-lg backdrop-blur active:bg-gold/20"
+          >
+            <IconMenu className="size-5" />
+          </button>
+        )}
       </div>
 
       {bars && <BottomBar page={page} onStep={step} onJump={show} />}
@@ -353,6 +412,9 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
             setMenu(false)
             show(p)
           }}
+          rec={rec}
+          onListen={() => listenFrom(first[0], first[1])}
+          onClose={close}
         />
       </Drawer>
     </div>
@@ -431,10 +493,12 @@ function BottomBar({
 function AyahSheet({
   picked,
   surahs,
+  onListen,
   onClose,
 }: {
   picked: Picked
   surahs: Surah[]
+  onListen: () => void
   onClose: () => void
 }) {
   const s = surahs[picked.surah - 1]!
@@ -471,10 +535,10 @@ function AyahSheet({
         </button>
       </div>
       <div className="flex gap-1">
-        <Link to={`/read/${s.id}#${picked.ayah}`} className={action}>
+        <button type="button" onClick={onListen} className={action}>
           <IconPlay className="size-5" />
-          الاستماع
-        </Link>
+          استمع من هنا
+        </button>
         <Link to={`/ayah/${s.id}/${picked.ayah}`} className={action}>
           <IconInfo className="size-5" />
           تحليل الآية
@@ -488,6 +552,52 @@ function AyahSheet({
   )
 }
 
+// ---------- the recitation in progress ----------
+
+type Recitation = ReturnType<typeof useMushafRecitation>
+
+function Player({ rec, surahs }: { rec: Recitation; surahs: Surah[] }) {
+  const playing = rec.status === 'playing' || rec.status === 'loading'
+  const st = rec.step
+  const where = st
+    ? `${surahs[st.surah - 1]?.name ?? ''} · ${st.basmala ? 'البسملة' : `الآية ${toArabicDigits(st.ayah)}`}`
+    : ''
+  const btn =
+    'tap grid size-11 shrink-0 place-items-center rounded-full text-vellum active:bg-gold/20'
+  return (
+    <section
+      aria-label="التلاوة"
+      className="absolute bottom-[max(0.375rem,env(safe-area-inset-bottom))] left-2 right-16 z-30 mx-auto flex max-w-sm items-center gap-0.5 rounded-full border border-gold/30 bg-night-deep/90 py-0.5 pe-1 ps-3 shadow-xl backdrop-blur"
+    >
+      <div className="min-w-0 flex-1 leading-tight" aria-live="polite">
+        <p className="truncate text-sm text-vellum">
+          {rec.status === 'error' ? 'تعذّر التشغيل، تحقّق من الاتصال' : where}
+        </p>
+        <p className="truncate text-xs text-mist">
+          {rec.status === 'loading' ? 'جارٍ التحميل…' : rec.reciter.name}
+        </p>
+      </div>
+      <button type="button" aria-label="الآية السابقة" onClick={() => rec.go(-1)} className={btn}>
+        <IconBack className="size-5" />
+      </button>
+      <button
+        type="button"
+        aria-label={playing ? 'إيقاف مؤقت' : 'متابعة'}
+        onClick={() => (playing ? rec.pause() : rec.resume())}
+        className={`${btn} bg-gold/25 text-gold-soft`}
+      >
+        {playing ? <IconPause className="size-5" /> : <IconPlay className="size-5" />}
+      </button>
+      <button type="button" aria-label="الآية التالية" onClick={() => rec.go(1)} className={btn}>
+        <IconForward className="size-5" />
+      </button>
+      <button type="button" aria-label="إيقاف التلاوة" onClick={rec.stop} className={btn}>
+        <IconStop className="size-5" />
+      </button>
+    </section>
+  )
+}
+
 // ---------- the drawer: surahs, juz, a page number, the day's portion, the text size ----------
 
 function Index({
@@ -498,6 +608,9 @@ function Index({
   large,
   onLarge,
   onJump,
+  rec,
+  onListen,
+  onClose,
 }: {
   mushaf: Mushaf
   ord: Ord
@@ -506,6 +619,9 @@ function Index({
   large: boolean
   onLarge: (v: boolean) => void
   onJump: (p: number) => void
+  rec: Recitation
+  onListen: () => void
+  onClose: () => void
 }) {
   const [tab, setTab] = useState<'surahs' | 'juz'>('surahs')
   const [typed, setTyped] = useState('')
@@ -539,6 +655,51 @@ function Index({
 
   return (
     <div className="flex flex-col gap-4 px-3 py-3">
+      <section aria-labelledby="tilawa" className="rounded-xl border border-gold/20 px-3 py-2.5">
+        <h3 id="tilawa" className="text-xs text-mist">
+          التلاوة
+        </h3>
+        <label className="mt-1.5 flex items-center gap-2">
+          <span className="w-14 shrink-0 text-sm text-mist">القارئ</span>
+          <select
+            value={rec.reciter.id}
+            onChange={(e) => rec.setReciter(e.target.value)}
+            className="h-11 min-w-0 flex-1 rounded-full border border-gold/30 bg-night px-3 text-vellum"
+          >
+            {RECITERS.map((x) => (
+              <option key={x.id} value={x.id}>
+                {x.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="mt-2 flex items-center gap-2">
+          <span className="w-14 shrink-0 text-sm text-mist">التكرار</span>
+          <select
+            value={rec.repeat}
+            onChange={(e) => rec.setRepeat(Number(e.target.value))}
+            className="h-11 min-w-0 flex-1 rounded-full border border-gold/30 bg-night px-3 text-vellum"
+          >
+            {[1, 3, 5].map((n) => (
+              <option key={n} value={n}>
+                {n === 1 ? 'كل آية مرة' : `كل آية ${countOf(n, TIME)}`}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          onClick={onListen}
+          className="tap mt-2.5 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-gold/25 text-gold-soft active:bg-gold/35"
+        >
+          <IconPlay className="size-5" />
+          استمع من أول الصفحة
+        </button>
+        <p className="mt-1.5 text-xs leading-relaxed text-mist/80">
+          أو المس أي آية واختر «استمع من هنا». تتقدّم الصفحات مع التلاوة.
+        </p>
+      </section>
+
       <form
         className="flex items-center gap-2"
         onSubmit={(e) => {
@@ -706,6 +867,9 @@ function Index({
         <Link to="/" className={row}>
           أقسام المنصة
         </Link>
+        <button type="button" onClick={onClose} className={row}>
+          إغلاق المصحف
+        </button>
       </div>
     </div>
   )

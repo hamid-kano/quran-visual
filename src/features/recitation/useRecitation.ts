@@ -11,12 +11,12 @@ import {
 
 export type RecitationStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'error'
 
-const STORE = 'qv.recitation'
-interface Saved {
+export const STORE = 'qv.recitation'
+export interface Saved {
   reciter: string
   repeat: number
 }
-function readSaved(): Saved {
+export function readSaved(): Saved {
   try {
     const v = JSON.parse(localStorage.getItem(STORE) ?? '{}') as Partial<Saved>
     return {

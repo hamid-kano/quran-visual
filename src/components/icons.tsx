@@ -110,3 +110,15 @@ export const IconInfo = (p: P) => (
     <path d="M12 11v5.5M12 7.6v.1" />
   </Svg>
 )
+
+export const IconPause = (p: P) => (
+  <Svg {...p}>
+    <path d="M8.5 5.5v13M15.5 5.5v13" />
+  </Svg>
+)
+
+export const IconStop = (p: P) => (
+  <Svg {...p}>
+    <rect x="6.5" y="6.5" width="11" height="11" rx="1.5" />
+  </Svg>
+)

@@ -34,6 +34,8 @@ export interface SheetProps {
   ord: Ord
   surahs: Surah[]
   picked: Picked | null
+  /** The ayah being recited, if any. */
+  reading?: Picked | null
   onPick: (p: Picked | null) => void
   /** A tap on the page outside any ayah. */
   onBackground: () => void
@@ -156,6 +158,7 @@ export function Sheet(p: SheetProps) {
                   >
                     {ayahs.map((a) => {
                       const on = p.picked?.surah === r.surah && p.picked.ayah === a.n
+                      const live = p.reading?.surah === r.surah && p.reading.ayah === a.n
                       return (
                         <span key={a.n}>
                           <span
@@ -163,6 +166,7 @@ export function Sheet(p: SheetProps) {
                             role="button"
                             tabIndex={0}
                             aria-pressed={on}
+                            aria-current={live || undefined}
                             onClick={() => p.onPick(on ? null : { surah: r.surah, ayah: a.n })}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
@@ -171,7 +175,7 @@ export function Sheet(p: SheetProps) {
                               }
                             }}
                             className={`cursor-pointer rounded-sm [-webkit-tap-highlight-color:transparent] [box-decoration-break:clone] ${
-                              on ? 'bg-[#e9d49b]' : ''
+                              on ? 'bg-[#e9d49b]' : live ? 'bg-[#cfe6d8]' : ''
                             }`}
                           >
                             {a.text} <AyahMark n={a.n} />

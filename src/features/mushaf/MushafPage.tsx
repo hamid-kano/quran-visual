@@ -7,6 +7,7 @@ import { ErrorNote, Loading } from '../../components/Status'
 import { Drawer } from '../../components/Drawer'
 import {
   IconBack,
+  IconChevronDown,
   IconClose,
   IconCopy,
   IconForward,
@@ -21,7 +22,8 @@ import { juzName, khatma, ordinals, pageOf } from '../../lib/mushaf'
 import { PAGE_COUNT, divisionAt, parsePage, spreadOf, spreadPages } from '../../lib/mushafPage'
 import { daysBetween, localDay, storedPlan } from '../../lib/khatmaPlan'
 import { LINE, PAGE_CHROME, Sheet, type Picked } from './Sheet'
-import { RECITERS, reciterLabel } from '../recitation/reciters'
+import { reciterLabel } from '../recitation/reciters'
+import { ReciterSheet } from '../recitation/ReciterPicker'
 import { AyahMenu } from './AyahMenu'
 import { useMushafRecitation } from '../recitation/useMushafRecitation'
 
@@ -113,6 +115,8 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
   const [picked, setPicked] = useState<Picked | null>(null)
   // the ayah whose full menu is open (a long press)
   const [held, setHeld] = useState<Picked | null>(null)
+  // the list of reciters, opened from the player or the menu
+  const [reciters, setReciters] = useState(false)
   // on a phone or tablet the mushaf opens on the whole screen; a tap on the page brings the
   // bars, another hides them
   const [bars, setBars] = useState(
@@ -385,7 +389,9 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
             onClose={() => setPicked(null)}
           />
         ) : (
-          rec.status !== 'idle' && <Player rec={rec} surahs={surahs} />
+          rec.status !== 'idle' && (
+            <Player rec={rec} surahs={surahs} onReciters={() => setReciters(true)} />
+          )
         )}
 
         {/* on the whole screen, the one way in: the menu, at the page's lower corner */}
@@ -423,6 +429,17 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
         }}
       />
 
+      <ReciterSheet
+        open={reciters}
+        onClose={() => setReciters(false)}
+        current={rec.reciter.id}
+        playing={rec.status !== 'idle'}
+        onPick={(id) => {
+          rec.setReciter(id)
+          setReciters(false)
+        }}
+      />
+
       <Drawer open={menu} onClose={() => setMenu(false)} title="المصحف">
         <Index
           mushaf={mushaf}
@@ -439,6 +456,7 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
             show(p)
           }}
           rec={rec}
+          onReciters={() => setReciters(true)}
           onListen={() => listenFrom(first[0], first[1])}
           onClose={close}
         />
@@ -582,7 +600,15 @@ function AyahSheet({
 
 type Recitation = ReturnType<typeof useMushafRecitation>
 
-function Player({ rec, surahs }: { rec: Recitation; surahs: Surah[] }) {
+function Player({
+  rec,
+  surahs,
+  onReciters,
+}: {
+  rec: Recitation
+  surahs: Surah[]
+  onReciters: () => void
+}) {
   const playing = rec.status === 'playing' || rec.status === 'loading'
   const st = rec.step
   const where = st
@@ -595,14 +621,24 @@ function Player({ rec, surahs }: { rec: Recitation; surahs: Surah[] }) {
       aria-label="التلاوة"
       className="absolute bottom-[max(0.375rem,env(safe-area-inset-bottom))] left-2 right-16 z-30 mx-auto flex max-w-sm items-center gap-0.5 rounded-full border border-gold/30 bg-night-deep/90 py-0.5 pe-1 ps-3 shadow-xl backdrop-blur"
     >
-      <div className="min-w-0 flex-1 leading-tight" aria-live="polite">
-        <p className="truncate text-sm text-vellum">
+      {/* the reciter's name opens the list of reciters: the voice can change mid-recitation */}
+      <button
+        type="button"
+        onClick={onReciters}
+        aria-haspopup="dialog"
+        aria-label={`القارئ: ${reciterLabel(rec.reciter)}. تغيير القارئ`}
+        className="tap -my-0.5 min-w-0 flex-1 rounded-full py-1 text-right leading-tight active:bg-gold/15"
+      >
+        <span className="block truncate text-sm text-vellum" aria-live="polite">
           {rec.status === 'error' ? 'تعذّر التشغيل، تحقّق من الاتصال' : where}
-        </p>
-        <p className="truncate text-xs text-mist">
-          {rec.status === 'loading' ? 'جارٍ التحميل…' : reciterLabel(rec.reciter)}
-        </p>
-      </div>
+        </span>
+        <span className="flex items-center gap-1 text-xs text-gold-soft/90">
+          <span className="truncate">
+            {rec.status === 'loading' ? 'جارٍ التحميل…' : reciterLabel(rec.reciter)}
+          </span>
+          <IconChevronDown className="size-3.5 shrink-0" />
+        </span>
+      </button>
       <button type="button" aria-label="الآية السابقة" onClick={() => rec.go(-1)} className={btn}>
         <IconBack className="size-5" />
       </button>
@@ -635,6 +671,7 @@ function Index({
   onLarge,
   onJump,
   rec,
+  onReciters,
   onListen,
   onClose,
 }: {
@@ -646,6 +683,7 @@ function Index({
   onLarge: (v: boolean) => void
   onJump: (p: number) => void
   rec: Recitation
+  onReciters: () => void
   onListen: () => void
   onClose: () => void
 }) {
@@ -685,20 +723,20 @@ function Index({
         <h3 id="tilawa" className="text-xs text-mist">
           التلاوة
         </h3>
-        <label className="mt-1.5 flex items-center gap-2">
+        <div className="mt-1.5 flex items-center gap-2">
           <span className="w-14 shrink-0 text-sm text-mist">القارئ</span>
-          <select
-            value={rec.reciter.id}
-            onChange={(e) => rec.setReciter(e.target.value)}
-            className="h-11 min-w-0 flex-1 rounded-full border border-gold/30 bg-night px-3 text-vellum"
+          <button
+            type="button"
+            onClick={onReciters}
+            aria-haspopup="dialog"
+            className="tap flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full border border-gold/30 bg-night pe-2 ps-4 text-right text-vellum active:bg-gold/15 hover:border-gold/50"
           >
-            {RECITERS.map((x) => (
-              <option key={x.id} value={x.id}>
-                {reciterLabel(x)}
-              </option>
-            ))}
-          </select>
-        </label>
+            <span className="min-w-0 flex-1 truncate">{reciterLabel(rec.reciter)}</span>
+            <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 text-xs text-gold-soft">
+              تغيير
+            </span>
+          </button>
+        </div>
         <label className="mt-2 flex items-center gap-2">
           <span className="w-14 shrink-0 text-sm text-mist">التكرار</span>
           <select

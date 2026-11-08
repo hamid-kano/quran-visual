@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import type { Surah } from '../../data/schemas'
 import { loadSurahText } from '../../data/load'
@@ -11,11 +11,10 @@ import {
   IconCopy,
   IconInfo,
   IconPlay,
-  IconSearch,
   IconShare,
 } from '../../components/icons'
-import { normalizeArabic, toArabicDigits } from '../../lib/arabic'
-import { RECITERS, reciterLabel } from '../recitation/reciters'
+import { toArabicDigits } from '../../lib/arabic'
+import { ReciterList } from '../recitation/ReciterPicker'
 import type { Picked } from './Sheet'
 
 /** The text as copied or shared: the ayah, then where it is, as the mushafs cite it. */
@@ -124,7 +123,6 @@ function Body({
   const text = useAsync(() => loadSurahText(s.id), String(s.id))
   const ayah = text.status === 'ready' ? text.data.ayahs[at.ayah - 1]!.text : null
   const [done, setDone] = useState<'copied' | 'failed' | null>(null)
-  const [query, setQuery] = useState('')
 
   const copy = async () => {
     if (!ayah) return
@@ -139,17 +137,6 @@ function Body({
   const share = () => {
     if (ayah) navigator.share({ text: cite(ayah, s.name, at.ayah) }).catch(() => {})
   }
-
-  // reciters in alphabetical order (a choice does not move the rows under the finger);
-  // searching ignores hamza forms and diacritics
-  const list = useMemo(() => {
-    const q = normalizeArabic(query)
-    const coll = new Intl.Collator('ar')
-    return RECITERS.filter((r) => !q || normalizeArabic(reciterLabel(r)).includes(q)).sort((a, b) =>
-      coll.compare(reciterLabel(a), reciterLabel(b)),
-    )
-  }, [query])
-  const current = RECITERS.find((r) => r.id === reciter)
 
   const tile =
     'tap flex min-h-16 flex-1 flex-col items-center justify-center gap-1 rounded-xl border border-gold/15 px-2 text-sm text-vellum active:bg-gold/15 hover:bg-white/5 disabled:opacity-40'
@@ -203,67 +190,14 @@ function Body({
       </div>
 
       <section aria-labelledby="qurra" className="mt-4">
-        <div className="flex items-baseline justify-between">
-          <h3 id="qurra" className="text-sm font-semibold text-vellum">
-            اختر القارئ
-          </h3>
-          <span className="text-xs text-mist">
-            {toArabicDigits(RECITERS.length)} قارئًا · رواية حفص
-          </span>
-        </div>
-        <p className="mt-0.5 text-xs text-mist/80">
-          {current && (
-            <>
-              القارئ الآن: <span className="text-gold-soft">{reciterLabel(current)}</span>.{' '}
-            </>
-          )}
-          المس اسم قارئ لتسمع الآية بصوته، ويبقى اختيارك للتلاوة.
-        </p>
-        <label className="relative mt-2 block">
-          <span className="sr-only">ابحث عن قارئ</span>
-          <IconSearch className="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-1/2 text-mist" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="ابحث عن قارئ"
-            className="h-11 w-full rounded-full border border-gold/25 bg-night pe-3 ps-10 text-vellum placeholder:text-mist/70 focus:border-gold/60 focus:outline-none"
-          />
-        </label>
-        <ul className="mt-2" role="list">
-          {list.map((r) => {
-            const on = r.id === reciter
-            return (
-              <li key={r.id}>
-                <button
-                  type="button"
-                  onClick={() => onReciter(r.id, at)}
-                  aria-pressed={on}
-                  className={`tap flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right active:bg-white/10 hover:bg-white/5 ${on ? 'bg-gold/10' : ''}`}
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className={on ? 'font-semibold text-gold-soft' : 'text-vellum'}>
-                      {r.name}
-                    </span>
-                    {r.style && (
-                      <span className="ms-2 rounded-full bg-white/5 px-2 py-0.5 text-xs text-mist">
-                        {r.style}
-                      </span>
-                    )}
-                  </span>
-                  {on ? (
-                    <IconCheck className="size-5 shrink-0 text-gold-soft" />
-                  ) : (
-                    <IconPlay className="size-4 shrink-0 text-mist" />
-                  )}
-                </button>
-              </li>
-            )
-          })}
-          {list.length === 0 && (
-            <li className="px-3 py-4 text-center text-sm text-mist">لا يوجد قارئ بهذا الاسم.</li>
-          )}
-        </ul>
+        <h3 id="qurra" className="mb-1 text-sm font-semibold text-vellum">
+          اختر القارئ
+        </h3>
+        <ReciterList
+          current={reciter}
+          onPick={(id) => onReciter(id, at)}
+          hint="المس اسم قارئ لتسمع الآية بصوته، ويبقى اختيارك للتلاوة."
+        />
       </section>
     </div>
   )

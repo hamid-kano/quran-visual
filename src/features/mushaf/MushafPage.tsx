@@ -32,7 +32,21 @@ type Ord = ReturnType<typeof ordinals>
 // ---------- the reader's settings, kept in this browser only ----------
 
 const PAGE_KEY = 'qv.mushafPage'
+const SIZE_KEY = 'qv.mushafSize'
+/** Before the middle size existed: true was the larger, scrolling text. */
 const LARGE_KEY = 'qv.mushafLarge'
+
+/**
+ * The text size: the whole page at the size its line width allows; the largest size at which
+ * the whole page still fits the screen; or larger still, the page scrolling.
+ */
+type Size = 'page' | 'fit' | 'scroll'
+const SIZES: Size[] = ['page', 'fit', 'scroll']
+function storedSize(): Size {
+  const v = stored(SIZE_KEY)
+  if (SIZES.includes(v as Size)) return v as Size
+  return stored(LARGE_KEY) === true ? 'scroll' : 'page'
+}
 function stored(key: string): unknown {
   try {
     return JSON.parse(localStorage.getItem(key) ?? 'null')
@@ -66,7 +80,12 @@ interface Layout {
   font: number
   /** The text is larger than the page holds, and the page scrolls. */
   scroll: boolean
+  /** This screen has room for a larger text that still shows the whole page. */
+  canFit: boolean
 }
+
+/** The middle size is offered only where it is clearly larger than the whole-page size. */
+const FIT_GAIN = 1.06
 
 /** Smallest text a whole page may be set in; below it (a phone held sideways) the page scrolls. */
 const MIN_FIT_FONT = 14
@@ -76,7 +95,8 @@ const MIN_FIT_FONT = 14
  * whole page fits the screen; with the larger text, or on a screen too short for a whole page,
  * the page takes the full width and scrolls.
  */
-function layoutFor(W: number, H: number, large: boolean): Layout {
+function layoutFor(W: number, H: number, size: Size): Layout {
+  const large = size === 'scroll'
   const margin = W < 500 || H < 500 ? 6 : 16
   const pageH = Math.floor(H - 2 * margin)
   const byHeight = (pageH - PAGE_CHROME) / (15 * LINE)
@@ -85,17 +105,31 @@ function layoutFor(W: number, H: number, large: boolean): Layout {
   if (byHeight < MIN_FIT_FONT) {
     const pageW = Math.floor(Math.min(W - 2 * margin, 760))
     const font = Math.min(textFor(pageW) * (large ? 1.25 : 1), large ? 32 : 26)
-    return { spread: false, pageW, pageH, font, scroll: true }
+    return { spread: false, pageW, pageH, font, scroll: true, canFit: false }
   }
   const twoFit = W - 2 * margin >= 2 * widthFor(Math.min(byHeight, 26)) && W > H
   const room = twoFit ? (W - 2 * margin) / 2 : W - 2 * margin
   if (large) {
     const font = Math.min(textFor(room) * 1.25, 44)
-    return { spread: twoFit, pageW: Math.floor(room), pageH, font, scroll: true }
+    return { spread: twoFit, pageW: Math.floor(room), pageH, font, scroll: true, canFit: true }
   }
   const pageW = Math.min(room, widthFor(byHeight))
   const font = Math.min(byHeight, textFor(pageW), 40)
-  return { spread: twoFit, pageW: Math.floor(pageW), pageH, font, scroll: false }
+  // the largest text at which the page, across the full width, still fits the height: the
+  // lines run about 15·f/textFor(room) and each is f·LINE high, so f² ≈ byHeight·textFor(room)
+  const fitFont = Math.min(Math.sqrt(byHeight * textFor(room)), 44)
+  const canFit = fitFont >= font * FIT_GAIN
+  if (size === 'fit' && canFit)
+    // a shade over, for the page to bring down to what it actually holds
+    return {
+      spread: twoFit,
+      pageW: Math.floor(room),
+      pageH,
+      font: fitFont * 1.03,
+      scroll: false,
+      canFit,
+    }
+  return { spread: twoFit, pageW: Math.floor(pageW), pageH, font, scroll: false, canFit }
 }
 
 // ---------- the reader ----------
@@ -110,7 +144,7 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
     pageRef.current = p
     setPageState(p)
   }
-  const [large, setLarge] = useState(() => stored(LARGE_KEY) === true)
+  const [size, setSize] = useState<Size>(storedSize)
   const [menu, setMenu] = useState(false)
   const [picked, setPicked] = useState<Picked | null>(null)
   // the ayah whose full menu is open (a long press)
@@ -135,7 +169,7 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
-  const layout = box ? layoutFor(box.W, box.H, large) : null
+  const layout = box ? layoutFor(box.W, box.H, size) : null
   const spread = layout?.spread ?? false
   const items = spread ? spreadOf(PAGE_COUNT) : PAGE_COUNT
   const indexOf = useCallback((p: number) => (spread ? spreadOf(p) - 1 : p - 1), [spread])
@@ -446,10 +480,11 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
           ord={ord}
           surahs={surahs}
           page={page}
-          large={large}
-          onLarge={(v) => {
-            setLarge(v)
-            store(LARGE_KEY, v)
+          size={size}
+          canFit={layout?.canFit ?? true}
+          onSize={(v) => {
+            setSize(v)
+            store(SIZE_KEY, v)
           }}
           onJump={(p) => {
             setMenu(false)
@@ -669,8 +704,9 @@ function Index({
   ord,
   surahs,
   page,
-  large,
-  onLarge,
+  size,
+  canFit,
+  onSize,
   onJump,
   rec,
   onReciters,
@@ -681,8 +717,10 @@ function Index({
   ord: Ord
   surahs: Surah[]
   page: number
-  large: boolean
-  onLarge: (v: boolean) => void
+  size: Size
+  /** This screen has room for the middle size. */
+  canFit: boolean
+  onSize: (v: Size) => void
   onJump: (p: number) => void
   rec: Recitation
   onReciters: () => void
@@ -714,6 +752,8 @@ function Index({
     list.current?.querySelector('[aria-current="true"]')?.scrollIntoView({ block: 'center' })
   }, [tab])
 
+  // where the screen has no room for the middle size, it shows as the whole page
+  const shown: Size = size === 'fit' && !canFit ? 'page' : size
   const seg = (on: boolean) =>
     `tap min-h-10 flex-1 rounded-full text-sm ${on ? 'bg-gold/20 font-semibold text-gold-soft' : 'text-mist hover:text-vellum'}`
   const row =
@@ -823,27 +863,33 @@ function Index({
       <div>
         <p className="mb-1 px-1 text-xs text-mist">حجم الخط</p>
         <div className="flex rounded-full bg-night p-1" role="group" aria-label="حجم الخط">
-          <button
-            type="button"
-            aria-pressed={!large}
-            onClick={() => onLarge(false)}
-            className={seg(!large)}
-          >
-            الصفحة كاملة
-          </button>
-          <button
-            type="button"
-            aria-pressed={large}
-            onClick={() => onLarge(true)}
-            className={seg(large)}
-          >
-            خط أكبر
-          </button>
+          {(
+            [
+              ['page', 'الصفحة كاملة'],
+              ['fit', 'خط أكبر'],
+              ['scroll', 'أكبر مع تمرير'],
+            ] as const
+          ).map(([v, label]) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={shown === v}
+              disabled={v === 'fit' && !canFit}
+              onClick={() => onSize(v)}
+              className={`${seg(shown === v)} disabled:opacity-40`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
         <p className="mt-1 px-1 text-xs leading-relaxed text-mist/80">
-          {large
+          {size === 'scroll'
             ? 'الخط أكبر، وتُمرَّر الصفحة إلى الأسفل لإكمالها.'
-            : 'تظهر الصفحة كلها في الشاشة.'}
+            : size === 'fit' && canFit
+              ? 'أكبر خط تظهر به الصفحة كلها في الشاشة دون تمرير.'
+              : canFit
+                ? 'تظهر الصفحة كلها في الشاشة.'
+                : 'تظهر الصفحة كلها في الشاشة، وهذا أكبر خط تتسع له الشاشة دون تمرير.'}
         </p>
       </div>
 

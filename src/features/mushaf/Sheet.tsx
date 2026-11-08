@@ -81,21 +81,32 @@ export function Sheet(p: SheetProps) {
     const el = body.current
     const inner = el?.firstElementChild as HTMLElement | null
     if (!el || !inner) return
-    let f = p.font
-    el.style.fontSize = `${f}px`
-    el.style.setProperty('--lh', String(LINE))
-    if (p.large || !ready) return
-    const room = el.clientHeight
-    for (let i = 0; i < 12 && inner.offsetHeight > room && f > 9; i++) {
-      // text height grows about with the square of the size (more lines, each taller)
-      f = i < 3 ? f * Math.sqrt(room / inner.offsetHeight) * 0.995 : f * 0.98
+    const fit = () => {
+      let f = p.font
       el.style.fontSize = `${f}px`
+      el.style.setProperty('--lh', String(LINE))
+      if (p.large || !ready) return
+      const room = el.clientHeight
+      for (let i = 0; i < 12 && inner.offsetHeight > room && f > 9; i++) {
+        // text height grows about with the square of the size (more lines, each taller)
+        f = i < 3 ? f * Math.sqrt(room / inner.offsetHeight) * 0.995 : f * 0.98
+        el.style.fontSize = `${f}px`
+      }
+      // a page whose text ends a line or two short: open its lines a little, as the printed
+      // page spreads its fifteen lines over the same height
+      const h = inner.offsetHeight
+      if (!opening && h > 0 && h < room)
+        el.style.setProperty('--lh', String(LINE * Math.min(room / h, MAX_STRETCH)))
     }
-    // a page whose text ends a line or two short: open its lines a little, as the printed
-    // page spreads its fifteen lines over the same height
-    const h = inner.offsetHeight
-    if (!opening && h > 0 && h < room)
-      el.style.setProperty('--lh', String(LINE * Math.min(room / h, MAX_STRETCH)))
+    fit()
+    if (p.large) return
+    // the text can still grow after this (the mushaf font arriving late): fit again whenever
+    // it runs past the page
+    const ro = new ResizeObserver(() => {
+      if (inner.offsetHeight > el.clientHeight + 1) fit()
+    })
+    ro.observe(inner)
+    return () => ro.disconnect()
   }, [p.font, p.large, p.width, p.height, ready, fontsReady, opening])
 
   // long press: a timer from the touch, cancelled by movement or an early lift; the tap that

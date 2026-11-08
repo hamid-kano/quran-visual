@@ -91,7 +91,7 @@ export const RECITERS: Reciter[] = [
     alt: 'Saood_ash-Shuraym_64kbps',
   },
   { id: 'sahl', name: 'سهل ياسين', folder: 'Sahl_Yassin_128kbps' },
-  { id: 'parhizgar', name: 'شهريار پرهيزگار', folder: 'Parhizgar_48kbps' },
+  { id: 'parhizgar', name: 'Parhizgar', folder: 'Parhizgar_48kbps' },
   { id: 'budair', name: 'صلاح البدير', folder: 'Salah_Al_Budair_128kbps' },
   { id: 'bukhatir', name: 'صلاح بو خاطر', folder: 'Salaah_AbdulRahman_Bukhatir_128kbps' },
   {

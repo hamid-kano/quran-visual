@@ -122,3 +122,16 @@ export const IconStop = (p: P) => (
     <rect x="6.5" y="6.5" width="11" height="11" rx="1.5" />
   </Svg>
 )
+
+export const IconCheck = (p: P) => (
+  <Svg {...p}>
+    <path d="m5 12.5 4.5 4.5L19 7.5" />
+  </Svg>
+)
+
+export const IconShare = (p: P) => (
+  <Svg {...p}>
+    <path d="M12 15V4M8 7.5 12 4l4 3.5" />
+    <path d="M7 11H6a1.5 1.5 0 0 0-1.5 1.5v6A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 18 11h-1" />
+  </Svg>
+)

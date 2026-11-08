@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   RECITERS,
+  altUrl,
   ayahUrl,
   basmalaUrl,
   firstStep,
@@ -94,7 +95,14 @@ export function useRecitation(surah: number, surahName: string, ayahCount: numbe
     const onPlaying = () => setStatus('playing')
     const onWaiting = () => setStatus('loading')
     const onPause = () => !el.ended && stepRef.current && setStatus('paused')
-    const onError = () => setStatus('error')
+    const onError = () => {
+      // the same file at EveryAyah's other quality, before giving up
+      const alt = el.src && altUrl(settings.current.reciter, el.src)
+      if (alt) {
+        el.src = alt
+        el.play().catch(() => setStatus('error'))
+      } else setStatus('error')
+    }
     const onEnded = () => {
       const s = stepRef.current
       playStep(s ? nextStep(s, ayahCount, settings.current.repeat) : null)

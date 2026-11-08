@@ -37,11 +37,18 @@ export interface SheetProps {
   /** The ayah being recited, if any. */
   reading?: Picked | null
   onPick: (p: Picked | null) => void
+  /** A long press on an ayah (or a right click, or the context-menu key): its full menu. */
+  onHold: (p: Picked) => void
   /** A tap on the page outside any ayah. */
   onBackground: () => void
   /** The right-hand page of an open spread, or the left (shapes the spine). */
   side?: 'right' | 'left'
 }
+
+/** How long a press must last to open an ayah's menu, in ms (the platforms' own is about 500). */
+const HOLD_MS = 450
+/** A finger that moves this far, in px, is turning the page, not pressing. */
+const HOLD_SLOP = 10
 
 /** One page of the Madinah mushaf: its ayahs, with each surah's heading where the surah opens. */
 export function Sheet(p: SheetProps) {
@@ -90,6 +97,43 @@ export function Sheet(p: SheetProps) {
     if (!opening && h > 0 && h < room)
       el.style.setProperty('--lh', String(LINE * Math.min(room / h, MAX_STRETCH)))
   }, [p.font, p.large, p.width, p.height, ready, fontsReady, opening])
+
+  // long press: a timer from the touch, cancelled by movement or an early lift; the tap that
+  // follows a long press is swallowed so it does not also pick or unpick the ayah
+  const hold = useRef<{ timer: number; x: number; y: number } | null>(null)
+  const held = useRef(false)
+  const cancelHold = () => {
+    if (hold.current) clearTimeout(hold.current.timer)
+    hold.current = null
+  }
+  const openHold = (at: Picked) => {
+    cancelHold()
+    held.current = true
+    navigator.vibrate?.(12)
+    p.onHold(at)
+  }
+  const holdHandlers = (at: Picked) => ({
+    onPointerDown: (e: React.PointerEvent) => {
+      held.current = false
+      if (e.pointerType === 'mouse') return // a mouse has its right click
+      cancelHold()
+      hold.current = {
+        x: e.clientX,
+        y: e.clientY,
+        timer: window.setTimeout(() => openHold(at), HOLD_MS),
+      }
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      const h = hold.current
+      if (h && Math.hypot(e.clientX - h.x, e.clientY - h.y) > HOLD_SLOP) cancelHold()
+    },
+    onPointerUp: cancelHold,
+    onPointerCancel: cancelHold,
+    onContextMenu: (e: React.MouseEvent) => {
+      e.preventDefault()
+      if (!held.current) openHold(at)
+    },
+  })
 
   const name = (s: number) => p.surahs[s - 1]?.name ?? ''
   const spine =
@@ -159,6 +203,7 @@ export function Sheet(p: SheetProps) {
                     {ayahs.map((a) => {
                       const on = p.picked?.surah === r.surah && p.picked.ayah === a.n
                       const live = p.reading?.surah === r.surah && p.reading.ayah === a.n
+                      const at = { surah: r.surah, ayah: a.n }
                       return (
                         <span key={a.n}>
                           <span
@@ -167,14 +212,19 @@ export function Sheet(p: SheetProps) {
                             tabIndex={0}
                             aria-pressed={on}
                             aria-current={live || undefined}
-                            onClick={() => p.onPick(on ? null : { surah: r.surah, ayah: a.n })}
+                            aria-haspopup="dialog"
+                            {...holdHandlers(at)}
+                            onClick={() => {
+                              if (held.current) held.current = false
+                              else p.onPick(on ? null : at)
+                            }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault()
-                                p.onPick(on ? null : { surah: r.surah, ayah: a.n })
+                                p.onPick(on ? null : at)
                               }
                             }}
-                            className={`cursor-pointer rounded-sm [-webkit-tap-highlight-color:transparent] [box-decoration-break:clone] ${
+                            className={`cursor-pointer rounded-sm [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [box-decoration-break:clone] pointer-coarse:select-none ${
                               on ? 'bg-[#e9d49b]' : live ? 'bg-[#cfe6d8]' : ''
                             }`}
                           >

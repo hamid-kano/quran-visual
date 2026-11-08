@@ -21,7 +21,8 @@ import { juzName, khatma, ordinals, pageOf } from '../../lib/mushaf'
 import { PAGE_COUNT, divisionAt, parsePage, spreadOf, spreadPages } from '../../lib/mushafPage'
 import { daysBetween, localDay, storedPlan } from '../../lib/khatmaPlan'
 import { LINE, PAGE_CHROME, Sheet, type Picked } from './Sheet'
-import { RECITERS } from '../recitation/reciters'
+import { RECITERS, reciterLabel } from '../recitation/reciters'
+import { AyahMenu } from './AyahMenu'
 import { useMushafRecitation } from '../recitation/useMushafRecitation'
 
 type Ord = ReturnType<typeof ordinals>
@@ -110,6 +111,8 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
   const [large, setLarge] = useState(() => stored(LARGE_KEY) === true)
   const [menu, setMenu] = useState(false)
   const [picked, setPicked] = useState<Picked | null>(null)
+  // the ayah whose full menu is open (a long press)
+  const [held, setHeld] = useState<Picked | null>(null)
   // on a phone or tablet the mushaf opens on the whole screen; a tap on the page brings the
   // bars, another hides them
   const [bars, setBars] = useState(
@@ -264,6 +267,10 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
         picked={picked}
         reading={reading}
         onPick={setPicked}
+        onHold={(at) => {
+          setPicked(at)
+          setHeld(at)
+        }}
         onBackground={() => (picked ? setPicked(null) : setBars(!bars))}
       />
     )
@@ -370,7 +377,7 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
           </>
         )}
 
-        {picked ? (
+        {picked && !held ? (
           <AyahSheet
             picked={picked}
             surahs={surahs}
@@ -396,6 +403,25 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
       </div>
 
       {bars && <BottomBar page={page} onStep={step} onJump={show} />}
+
+      <AyahMenu
+        at={held}
+        surahs={surahs}
+        reciter={rec.reciter.id}
+        onClose={() => {
+          setHeld(null)
+          setPicked(null)
+        }}
+        onListen={(at, one) => {
+          setHeld(null)
+          setPicked(null)
+          rec.start(at.surah, at.ayah, one)
+        }}
+        onReciter={(id, at) => {
+          rec.setReciter(id, true)
+          rec.start(at.surah, at.ayah, true)
+        }}
+      />
 
       <Drawer open={menu} onClose={() => setMenu(false)} title="المصحف">
         <Index
@@ -574,7 +600,7 @@ function Player({ rec, surahs }: { rec: Recitation; surahs: Surah[] }) {
           {rec.status === 'error' ? 'تعذّر التشغيل، تحقّق من الاتصال' : where}
         </p>
         <p className="truncate text-xs text-mist">
-          {rec.status === 'loading' ? 'جارٍ التحميل…' : rec.reciter.name}
+          {rec.status === 'loading' ? 'جارٍ التحميل…' : reciterLabel(rec.reciter)}
         </p>
       </div>
       <button type="button" aria-label="الآية السابقة" onClick={() => rec.go(-1)} className={btn}>
@@ -668,7 +694,7 @@ function Index({
           >
             {RECITERS.map((x) => (
               <option key={x.id} value={x.id}>
-                {x.name}
+                {reciterLabel(x)}
               </option>
             ))}
           </select>
@@ -696,7 +722,8 @@ function Index({
           استمع من أول الصفحة
         </button>
         <p className="mt-1.5 text-xs leading-relaxed text-mist/80">
-          أو المس أي آية واختر «استمع من هنا». تتقدّم الصفحات مع التلاوة.
+          أو المس أي آية واختر «استمع من هنا»، أو اضغط عليها مطوّلًا لتنسخها أو تسمعها بصوت أي قارئ.
+          تتقدّم الصفحات مع التلاوة.
         </p>
       </section>
 

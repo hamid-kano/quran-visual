@@ -132,6 +132,50 @@
     }
   }
 
+  /* Bottom sheet (a modal <dialog>) rising from the bottom edge; centred on wide screens. */
+  .sheet {
+    position: fixed;
+    inset-block: auto 0;
+    inset-inline: 0;
+    margin: 0 auto;
+    padding: 0;
+    border: 1px solid rgb(205 182 122 / 0.25);
+    border-bottom: 0;
+    border-radius: 1.25rem 1.25rem 0 0;
+    width: min(32rem, 100%);
+    max-width: none;
+    height: min(85dvh, 44rem);
+    max-height: none;
+    background: var(--color-night-deep);
+    color: var(--color-vellum);
+    box-shadow: 0 -12px 40px rgb(0 0 0 / 0.45);
+    translate: 0 0;
+    transition:
+      translate 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+      overlay 0.25s allow-discrete,
+      display 0.25s allow-discrete;
+  }
+  .sheet:not([open]) {
+    translate: 0 100%;
+  }
+  @starting-style {
+    .sheet[open] {
+      translate: 0 100%;
+    }
+  }
+  .sheet::backdrop {
+    background: rgb(4 10 22 / 0.55);
+    transition:
+      background-color 0.25s,
+      overlay 0.25s allow-discrete,
+      display 0.25s allow-discrete;
+  }
+  @starting-style {
+    .sheet[open]::backdrop {
+      background: transparent;
+    }
+  }
+
   /* Taps on controls: no grey flash, no double-tap zoom wait. */
   .tap {
     -webkit-tap-highlight-color: transparent;

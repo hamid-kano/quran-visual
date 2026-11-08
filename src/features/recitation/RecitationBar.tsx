@@ -1,5 +1,5 @@
 import { TIME, countOf, toArabicDigits } from '../../lib/arabic'
-import { RECITERS } from './reciters'
+import { RECITERS, reciterLabel } from './reciters'
 import type { useRecitation } from './useRecitation'
 
 type Recitation = ReturnType<typeof useRecitation>
@@ -132,7 +132,7 @@ export function RecitationBar({
           >
             {RECITERS.map((x) => (
               <option key={x.id} value={x.id}>
-                {x.name}
+                {reciterLabel(x)}
               </option>
             ))}
           </select>
@@ -160,7 +160,7 @@ export function RecitationBar({
           : r.status === 'loading'
             ? `جارٍ التحميل… ${where ?? ''}`
             : where
-              ? `${r.reciter.name}، ${where}`
+              ? `${reciterLabel(r.reciter)}، ${where}`
               : single
                 ? 'استمع إلى الآية بصوت القارئ الذي تختاره.'
                 : 'اختر رقم أي آية لتبدأ التلاوة منها.'}

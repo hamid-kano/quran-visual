@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { RECITERS, ayahUrl, basmalaUrl, firstStep, nextStep, type Step } from './reciters'
+import { RECITERS, altUrl, ayahUrl, basmalaUrl, firstStep, nextStep, type Step } from './reciters'
 import { STORE, readSaved, type RecitationStatus, type Saved } from './useRecitation'
 
 /** A step of the recitation in the mushaf: as in a surah, with the surah it belongs to. */
@@ -28,6 +28,9 @@ export function useMushafRecitation(
   const audio = useRef<HTMLAudioElement | null>(null)
   const ahead = useRef<HTMLAudioElement | null>(null)
   const stepRef = useRef<MushafStep | null>(null)
+  // one ayah only (its repeats included), then stop
+  const single = useRef(false)
+  const [only, setOnly] = useState(false)
   const settings = useRef({ reciter, repeat: saved.repeat })
   const surahsRef = useRef(surahs)
   useEffect(() => {
@@ -42,6 +45,7 @@ export function useMushafRecitation(
 
   /** The step after `s`: the next ayah, or the opening of the next surah. */
   const after = (s: MushafStep): MushafStep | null => {
+    if (single.current && !s.basmala && s.repeatsLeft === 0) return null
     const count = surahsRef.current[s.surah - 1]?.ayahs ?? 0
     const n = nextStep(s, count, settings.current.repeat)
     if (n) return { ...n, surah: s.surah }
@@ -87,7 +91,14 @@ export function useMushafRecitation(
     const onPlaying = () => setStatus('playing')
     const onWaiting = () => setStatus('loading')
     const onPause = () => !el.ended && stepRef.current && setStatus('paused')
-    const onError = () => setStatus('error')
+    const onError = () => {
+      // the same file at EveryAyah's other quality, before giving up
+      const alt = el.src && altUrl(settings.current.reciter, el.src)
+      if (alt) {
+        el.src = alt
+        el.play().catch(() => setStatus('error'))
+      } else setStatus('error')
+    }
     const onEnded = () => {
       const s = stepRef.current
       playStep.current(s ? after(s) : null)
@@ -109,8 +120,16 @@ export function useMushafRecitation(
     }
   }, [])
 
-  const start = useCallback((surah: number, ayah: number) => {
-    playStep.current({ ...firstStep(surah, ayah, settings.current.repeat), surah })
+  /** From an ayah on; with `one`, that ayah alone (no basmala before it), then stop. */
+  const start = useCallback((surah: number, ayah: number, one = false) => {
+    single.current = one
+    setOnly(one)
+    const repeat = settings.current.repeat
+    playStep.current(
+      one
+        ? { basmala: false, ayah, repeatsLeft: repeat - 1, surah }
+        : { ...firstStep(surah, ayah, repeat), surah },
+    )
   }, [])
   const pause = useCallback(() => audio.current?.pause(), [])
   const resume = useCallback(() => {
@@ -163,19 +182,22 @@ export function useMushafRecitation(
     repeat: saved.repeat,
     status,
     step,
+    /** Reciting one ayah only. */
+    only,
     start,
     pause,
     resume,
     stop,
     go,
-    setReciter: (id: string) => {
+    /** Choose the reciter; with `quiet`, keep what is playing as it is. */
+    setReciter: (id: string, quiet = false) => {
       const next = RECITERS.find((r) => r.id === id)
       if (!next) return
       save({ reciter: id })
       settings.current = { ...settings.current, reciter: next }
       // carry on from the same ayah in the new voice
       const s = stepRef.current
-      if (s) playStep.current({ ...s })
+      if (s && !quiet) playStep.current({ ...s })
     },
     setRepeat: (n: number) => {
       save({ repeat: n })

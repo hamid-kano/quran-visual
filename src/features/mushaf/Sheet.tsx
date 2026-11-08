@@ -159,7 +159,7 @@ export function Sheet(p: SheetProps) {
 
       <div
         ref={body}
-        className={`min-h-0 flex-1 px-[22px] ${p.large ? 'overflow-y-auto overscroll-contain' : 'overflow-hidden'} flex flex-col ${p.large ? '' : 'justify-center'}`}
+        className={`min-h-0 flex-1 px-[22px] ${p.large ? 'overflow-y-auto overscroll-y-contain' : 'overflow-hidden'} flex flex-col ${p.large ? '' : 'justify-center'}`}
       >
         <div className={opening ? 'mx-auto w-[80%]' : ''}>
           {text.status === 'error' && (

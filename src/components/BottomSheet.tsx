@@ -67,7 +67,7 @@ export function BottomSheet({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div data-sheet-panel tabIndex={-1} className="flex max-h-[inherit] flex-col outline-none">
+      <div data-sheet-panel tabIndex={-1} className="flex h-full flex-col outline-none">
         <div {...grip} className="shrink-0 touch-none">
           <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-mist/40" aria-hidden />
           {header}

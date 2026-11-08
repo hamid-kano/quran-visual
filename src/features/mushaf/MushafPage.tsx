@@ -630,12 +630,14 @@ function Player({
         className="tap -my-0.5 min-w-0 flex-1 rounded-full py-1 text-right leading-tight active:bg-gold/15"
       >
         <span className="block truncate text-sm text-vellum" aria-live="polite">
-          {rec.status === 'error' ? 'تعذّر التشغيل، تحقّق من الاتصال' : where}
+          {rec.status === 'error'
+            ? 'تعذّر التشغيل، تحقّق من الاتصال'
+            : rec.status === 'loading'
+              ? `${where}…`
+              : where}
         </span>
         <span className="flex items-center gap-1 text-xs text-gold-soft/90">
-          <span className="truncate">
-            {rec.status === 'loading' ? 'جارٍ التحميل…' : reciterLabel(rec.reciter)}
-          </span>
+          <span className="truncate">{reciterLabel(rec.reciter)}</span>
           <IconChevronDown className="size-3.5 shrink-0" />
         </span>
       </button>

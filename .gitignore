@@ -5,3 +5,4 @@ dev-dist
 .DS_Store
 node_modules/.tmp
 public/data
+dist-app

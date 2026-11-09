@@ -15,6 +15,7 @@ import {
 } from '../../components/icons'
 import { toArabicDigits } from '../../lib/arabic'
 import { ReciterList } from '../recitation/ReciterPicker'
+import { canShareText, shareText } from '../../lib/native'
 import type { Picked } from './Sheet'
 
 /** The text as copied or shared: the ayah, then where it is, as the mushafs cite it. */
@@ -133,9 +134,9 @@ function Body({
       setDone('failed')
     }
   }
-  const canShare = typeof navigator.share === 'function'
+  const canShare = canShareText()
   const share = () => {
-    if (ayah) navigator.share({ text: cite(ayah, s.name, at.ayah) }).catch(() => {})
+    if (ayah) shareText(cite(ayah, s.name, at.ayah)).catch(() => {})
   }
 
   const tile =

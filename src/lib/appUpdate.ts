@@ -1,3 +1,5 @@
+import { IS_APP } from './platform'
+
 /**
  * Keeps visitors on the latest deploy. The service worker fetches a new version in the
  * background and takes over the page (skipWaiting and clientsClaim, from the autoUpdate
@@ -15,7 +17,8 @@ export function holdUpdate(on: boolean) {
 }
 
 export function registerServiceWorker() {
-  if (!('serviceWorker' in navigator) || !import.meta.env.PROD) return
+  // the app carries its own copy of the site and is updated through the store
+  if (!('serviceWorker' in navigator) || !import.meta.env.PROD || IS_APP) return
   const sw = navigator.serviceWorker
   // the very first install takes over a page that already runs the current code: no reload
   const hadWorker = !!sw.controller

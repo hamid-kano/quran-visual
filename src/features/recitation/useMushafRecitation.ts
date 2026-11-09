@@ -1,6 +1,17 @@
 import { holdUpdate } from '../../lib/appUpdate'
+import { setMediaActions, setMediaState, setNowPlaying } from '../../lib/mediaSession'
+import { toArabicDigits } from '../../lib/arabic'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { RECITERS, altUrl, ayahUrl, basmalaUrl, firstStep, nextStep, type Step } from './reciters'
+import {
+  RECITERS,
+  altUrl,
+  ayahUrl,
+  basmalaUrl,
+  firstStep,
+  nextStep,
+  reciterLabel,
+  type Step,
+} from './reciters'
 import { STORE, readSaved, type RecitationStatus, type Saved } from './useRecitation'
 
 /** A step of the recitation in the mushaf: as in a surah, with the surah it belongs to. */
@@ -80,14 +91,12 @@ export function useMushafRecitation(
       ahead.current.preload = 'auto'
       ahead.current.src = urlOf(n)
     }
-    if ('mediaSession' in navigator && typeof MediaMetadata !== 'undefined') {
-      const name = surahsRef.current[s.surah - 1]?.name ?? ''
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: s.basmala ? `سورة ${name}، البسملة` : `سورة ${name}، الآية ${s.ayah}`,
-        artist: settings.current.reciter.name,
-        album: 'آيات مرئية',
-      })
-    }
+    const name = surahsRef.current[s.surah - 1]?.name ?? ''
+    setNowPlaying({
+      title: s.basmala ? `سورة ${name}، البسملة` : `سورة ${name}، الآية ${toArabicDigits(s.ayah)}`,
+      artist: reciterLabel(settings.current.reciter),
+      album: 'آيات مرئية',
+    })
   })
 
   useEffect(() => {
@@ -160,18 +169,23 @@ export function useMushafRecitation(
     playStep.current({ ...firstStep(surah, ayah, settings.current.repeat), surah })
   }, [])
 
+  // the controls outside the page (lock screen, notification, headphones)
   useEffect(() => {
-    if (!('mediaSession' in navigator)) return
-    const ms = navigator.mediaSession
-    ms.setActionHandler('play', resume)
-    ms.setActionHandler('pause', pause)
-    ms.setActionHandler('nexttrack', () => go(1))
-    ms.setActionHandler('previoustrack', () => go(-1))
-    return () => {
-      for (const a of ['play', 'pause', 'nexttrack', 'previoustrack'] as const)
-        ms.setActionHandler(a, null)
-    }
-  }, [go, pause, resume])
+    setMediaActions({
+      play: resume,
+      pause,
+      nexttrack: () => go(1),
+      previoustrack: () => go(-1),
+      stop,
+    })
+    return () =>
+      setMediaActions({ play: null, pause: null, nexttrack: null, previoustrack: null, stop: null })
+  }, [go, pause, resume, stop])
+  useEffect(() => {
+    setMediaState(
+      status === 'idle' ? 'none' : status === 'paused' || status === 'error' ? 'paused' : 'playing',
+    )
+  }, [status])
 
   const save = (next: Partial<Saved>) => {
     const v = { ...saved, ...next }

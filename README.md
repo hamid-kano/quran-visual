@@ -59,6 +59,17 @@ pnpm dev
 
 قبل كل نشر: `pnpm test` يتحقق من مطابقة النص لملف المجمع حرفاً حرفاً، وعدد السور والآيات والكلمات، وكل رقم يعرضه الموقع على أنه حقيقة. التفاصيل في `VERIFICATION.md`.
 
+## تطبيق الجوال (Android وiOS)
+
+التطبيق مبني بـ [Capacitor](https://capacitorjs.com) من الكود نفسه، ويحمل نسخة من المنصة في داخله، فيفتح فوراً ويعمل دون اتصال، إلا التلاوات فتُبثّ من EveryAyah كما في الموقع.
+
+- `pnpm build:app`: نسخة التطبيق من المنصة في `dist-app/`، من جذر التطبيق وبلا Service Worker.
+- `npx cap sync`: نسخها إلى مشروعي `android/` و`ios/`.
+- `npx cap open android` أو `npx cap open ios`: فتح المشروع في Android Studio أو Xcode.
+- `npx tsx scripts/app-assets.ts` ثم `npx capacitor-assets generate`: الأيقونة وشاشة البداية من شعار المنصة.
+
+وفي التطبيق: تستمر التلاوة والشاشة مقفلة مع أزرار التحكم في شاشة القفل، وتبقى الشاشة مضاءة في المصحف، ويغلق زر الرجوع في Android ما هو مفتوح قبل أن يرجع صفحة. ويبني سير العمل `.github/workflows/android.yml` نسخة APK تجريبية مع كل تحديث.
+
 ## المصادر والتراخيص
 
 - **التلاوات**: [EveryAyah](https://everyayah.com)، تُشغَّل من الموقع مباشرة ولا تُحفظ في المستودع.

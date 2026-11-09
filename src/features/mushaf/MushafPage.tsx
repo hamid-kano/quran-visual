@@ -25,6 +25,7 @@ import { LINE, PAGE_CHROME, Sheet, type Picked } from './Sheet'
 import { reciterLabel } from '../recitation/reciters'
 import { ReciterSheet } from '../recitation/ReciterPicker'
 import { AyahMenu } from './AyahMenu'
+import { keepAwake } from '../../lib/native'
 import { useMushafRecitation } from '../recitation/useMushafRecitation'
 
 type Ord = ReturnType<typeof ordinals>
@@ -148,6 +149,8 @@ function Reader({ start, mushaf, surahs }: { start: number; mushaf: Mushaf; sura
   const [menu, setMenu] = useState(false)
   const [picked, setPicked] = useState<Picked | null>(null)
   // the ayah whose full menu is open (a long press)
+  // in the app, the screen stays on while the mushaf is open, as on a printed page
+  useEffect(() => keepAwake(), [])
   const [held, setHeld] = useState<Picked | null>(null)
   // the list of reciters, opened from the player or the menu
   const [reciters, setReciters] = useState(false)

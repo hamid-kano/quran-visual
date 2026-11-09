@@ -7,6 +7,7 @@ import { toArabicDigits } from '../../lib/arabic'
 import { juzName, type ordinals } from '../../lib/mushaf'
 import { divisionAt, pageRuns } from '../../lib/mushafPage'
 import { BASMALA, showsBasmalaHeader } from '../../lib/quran'
+import { tapFeedback } from '../../lib/native'
 
 type Ord = ReturnType<typeof ordinals>
 
@@ -120,7 +121,7 @@ export function Sheet(p: SheetProps) {
   const openHold = (at: Picked) => {
     cancelHold()
     held.current = true
-    navigator.vibrate?.(12)
+    tapFeedback()
     p.onHold(at)
   }
   const holdHandlers = (at: Picked) => ({

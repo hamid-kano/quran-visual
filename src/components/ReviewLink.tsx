@@ -1,8 +1,7 @@
 import { useId, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { REVIEW, issueUrl, mailUrl } from '../lib/review'
-
-const SITE = 'https://hamid-kano.github.io'
+import { SITE_URL } from '../lib/platform'
 
 /**
  * «ملاحظة على هذا الموضع»: opens a ready note about the place shown, by email or as a GitHub
@@ -18,8 +17,8 @@ export function ReviewLink({
   const [open, setOpen] = useState(false)
   const id = useId()
   const { pathname, search } = useLocation()
-  // the public address, also when the page is opened from a local copy
-  const url = `${SITE}${import.meta.env.BASE_URL.replace(/\/$/, '')}${pathname}${search}`
+  // the public address, also when the page is opened from a local copy or in the app
+  const url = `${SITE_URL}${pathname}${search}`
   const place = { subject, url }
   const page = tone === 'page'
   const quiet = page ? 'text-ink-soft hover:text-ink' : 'text-mist hover:text-vellum'

@@ -112,6 +112,12 @@ function Index({ lex }: { lex: Lexicon }) {
             ألفبائياً
           </Chip>
         </div>
+        <Link
+          to="/words/top"
+          className="tap inline-flex min-h-11 items-center rounded-full border border-gold/30 px-4 text-sm text-gold-soft hover:bg-gold/10"
+        >
+          الأكثر وروداً بالرسم، بالسورة وبالجذر ←
+        </Link>
       </div>
 
       <p className="mt-4 text-sm text-mist" aria-live="polite">

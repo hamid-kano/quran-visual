@@ -261,6 +261,8 @@ export const LexiconEntry = z.object({
 
 export type Segment = z.infer<typeof Segment>
 export type SurahMorphology = z.infer<typeof SurahMorphology>
+/** Each lexicon entry's occurrences by surah, in the index's order, as [surah, count, …]. */
+export const Frequency = z.object({ bySurah: z.array(z.array(z.number().int().positive())) })
 export type Lexicon = z.infer<typeof Lexicon>
 export type LexiconIndexEntry = z.infer<typeof LexiconIndexEntry>
 export type LexiconEntry = z.infer<typeof LexiconEntry>

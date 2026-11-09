@@ -9,6 +9,8 @@ interface Item {
   end?: boolean
   /** Other addresses that belong to this item (a surah opened from the galaxy, …). */
   also?: string[]
+  /** Addresses under this item that belong to another one. */
+  not?: string[]
 }
 
 /** Every section, grouped as the side navigation shows them. */
@@ -27,7 +29,8 @@ const GROUPS: { title?: string; items: Item[] }[] = [
     items: [
       { to: '/search', label: 'البحث' },
       { to: '/topics', label: 'الموضوعات' },
-      { to: '/words', label: 'معجم الألفاظ' },
+      { to: '/words', label: 'معجم الألفاظ', end: true, also: ['/words'], not: ['/words/top'] },
+      { to: '/words/top', label: 'الأكثر وروداً' },
       { to: '/roots', label: 'شبكة الجذور' },
       { to: '/names', label: 'الأعلام' },
       { to: '/similar', label: 'المتشابهات' },
@@ -106,7 +109,7 @@ export function SectionNav({ onPick }: { onPick?: () => void }) {
                   data-current={within(pathname, l.also) || undefined}
                   className={({ isActive }) =>
                     `tap flex min-h-11 items-center rounded-lg px-3 text-[0.95rem] transition-colors ${
-                      isActive || within(pathname, l.also)
+                      (isActive || within(pathname, l.also)) && !within(pathname, l.not)
                         ? 'bg-gold/15 font-semibold text-gold-soft'
                         : 'text-mist hover:bg-white/5 hover:text-vellum active:bg-white/10'
                     }`

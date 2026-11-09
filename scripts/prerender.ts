@@ -402,6 +402,12 @@ for (let p = 1; p <= mushaf.pages.length; p++) {
   })
 }
 
+pages.set('words/top', {
+  title: titled('الألفاظ الأكثر وروداً'),
+  description:
+    'ترتيب ألفاظ القرآن الكريم بعدد ورودها في المصحف كله أو في السور المكية أو المدنية أو في سورة واحدة، بمداخلها أو بجذورها، مع طريقة العدّ.',
+  ...SITE_IMAGE,
+})
 for (const e of lexicon.entries)
   pages.set(`words/${e.slug}`, {
     title: titled(`${stripTashkeel(e.lemma)} في معجم الألفاظ`),
@@ -570,6 +576,12 @@ function hintsFor(route: string): Hints {
         quranFont: false,
       }
     case 'words':
+      if (a === 'top')
+        return {
+          modules: one(feature('words/TopWordsPage')),
+          data: ['lexicon.json', 'frequency.json', 'surahs.json'],
+          quranFont: true,
+        }
       return {
         modules: one(feature('words/WordsPage')),
         data: ['lexicon.json', 'surahs.json', ...(a ? [`lex/${encodeURIComponent(a)}.json`] : [])],

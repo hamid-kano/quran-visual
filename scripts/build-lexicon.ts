@@ -7,7 +7,13 @@
  */
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { Lexicon, LexiconEntry, SurahMorphology, type Segment } from '../src/data/schemas.ts'
+import {
+  Frequency,
+  Lexicon,
+  LexiconEntry,
+  SurahMorphology,
+  type Segment,
+} from '../src/data/schemas.ts'
 import { describeSegment } from '../src/lib/morphology.ts'
 import { AMBIGUOUS, continuesToken, lemmaOf, lexSlug, rootOf, stemOf } from '../src/lib/lexicon.ts'
 import { ayahWords, vocalKey } from '../src/lib/quran.ts'
@@ -128,6 +134,17 @@ write(
       ayahs,
       surahs,
     })),
+  }),
+)
+// how often each entry occurs in each surah, in the index's order: [surah, count, surah, count, …]
+write(
+  'frequency.json',
+  Frequency.parse({
+    bySurah: list.map((x) => {
+      const n = new Map<number, number>()
+      for (const [s] of x.e.occ) n.set(s, (n.get(s) ?? 0) + 1)
+      return [...n].sort((a, b) => a[0] - b[0]).flat()
+    }),
   }),
 )
 console.log(

@@ -63,10 +63,15 @@ export function ReciterList({
                   <span className={on ? 'font-semibold text-gold-soft' : 'text-vellum'}>
                     {r.name}
                   </span>
+                  {/* a space, and a box of its own: Arabic letters join across touching
+                      elements, which would set the name's last letter in its joined form */}
                   {r.style && (
-                    <span className="ms-2 rounded-full bg-white/5 px-2 py-0.5 text-xs text-mist">
-                      {r.style}
-                    </span>
+                    <>
+                      {' '}
+                      <span className="ms-1 inline-block rounded-full bg-white/5 px-2 py-0.5 text-xs text-mist">
+                        {r.style}
+                      </span>
+                    </>
                   )}
                 </span>
                 {on ? (

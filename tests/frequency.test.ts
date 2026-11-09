@@ -56,7 +56,7 @@ describe('word frequency', () => {
     const net = new Map(roots.roots.map((x) => [x.root, x]))
     expect(r).toHaveLength(roots.roots.length)
     for (const x of r) {
-      // one written word holds two rooted nouns: يَبۡنَؤُمَّ (Taha 20:94), يا ابنَ أُمَّ. Counting each
+      // one written word holds two rooted nouns: يَبۡنَؤُمَّ (Taha 20:94), يا ابنَ أُمَّ. Counting each
       // written word once, under its first entry, as the lexicon does, counts it in ابن alone;
       // the network counts every root in a word, so أمم has one more there
       if (x.key === 'أمم') {
@@ -70,7 +70,7 @@ describe('word frequency', () => {
     }
   })
 
-  it('has يَبۡنَؤُمَّ as the only word with two roots in it', () => {
+  it('has يَبۡنَؤُمَّ as the only word with two roots in it', () => {
     const morph = readFileSync('sources/quran-morphology.txt', 'utf8').trim().split('\n')
     const rooted = new Map<string, number>()
     for (const line of morph) {

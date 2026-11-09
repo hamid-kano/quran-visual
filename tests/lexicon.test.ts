@@ -102,3 +102,48 @@ describe('searching the lexicon', () => {
       ).toBeLessThanOrEqual(0)
   })
 })
+
+describe('the line over the words of a prostration', () => {
+  const text = JSON.parse(readFileSync('sources/kfgqpc-hafs-v18.json', 'utf8')) as {
+    sora: number
+    aya_no: number
+    aya_text: string
+  }[]
+  it('is marked (U+06E4) in the fifteen places of prostration and nowhere else', () => {
+    const marked = [
+      ...new Set(
+        text.filter((a) => a.aya_text.includes('\u06E4')).map((a) => `${a.sora}:${a.aya_no}`),
+      ),
+    ]
+    expect(marked).toEqual([
+      '7:206',
+      '13:15',
+      '16:49',
+      '17:107',
+      '19:58',
+      '22:18',
+      '22:77',
+      '25:60',
+      '27:25',
+      '32:15',
+      '38:24',
+      '41:37',
+      '53:62',
+      '84:21',
+      '96:19',
+    ])
+  })
+  it('is not part of a word’s form', () => {
+    const allah = entry('اللَّه')
+    expect(allah.forms.some(([f]) => f.includes('\u06E4'))).toBe(false)
+    // لله as the KFGQPC text spells it (lam kasra, lam shadda fatha, ha kasra): with the line
+    // in 41:37 and 53:62, without it elsewhere; one form, counted 116 times
+    const lillah = '\u0644\u0650\u0644\u0651\u064E\u0647\u0650'
+    expect(allah.forms.filter(([f]) => f === lillah)).toEqual([[lillah, 116]])
+    for (const e of lex.entries.slice(0, 400))
+      expect(
+        entry(e.slug).forms.some(([f]) => f.includes('\u06E4')),
+        e.slug,
+      ).toBe(false)
+  })
+})

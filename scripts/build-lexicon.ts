@@ -22,8 +22,12 @@ import { quran } from './quran-text.ts'
 const OUT = 'public/data'
 const write = (file: string, data: unknown) => writeFileSync(join(OUT, file), JSON.stringify(data))
 
-/** Pause and section signs belong to the reading of the passage, not to the word's form. */
-const form = (w: string) => w.replace(/[ۖ-ۜ۞۩]/g, '')
+/**
+ * Pause and section signs belong to the reading of the passage, not to the word's form; so does
+ * the line over the words of a prostration (U+06E4 in the KFGQPC text).
+ */
+// eslint-disable-next-line no-misleading-character-class -- removing combining marks is the intent
+const form = (w: string) => w.replace(/[\u06D6-\u06DC\u06DE\u06E4\u06E9]/g, '')
 
 interface Acc {
   lemma: string

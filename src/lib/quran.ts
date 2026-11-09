@@ -59,12 +59,14 @@ export const alignKey = (w: string) => wordKey(w).replace(/[ءؤئاوي]/g, '')
  * Full vowelled form of a word for detecting differences in vowels alone, with marks that
  * depend only on the neighbouring word removed: pause signs, the small meem of iqlab,
  * open-tanween shapes (they mark idgham/ikhfa with what follows) and a shadda on the first
- * letter (idgham with what precedes).
+ * letter (idgham with what precedes). Also removed: the line the mushaf draws over the words
+ * of a prostration (the KFGQPC text writes it as U+06E4 on each of those words, in the fifteen
+ * places of prostration and nowhere else), which marks the place, not the word.
  */
 export function vocalKey(w: string) {
   const v = w
     // eslint-disable-next-line no-misleading-character-class -- removing combining marks is the intent
-    .replace(/[\u0640\u06D6-\u06DC\u06DE\u06E2\u06E9\u06ED]/g, '')
+    .replace(/[\u0640\u06D6-\u06DC\u06DE\u06E2\u06E4\u06E9\u06ED]/g, '')
     .replace(/\u0657/g, '\u064B')
     .replace(/\u065E/g, '\u064C')
     .replace(/\u0656/g, '\u064D')

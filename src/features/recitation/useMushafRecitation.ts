@@ -1,3 +1,4 @@
+import { holdUpdate } from '../../lib/appUpdate'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { RECITERS, altUrl, ayahUrl, basmalaUrl, firstStep, nextStep, type Step } from './reciters'
 import { STORE, readSaved, type RecitationStatus, type Saved } from './useRecitation'
@@ -24,6 +25,11 @@ export function useMushafRecitation(
   const [saved, setSaved] = useState(readSaved)
   const reciter = RECITERS.find((r) => r.id === saved.reciter) ?? RECITERS[0]!
   const [status, setStatus] = useState<RecitationStatus>('idle')
+  // a new version of the site waits while a recitation plays
+  useEffect(() => {
+    holdUpdate(status === 'playing' || status === 'loading')
+    return () => holdUpdate(false)
+  }, [status])
   const [step, setStep] = useState<MushafStep | null>(null)
   const audio = useRef<HTMLAudioElement | null>(null)
   const ahead = useRef<HTMLAudioElement | null>(null)

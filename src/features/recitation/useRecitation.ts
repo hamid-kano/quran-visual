@@ -1,3 +1,4 @@
+import { holdUpdate } from '../../lib/appUpdate'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   RECITERS,
@@ -37,6 +38,11 @@ export function useRecitation(surah: number, surahName: string, ayahCount: numbe
   const [saved, setSaved] = useState(readSaved)
   const reciter: Reciter = RECITERS.find((r) => r.id === saved.reciter) ?? RECITERS[0]!
   const [status, setStatus] = useState<RecitationStatus>('idle')
+  // a new version of the site waits while a recitation plays
+  useEffect(() => {
+    holdUpdate(status === 'playing' || status === 'loading')
+    return () => holdUpdate(false)
+  }, [status])
   const [step, setStep] = useState<Step | null>(null)
   const audio = useRef<HTMLAudioElement | null>(null)
   const ahead = useRef<HTMLAudioElement | null>(null)

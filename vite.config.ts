@@ -13,6 +13,8 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // registered by src/lib/appUpdate.ts, which also moves an open page onto a new version
+      injectRegister: false,
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'آيات مرئية — منصة التحليل البياني للقرآن الكريم',
@@ -28,6 +30,9 @@ export default defineConfig({
         icons: [{ src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
       },
       workbox: {
+        // a new version takes over open pages at once (see src/lib/appUpdate.ts)
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
         runtimeCaching: [
           {

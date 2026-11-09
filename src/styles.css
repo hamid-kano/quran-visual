@@ -41,6 +41,28 @@
     color-scheme: dark;
     background: var(--color-night);
   }
+  /* Every scrolling area: the thin gold bar of the side menu, on a clear track. The width does
+     not inherit, so it is set on every element; .scrollbar-none still hides it where asked. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cdb67a transparent;
+  }
+  /* Safari before 18.2 knows only the older, prefixed form */
+  @supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cdb67a;
+      border: 2px solid transparent;
+      border-radius: 9999px;
+      background-clip: padding-box;
+    }
+  }
   body {
     margin: 0;
     font-family: var(--font-ui);

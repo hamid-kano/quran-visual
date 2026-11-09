@@ -15,6 +15,7 @@ import { Shell } from './components/Shell'
 import { Loading } from './components/Status'
 import { RouteError } from './components/RouteError'
 import { reloadOnce } from './lib/reload'
+import { registerServiceWorker } from './lib/appUpdate'
 
 const GalaxyPage = lazy(() => import('./features/galaxy/GalaxyPage'))
 const RootsPage = lazy(() => import('./features/roots/RootsPage'))
@@ -91,6 +92,8 @@ const router = createBrowserRouter(
 window.addEventListener('vite:preloadError', (e) => {
   if (reloadOnce()) e.preventDefault()
 })
+
+registerServiceWorker()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

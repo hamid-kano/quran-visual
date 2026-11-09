@@ -9,7 +9,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  # to publish the APK on the repository's releases page
+  contents: write
 
 concurrency:
   group: android-${{ github.ref }}
@@ -46,9 +47,26 @@ jobs:
           cache: gradle
       - name: Build the APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon -PversionCode=${{ github.run_number }}
       - uses: actions/upload-artifact@v4
         with:
           name: ayat-maria-debug-${{ github.sha }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
+      # a direct download, the same address every time: the latest build replaces the file
+      - name: Publish the APK for direct download
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk ayat-maria.apk
+          notes="نسخة تجريبية من تطبيق «آيات مرئية» لأندرويد، تُبنى تلقائياً مع كل تحديث للمنصة.
+          آخر بناء: ${GITHUB_SHA::7} (رقم ${{ github.run_number }}).
+          للتثبيت: حمّل ayat-maria.apk وافتحه على الهاتف، واسمح بالتثبيت من هذا المصدر."
+          if gh release view app-latest >/dev/null 2>&1; then
+            gh release edit app-latest --notes "$notes"
+          else
+            gh release create app-latest --prerelease --target "$GITHUB_SHA" \
+              --title "آيات مرئية لأندرويد (نسخة تجريبية)" --notes "$notes"
+          fi
+          gh release upload app-latest ayat-maria.apk --clobber

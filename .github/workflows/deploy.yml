@@ -50,7 +50,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          # the site is some fifteen thousand files; when GitHub is slow, syncing them can take
-          # longer than the action's default ten minutes, after which it cancels the deployment
-          timeout: 1200000

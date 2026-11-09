@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { Drawer } from './Drawer'
-import { IconGalaxy, IconMore, IconMushaf, IconSearch, IconStudies } from './icons'
+import { IconChevronDown, IconGalaxy, IconMore, IconMushaf, IconSearch, IconStudies } from './icons'
 
 interface Item {
   to: string
@@ -89,6 +89,105 @@ function Brand() {
   )
 }
 
+/** The item is the page shown, or the page belongs to it. */
+const isOn = (pathname: string, l: Item) =>
+  ((l.end ? pathname === l.to : within(pathname, [l.to])) || within(pathname, l.also)) &&
+  !within(pathname, l.not)
+
+/**
+ * The large screens' bar of sections: the galaxy, then each group as a menu that opens below
+ * its name (a disclosure: a button that shows and hides a list of links). A click outside,
+ * Escape or going to another page closes it.
+ */
+function TopNav() {
+  const { pathname } = useLocation()
+  // the open menu belongs to the page it was opened on
+  const [openAt, setOpenAt] = useState<{ group: string; at: string } | null>(null)
+  const open = openAt?.at === pathname ? openAt.group : null
+  const bar = useRef<HTMLElement>(null)
+  const id = useId()
+
+  useEffect(() => {
+    if (!open) return
+    const outside = (e: PointerEvent) => {
+      if (!bar.current?.contains(e.target as Node)) setOpenAt(null)
+    }
+    const escape = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setOpenAt(null)
+      bar.current?.querySelector<HTMLElement>(`[data-group="${open}"]`)?.focus()
+    }
+    document.addEventListener('pointerdown', outside)
+    document.addEventListener('keydown', escape)
+    return () => {
+      document.removeEventListener('pointerdown', outside)
+      document.removeEventListener('keydown', escape)
+    }
+  }, [open])
+
+  const link = (on: boolean) =>
+    `tap flex min-h-10 items-center rounded-full px-3.5 text-[0.95rem] transition-colors ${
+      on
+        ? 'bg-gold/15 font-semibold text-gold-soft'
+        : 'text-mist hover:bg-white/5 hover:text-vellum'
+    }`
+
+  return (
+    <nav ref={bar} aria-label="الأقسام" className="hidden items-center gap-1 lg:flex">
+      {GROUPS.map((g, gi) =>
+        !g.title ? (
+          g.items.map((l) => (
+            <NavLink key={l.to} to={l.to} end={l.end} className={() => link(isOn(pathname, l))}>
+              {l.label}
+            </NavLink>
+          ))
+        ) : (
+          <div key={g.title} className="relative">
+            <button
+              type="button"
+              data-group={g.title}
+              aria-expanded={open === g.title}
+              aria-controls={`${id}-${gi}`}
+              onClick={() => setOpenAt(open === g.title ? null : { group: g.title!, at: pathname })}
+              className={`${link(g.items.some((l) => isOn(pathname, l)))} gap-1`}
+            >
+              {g.title}
+              <IconChevronDown
+                className={`size-4 transition-transform ${open === g.title ? 'rotate-180' : ''}`}
+              />
+            </button>
+            <ul
+              id={`${id}-${gi}`}
+              hidden={open !== g.title}
+              className="absolute start-0 top-full z-30 mt-2 min-w-56 rounded-xl border border-gold/20 bg-night-deep p-1.5 shadow-[0_12px_32px_rgb(0_0_0/0.45)]"
+            >
+              {g.items.map((l) => {
+                const on = isOn(pathname, l)
+                return (
+                  <li key={l.to}>
+                    <NavLink
+                      to={l.to}
+                      end={l.end}
+                      onClick={() => setOpenAt(null)}
+                      className={`tap flex min-h-11 items-center rounded-lg px-3 text-[0.95rem] transition-colors ${
+                        on
+                          ? 'bg-gold/15 font-semibold text-gold-soft'
+                          : 'text-mist hover:bg-white/5 hover:text-vellum'
+                      }`}
+                    >
+                      {l.label}
+                    </NavLink>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ),
+      )}
+    </nav>
+  )
+}
+
 /** The grouped list of sections, in the large screens' sidebar and in the phone's drawer. */
 export function SectionNav({ onPick }: { onPick?: () => void }) {
   const { pathname } = useLocation()
@@ -145,24 +244,15 @@ export function Shell() {
   const anyTab = TABS.some(tabOn)
 
   return (
-    <div className="flex h-dvh bg-night">
-      {/* large screens: the sections always in view */}
-      <aside className="hidden w-60 shrink-0 flex-col border-e border-gold/15 bg-night-deep/70 lg:flex">
-        <div className="px-6 pb-2 pt-5">
-          <Brand />
-          <p className="mt-1 text-xs text-mist">استكشاف بصري لكتاب الله</p>
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
-          <SectionNav />
-        </div>
-      </aside>
+    <div className="flex h-dvh flex-col bg-night">
+      {/* the app bar: on large screens it carries the sections; on phones and tablets the tabs
+          at the bottom and the drawer do */}
+      <header className="relative z-20 flex shrink-0 items-center gap-6 border-b border-gold/15 bg-night-deep/90 px-4 pb-1.5 pt-[max(0.375rem,env(safe-area-inset-top))] backdrop-blur lg:h-16 lg:px-6 lg:py-0">
+        <Brand />
+        <TopNav />
+      </header>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* phones and tablets: an app bar on top, tabs at the bottom */}
-        <header className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-gold/15 bg-night-deep/90 px-4 pb-1.5 pt-[max(0.375rem,env(safe-area-inset-top))] backdrop-blur lg:hidden">
-          <Brand />
-        </header>
-
+      <div className="flex min-h-0 flex-1 flex-col">
         <main className="relative min-h-0 flex-1">
           <Outlet />
         </main>

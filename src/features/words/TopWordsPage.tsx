@@ -5,6 +5,8 @@ import { loadFrequency, loadLexicon, loadSurahs } from '../../data/load'
 import { useAsync } from '../../data/useAsync'
 import { ErrorNote, Loading } from '../../components/Status'
 import { ReviewLink } from '../../components/ReviewLink'
+import { Picker } from '../../components/Picker'
+import { surahOption, type PickerOption } from '../../lib/picker'
 import {
   ENTRY,
   ROOT,
@@ -100,6 +102,16 @@ function Ranking({
       { replace: true },
     )
 
+  const scopeOptions = useMemo<PickerOption[]>(
+    () => [
+      { value: 'all', label: 'المصحف كله', group: 'المصحف' },
+      { value: 'meccan', label: 'السور المكية', group: 'المصحف', keywords: 'مكي' },
+      { value: 'medinan', label: 'السور المدنية', group: 'المصحف', keywords: 'مدني' },
+      ...surahs.map((s) => surahOption(s, 'سورة واحدة')),
+    ],
+    [surahs],
+  )
+
   const list = useMemo(() => {
     const inScope =
       scope === 'all'
@@ -149,25 +161,18 @@ function Ranking({
               بالجذر
             </Chip>
           </div>
-          <label className="flex min-w-0 flex-1 basis-56 items-center gap-2">
-            <span className="shrink-0 text-sm text-mist">في</span>
-            <select
+          <div className="flex min-w-0 flex-1 basis-56 items-center gap-2">
+            <span className="shrink-0 text-sm text-mist" aria-hidden>
+              في
+            </span>
+            <Picker
+              label="النطاق"
               value={String(scope)}
-              onChange={(e) => set('in', e.target.value === 'all' ? null : e.target.value)}
-              className="h-11 min-w-0 flex-1 rounded-full border border-gold/30 bg-night-deep/60 px-4 text-vellum focus:border-gold/60 focus:outline-none"
-            >
-              <option value="all">المصحف كله</option>
-              <option value="meccan">السور المكية</option>
-              <option value="medinan">السور المدنية</option>
-              <optgroup label="سورة">
-                {surahs.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {toArabicDigits(s.id)}. {s.name}
-                  </option>
-                ))}
-              </optgroup>
-            </select>
-          </label>
+              options={scopeOptions}
+              onChange={(v) => set('in', v === 'all' ? null : v)}
+              placeholder="ابحث باسم السورة أو رقمها"
+            />
+          </div>
         </div>
         {unit === 'lemma' && (
           <div role="group" aria-label="نوع اللفظ" className="flex flex-wrap">

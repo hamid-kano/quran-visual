@@ -779,20 +779,29 @@ function Index({
             </span>
           </button>
         </div>
-        <label className="mt-2 flex items-center gap-2">
-          <span className="w-14 shrink-0 text-sm text-mist">التكرار</span>
-          <select
-            value={rec.repeat}
-            onChange={(e) => rec.setRepeat(Number(e.target.value))}
-            className="h-11 min-w-0 flex-1 rounded-full border border-gold/30 bg-night px-3 text-vellum"
+        <div className="mt-2 flex items-center gap-2">
+          <span className="w-14 shrink-0 text-sm text-mist" id="repeat-label">
+            التكرار
+          </span>
+          <div
+            role="group"
+            aria-labelledby="repeat-label"
+            className="flex min-w-0 flex-1 rounded-full bg-night p-1"
           >
             {[1, 3, 5].map((n) => (
-              <option key={n} value={n}>
-                {n === 1 ? 'كل آية مرة' : `كل آية ${countOf(n, TIME)}`}
-              </option>
+              <button
+                key={n}
+                type="button"
+                aria-pressed={rec.repeat === n}
+                aria-label={n === 1 ? 'كل آية مرة واحدة' : `كل آية ${countOf(n, TIME)}`}
+                onClick={() => rec.setRepeat(n)}
+                className={seg(rec.repeat === n)}
+              >
+                {n === 1 ? 'مرة' : `${toArabicDigits(n)} مرات`}
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </div>
         <button
           type="button"
           onClick={onListen}

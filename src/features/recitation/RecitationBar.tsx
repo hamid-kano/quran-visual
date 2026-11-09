@@ -1,5 +1,8 @@
 import { TIME, countOf, toArabicDigits } from '../../lib/arabic'
-import { RECITERS, reciterLabel } from './reciters'
+import { useId, useState } from 'react'
+import { IconChevronDown } from '../../components/icons'
+import { reciterLabel } from './reciters'
+import { ReciterSheet } from './ReciterPicker'
 import type { useRecitation } from './useRecitation'
 
 type Recitation = ReturnType<typeof useRecitation>
@@ -60,6 +63,8 @@ export function RecitationBar({
   ayahCount: number
   single?: number
 }) {
+  const [picking, setPicking] = useState(false)
+  const repeatId = useId()
   const active = r.status !== 'idle'
   const playing = r.status === 'playing' || r.status === 'loading'
   const where = r.step
@@ -123,35 +128,43 @@ export function RecitationBar({
           )}
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-ink-soft">
-          <span className="sr-only">القارئ</span>
-          <select
-            value={r.reciter.id}
-            onChange={(e) => r.setReciter(e.target.value)}
-            className="rounded-full border border-[#cdb67a] bg-vellum px-3 py-1.5 text-sm text-ink"
-          >
-            {RECITERS.map((x) => (
-              <option key={x.id} value={x.id}>
-                {reciterLabel(x)}
-              </option>
-            ))}
-          </select>
-        </label>
+        {/* the reciter: the same searchable list as in the mushaf */}
+        <button
+          type="button"
+          onClick={() => setPicking(true)}
+          aria-haspopup="dialog"
+          aria-label={`القارئ: ${reciterLabel(r.reciter)}. تغيير القارئ`}
+          className="inline-flex min-h-9 max-w-full items-center gap-1.5 rounded-full border border-[#cdb67a] bg-vellum pe-2.5 ps-3.5 text-sm text-ink hover:bg-[#efe3c4]"
+        >
+          <span className="truncate">{reciterLabel(r.reciter)}</span>
+          <IconChevronDown className="size-4 shrink-0 text-ink-soft" />
+        </button>
 
-        <label className="flex items-center gap-2 text-sm text-ink-soft">
-          <span>تكرار كل آية</span>
-          <select
-            value={r.repeat}
-            onChange={(e) => r.setRepeat(Number(e.target.value))}
-            className="rounded-full border border-[#cdb67a] bg-vellum px-3 py-1.5 text-sm text-ink"
+        <div className="flex items-center gap-2 text-sm text-ink-soft">
+          <span id={`${repeatId}-label`}>تكرار كل آية</span>
+          <div
+            role="group"
+            aria-labelledby={`${repeatId}-label`}
+            className="flex rounded-full border border-[#cdb67a] p-0.5"
           >
             {[1, 3, 5].map((n) => (
-              <option key={n} value={n}>
-                {countOf(n, TIME)}
-              </option>
+              <button
+                key={n}
+                type="button"
+                aria-pressed={r.repeat === n}
+                aria-label={countOf(n, TIME)}
+                onClick={() => r.setRepeat(n)}
+                className={`min-h-8 rounded-full px-3 transition-colors ${
+                  r.repeat === n
+                    ? 'bg-[#e9d49b] font-semibold text-ink'
+                    : 'text-ink-soft hover:text-ink'
+                }`}
+              >
+                {n === 1 ? 'مرة' : toArabicDigits(n)}
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </div>
       </div>
 
       <p className="mt-1.5 min-h-5 text-sm text-ink-soft" aria-live="polite">
@@ -165,6 +178,16 @@ export function RecitationBar({
                 ? 'استمع إلى الآية بصوت القارئ الذي تختاره.'
                 : 'اختر رقم أي آية لتبدأ التلاوة منها.'}
       </p>
+      <ReciterSheet
+        open={picking}
+        onClose={() => setPicking(false)}
+        current={r.reciter.id}
+        playing={active}
+        onPick={(id) => {
+          r.setReciter(id)
+          setPicking(false)
+        }}
+      />
     </section>
   )
 }

@@ -141,3 +141,10 @@ export const IconChevronDown = (p: P) => (
     <path d="m6 9.5 6 6 6-6" />
   </Svg>
 )
+
+export const IconDownload = (p: P) => (
+  <Svg {...p}>
+    <path d="M12 4v11M7.5 10.5 12 15l4.5-4.5" />
+    <path d="M5 19h14" />
+  </Svg>
+)

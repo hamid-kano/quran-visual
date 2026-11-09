@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { Drawer } from './Drawer'
+import { NATIVE } from '../lib/native'
 import { IconChevronDown, IconGalaxy, IconMore, IconMushaf, IconSearch, IconStudies } from './icons'
 
 interface Item {
@@ -58,6 +59,8 @@ const GROUPS: { title?: string; items: Item[] }[] = [
     items: [
       { to: '/about', label: 'المنهج والمصادر' },
       { to: '/review', label: 'مراجعة أهل الاختصاص' },
+      // not inside the app itself
+      ...(NATIVE ? [] : [{ to: '/app', label: 'تطبيق أندرويد' }]),
     ],
   },
 ]

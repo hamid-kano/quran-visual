@@ -29,6 +29,7 @@ const SearchPage = lazy(() => import('./features/search/SearchPage'))
 const TopicsPage = lazy(() => import('./features/topics/TopicsPage'))
 const AyahPage = lazy(() => import('./features/ayah/AyahPage'))
 const ReviewPage = lazy(() => import('./features/review/ReviewPage'))
+const AppPage = lazy(() => import('./features/app/AppPage'))
 const WordsPage = lazy(() => import('./features/words/WordsPage'))
 const TopWordsPage = lazy(() => import('./features/words/TopWordsPage'))
 const ReadPage = lazy(() => import('./features/read/ReadPage'))
@@ -82,6 +83,7 @@ const router = createBrowserRouter(
             { path: 'words/:slug', element: page(<WordsPage />) },
             { path: 'about', element: page(<AboutPage />) },
             { path: 'review', element: page(<ReviewPage />) },
+            { path: 'app', element: page(<AppPage />) },
             { path: '*', element: page(<GalaxyPage />) },
           ],
         },

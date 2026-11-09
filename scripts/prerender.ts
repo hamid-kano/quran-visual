@@ -307,6 +307,11 @@ const sections: [string, string, string][] = [
     'ما نرجو من أهل الاختصاص في علوم القرآن والعربية مراجعته في المنصة قبل إطلاقها العام، وكيف تُرسل الملاحظات.',
   ],
   [
+    'app',
+    'تطبيق آيات مرئية لأندرويد',
+    'حمّل تطبيق آيات مرئية لأندرويد: المنصة كاملة دون اتصال، والتلاوة مستمرة والشاشة مقفلة، والمصحف لا ينطفئ.',
+  ],
+  [
     'about',
     'المنهج والمصادر',
     'مصادر النص والبيانات، وكيف يُحسب كل رقم في المنصة، وما يُتحقَّق منه قبل كل نشر.',
@@ -587,6 +592,8 @@ function hintsFor(route: string): Hints {
         data: ['lexicon.json', 'surahs.json', ...(a ? [`lex/${encodeURIComponent(a)}.json`] : [])],
         quranFont: true,
       }
+    case 'app':
+      return { modules: one(feature('app/AppPage')), data: [], quranFont: false }
     case 'review':
       return { modules: one(feature('review/ReviewPage')), data: [], quranFont: false }
     default:

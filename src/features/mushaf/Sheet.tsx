@@ -13,8 +13,10 @@ type Ord = ReturnType<typeof ordinals>
 
 /** Line height of the mushaf text, in em. */
 export const LINE = 2
-/** How far a short page's lines may open up: about two lines over thirteen. */
-const MAX_STRETCH = 1.16
+/** The least space between two words of a printed line, in em; a line needing less is set smaller. */
+const MIN_GAP = 0.2
+/** A surah's last line shorter than this share of the line width stands centred, not spread. */
+const SHORT_LINE = 0.75
 /** Height of the page's own head (surah, juz) and foot (page number), together, in px. */
 export const PAGE_CHROME = 76
 
@@ -78,37 +80,40 @@ export function Sheet(p: SheetProps) {
     }
   }, [fontsReady])
   const ready = text.status === 'ready'
+  // the page sizes: every line as printed, a line too long for the page set a little smaller
   useLayoutEffect(() => {
     const el = body.current
-    const inner = el?.firstElementChild as HTMLElement | null
-    if (!el || !inner) return
+    if (!el || p.large || !ready) return
     const fit = () => {
-      let f = p.font
-      el.style.fontSize = `${f}px`
-      el.style.setProperty('--lh', String(LINE))
-      if (p.large || !ready) return
-      const room = el.clientHeight
-      for (let i = 0; i < 12 && inner.offsetHeight > room && f > 9; i++) {
-        // text height grows about with the square of the size (more lines, each taller)
-        f = i < 3 ? f * Math.sqrt(room / inner.offsetHeight) * 0.995 : f * 0.98
-        el.style.fontSize = `${f}px`
-      }
-      // a page whose text ends a line or two short: open its lines a little, as the printed
-      // page spreads its fifteen lines over the same height
-      const h = inner.offsetHeight
-      if (!opening && h > 0 && h < room)
-        el.style.setProperty('--lh', String(LINE * Math.min(room / h, MAX_STRETCH)))
+      el.style.fontSize = `${p.font}px`
+      const cs = getComputedStyle(el)
+      const room = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+      if (!room) return
+      el.querySelectorAll<HTMLElement>('[data-line]').forEach((line) => {
+        line.style.fontSize = ''
+        line.style.justifyContent = ''
+        const words = [...line.children] as HTMLElement[]
+        const gap = p.font * MIN_GAP * words.length // each word's own margin, both sides
+        const natural = words.reduce((w, c) => w + c.getBoundingClientRect().width, 0) + gap
+        if (natural > room) line.style.fontSize = `${(room / natural) * 0.995}em`
+        // the opening pages, and a line that ends a surah well short of the margin: centred
+        else if (opening || (line.dataset.end && natural < room * SHORT_LINE))
+          line.style.justifyContent = 'center'
+      })
     }
     fit()
-    if (p.large) return
-    // the text can still grow after this (the mushaf font arriving late): fit again whenever
-    // it runs past the page
-    const ro = new ResizeObserver(() => {
-      if (inner.offsetHeight > el.clientHeight + 1) fit()
-    })
-    ro.observe(inner)
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
     return () => ro.disconnect()
   }, [p.font, p.large, p.width, p.height, ready, fontsReady, opening])
+
+  // the larger, scrolling size: the text flows down the page
+  useLayoutEffect(() => {
+    const el = body.current
+    if (!el || !p.large) return
+    el.style.fontSize = `${p.font}px`
+    el.style.setProperty('--lh', String(LINE))
+  }, [p.font, p.large])
 
   // long press: a timer from the touch, cancelled by movement or an early lift; the tap that
   // follows a long press is swallowed so it does not also pick or unpick the ayah
@@ -147,6 +152,45 @@ export function Sheet(p: SheetProps) {
     },
   })
 
+  /** What makes an ayah (or one word of it, on a printed line) answer to a tap or a key. */
+  const ayahProps = (at: Picked, focusable = true) => {
+    const on = p.picked?.surah === at.surah && p.picked.ayah === at.ayah
+    const live = p.reading?.surah === at.surah && p.reading.ayah === at.ayah
+    return {
+      'data-ayah': true,
+      ...(focusable
+        ? {
+            role: 'button',
+            tabIndex: 0,
+            'aria-pressed': on,
+            'aria-current': live || undefined,
+            'aria-haspopup': 'dialog' as const,
+          }
+        : {}),
+      ...holdHandlers(at),
+      onClick: () => {
+        if (held.current) held.current = false
+        else p.onPick(on ? null : at)
+      },
+      onKeyDown: (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          p.onPick(on ? null : at)
+        }
+      },
+      className: `cursor-pointer rounded-sm [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [box-decoration-break:clone] pointer-coarse:select-none ${
+        on ? 'bg-[#e9d49b]' : live ? 'bg-[#cfe6d8]' : ''
+      }`,
+    }
+  }
+
+  // the page as printed: its lines, each heading line and each line's words
+  const printed = useMemo(
+    () =>
+      ready && !p.large ? printedLines(p.mushaf.lines[p.page - 1]!, runs, text.data, counts) : null,
+    [ready, p.large, p.mushaf, p.page, runs, text, counts],
+  )
+
   const name = (s: number) => p.surahs[s - 1]?.name ?? ''
   const spine =
     p.side === 'right'
@@ -171,85 +215,117 @@ export function Sheet(p: SheetProps) {
 
       <div
         ref={body}
-        className={`min-h-0 flex-1 px-[22px] ${p.large ? 'overflow-y-auto overscroll-y-contain' : 'overflow-hidden'} flex flex-col ${p.large ? '' : 'justify-center'}`}
+        className={`min-h-0 flex-1 px-[22px] ${p.large ? 'overflow-y-auto overscroll-y-contain' : 'overflow-hidden'} flex flex-col ${p.large ? '' : 'justify-center'} ${printed ? 'px-[calc(22px-0.1em)]' : ''}`}
       >
-        <div className={opening ? 'mx-auto w-[80%]' : ''}>
-          {text.status === 'error' && (
-            <p className="py-10 text-center font-[family-name:var(--font-ui)] text-base text-ink-soft">
-              تعذّر تحميل الصفحة. تحقّق من الاتصال ثم أعد المحاولة.
-            </p>
-          )}
-          {text.status === 'loading' && <div style={{ height: `${LINE * 15}em` }} aria-hidden />}
-          {ready &&
-            runs.map((r, i) => {
-              const ayahs = text.data[i]!.ayahs.slice(r.from - 1, r.to)
-              const ends = r.to === counts[r.surah - 1]
-              return (
-                <section key={r.surah} aria-label={`سورة ${name(r.surah)}`}>
-                  {r.opens && (
-                    <h2
-                      className="mushaf-title flex items-center justify-center font-display font-bold text-ink"
-                      style={{ height: 'calc(var(--lh) * 1em)' }}
-                    >
-                      <span style={{ fontSize: '0.8em' }}>سورة {name(r.surah)}</span>
-                    </h2>
-                  )}
-                  {r.opens && showsBasmalaHeader(r.surah) && (
-                    <p
-                      className="text-center font-quran text-ink"
-                      style={{ lineHeight: 'var(--lh)' }}
-                    >
-                      {BASMALA}
-                    </p>
-                  )}
-                  <p
-                    className="font-quran text-ink"
-                    style={{
-                      lineHeight: 'var(--lh)',
-                      textAlign: opening ? 'center' : 'justify',
-                      // a surah's last line is centred; a page that runs on keeps its last line
-                      // at the start, like the line before a page turn
-                      textAlignLast: opening || ends ? 'center' : 'start',
-                    }}
+        {printed ? (
+          <div
+            className="grid h-full font-quran text-ink"
+            style={{ gridTemplateRows: 'repeat(15, minmax(0, 1fr))' }}
+          >
+            {printed.map((line, i) => {
+              // the eight lines of the opening pages stand in the middle of the page
+              const row = { gridRowStart: i + 1 + (printed.length < 15 ? 4 : 0) }
+              if (line.kind === 'title')
+                return (
+                  <h2
+                    key={i}
+                    style={row}
+                    className="mushaf-title my-[0.12em] flex items-center justify-center font-display font-bold"
                   >
-                    {ayahs.map((a) => {
-                      const on = p.picked?.surah === r.surah && p.picked.ayah === a.n
-                      const live = p.reading?.surah === r.surah && p.reading.ayah === a.n
-                      const at = { surah: r.surah, ayah: a.n }
-                      return (
+                    <span style={{ fontSize: '0.8em' }}>سورة {name(line.surah)}</span>
+                  </h2>
+                )
+              if (line.kind === 'basmala')
+                return (
+                  <p
+                    key={i}
+                    style={row}
+                    className="flex items-center justify-center whitespace-nowrap"
+                  >
+                    {BASMALA}
+                  </p>
+                )
+              return (
+                <p
+                  key={i}
+                  data-line
+                  data-end={line.end || undefined}
+                  style={row}
+                  className="flex items-center justify-between whitespace-nowrap"
+                >
+                  {line.words.map((w, j) => (
+                    <span
+                      key={j}
+                      {...ayahProps(w, w.first)}
+                      // a word's own space, on a line set to center
+                      style={{ marginInline: `${MIN_GAP / 2}em` }}
+                    >
+                      {w.text}
+                      {w.mark && (
+                        <>
+                          {'\u00a0'}
+                          <AyahMark n={w.ayah} />
+                        </>
+                      )}
+                    </span>
+                  ))}
+                </p>
+              )
+            })}
+          </div>
+        ) : (
+          <div className={opening ? 'mx-auto w-[80%]' : ''}>
+            {text.status === 'error' && (
+              <p className="py-10 text-center font-[family-name:var(--font-ui)] text-base text-ink-soft">
+                تعذّر تحميل الصفحة. تحقّق من الاتصال ثم أعد المحاولة.
+              </p>
+            )}
+            {text.status === 'loading' && <div style={{ height: `${LINE * 15}em` }} aria-hidden />}
+            {ready &&
+              runs.map((r, i) => {
+                const ayahs = text.data[i]!.ayahs.slice(r.from - 1, r.to)
+                const ends = r.to === counts[r.surah - 1]
+                return (
+                  <section key={r.surah} aria-label={`سورة ${name(r.surah)}`}>
+                    {r.opens && (
+                      <h2
+                        className="mushaf-title flex items-center justify-center font-display font-bold text-ink"
+                        style={{ height: 'calc(var(--lh) * 1em)' }}
+                      >
+                        <span style={{ fontSize: '0.8em' }}>سورة {name(r.surah)}</span>
+                      </h2>
+                    )}
+                    {r.opens && showsBasmalaHeader(r.surah) && (
+                      <p
+                        className="text-center font-quran text-ink"
+                        style={{ lineHeight: 'var(--lh)' }}
+                      >
+                        {BASMALA}
+                      </p>
+                    )}
+                    <p
+                      className="font-quran text-ink"
+                      style={{
+                        lineHeight: 'var(--lh)',
+                        textAlign: opening ? 'center' : 'justify',
+                        // a surah's last line is centred; a page that runs on keeps its last line
+                        // at the start, like the line before a page turn
+                        textAlignLast: opening || ends ? 'center' : 'start',
+                      }}
+                    >
+                      {ayahs.map((a) => (
                         <span key={a.n}>
-                          <span
-                            data-ayah
-                            role="button"
-                            tabIndex={0}
-                            aria-pressed={on}
-                            aria-current={live || undefined}
-                            aria-haspopup="dialog"
-                            {...holdHandlers(at)}
-                            onClick={() => {
-                              if (held.current) held.current = false
-                              else p.onPick(on ? null : at)
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault()
-                                p.onPick(on ? null : at)
-                              }
-                            }}
-                            className={`cursor-pointer rounded-sm [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [box-decoration-break:clone] pointer-coarse:select-none ${
-                              on ? 'bg-[#e9d49b]' : live ? 'bg-[#cfe6d8]' : ''
-                            }`}
-                          >
+                          <span {...ayahProps({ surah: r.surah, ayah: a.n })}>
                             {a.text} <AyahMark n={a.n} />
                           </span>{' '}
                         </span>
-                      )
-                    })}
-                  </p>
-                </section>
-              )
-            })}
-        </div>
+                      ))}
+                    </p>
+                  </section>
+                )
+              })}
+          </div>
+        )}
       </div>
 
       <footer className="flex h-[38px] shrink-0 items-start justify-center pt-1 text-sm text-ink-soft">
@@ -257,4 +333,68 @@ export function Sheet(p: SheetProps) {
       </footer>
     </article>
   )
+}
+
+// ---------- the printed lines ----------
+
+interface Word extends Picked {
+  text: string
+  /** The ayah ends with this word: its number follows. */
+  mark: boolean
+  /** The ayah's first word on this page: the one a key reaches. */
+  first: boolean
+}
+type Line =
+  | { kind: 'title'; surah: number }
+  | { kind: 'basmala' }
+  | { kind: 'text'; words: Word[]; end: boolean }
+
+/** Letters, as opposed to signs that stand alone between words (۞). */
+const LETTER = /[\u0621-\u063A\u0641-\u064A\u0671]/u
+
+/**
+ * Lays the page's words on its printed lines: `counts` gives the words of each line, 0 for a
+ * heading line, which takes the next heading of a surah opening on the page.
+ */
+function printedLines(
+  counts: number[],
+  runs: ReturnType<typeof pageRuns>,
+  texts: { ayahs: { n: number; text: string }[] }[],
+  ayahCounts: number[],
+): Line[] {
+  const words: (Word & { ends: boolean })[] = []
+  const headings: Line[] = []
+  runs.forEach((r, i) => {
+    if (r.opens) {
+      headings.push({ kind: 'title', surah: r.surah })
+      if (showsBasmalaHeader(r.surah)) headings.push({ kind: 'basmala' })
+    }
+    for (const a of texts[i]!.ayahs.slice(r.from - 1, r.to)) {
+      // a sign standing alone (۞) goes with the word after it, as the line data counts words
+      const parts: string[] = []
+      let sign = ''
+      for (const t of a.text.split(/\s+/).filter(Boolean)) {
+        if (LETTER.test(t)) {
+          parts.push(sign ? `${sign} ${t}` : t)
+          sign = ''
+        } else sign = sign ? `${sign} ${t}` : t
+      }
+      parts.forEach((text, j) =>
+        words.push({
+          surah: r.surah,
+          ayah: a.n,
+          text,
+          mark: j === parts.length - 1,
+          first: j === 0,
+          ends: j === parts.length - 1 && a.n === ayahCounts[r.surah - 1],
+        }),
+      )
+    }
+  })
+  let at = 0
+  return counts.map((n): Line => {
+    if (n === 0) return headings.shift() ?? { kind: 'basmala' }
+    const ws = words.slice(at, (at += n))
+    return { kind: 'text', words: ws, end: ws.at(-1)?.ends ?? false }
+  })
 }

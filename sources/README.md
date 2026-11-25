@@ -8,3 +8,5 @@
 | `kfgqpc-hafs-v18.json` | مجمع الملك فهد لطباعة المصحف الشريف، نص حفص الإصدار ١٨، عبر [thetruetruth/quran-data-kfgqpc](https://github.com/thetruetruth/quran-data-kfgqpc) (`hafs/data/hafsData_v18.json`) | `5d8bb91726e482839d0057633cb1973031e4d706fa9604eea5e08892f20ba140` |
 
 وخط المصحف في `public/fonts/kfgqpc-hafs-18.woff2` من المصدر نفسه (`hafs/font/hafs.18.woff2`)، SHA-256 `8c00e7a7d5f773bcfb1642fdcfba505dbd81975fef39f14718827a32d075020c`، ومعه نص ترخيصه كما ورد في الخط.
+
+| `mushaf-lines.json` | مُشتقّ: عدد كلمات كل سطر في صفحات مصحف المدينة (طبعة ١٤٤١هـ، وهي التي يتبعها نص حفص ١٨ وخطه)، استُخرج بالسكربت `scripts/extract-mushaf-lines.ts` من بيانات حزمة npm [`quran-madina-html`](https://www.npmjs.com/package/quran-madina-html) ٢٫٢٫٢ (`assets/db/v2/Madina-1441H`، رخصة Waqf GPL 2.0). يتحقّق `build-mushaf.ts` من مطابقته لبداية كل آية ونهايتها في ملف حفص ١٨ على الصفحات الـ٦٠٤ كلها. | — |

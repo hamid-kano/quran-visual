@@ -20,6 +20,8 @@ export const STORE = 'qv.recitation'
 export interface Saved {
   reciter: string
   repeat: number
+  /** In the mushaf: the repeat applies to each ayah, or to the whole page. */
+  by: 'ayah' | 'page'
 }
 export function readSaved(): Saved {
   try {
@@ -27,9 +29,10 @@ export function readSaved(): Saved {
     return {
       reciter: RECITERS.some((r) => r.id === v.reciter) ? v.reciter! : RECITERS[0]!.id,
       repeat: [1, 3, 5].includes(v.repeat ?? 0) ? v.repeat! : 1,
+      by: v.by === 'page' ? 'page' : 'ayah',
     }
   } catch {
-    return { reciter: RECITERS[0]!.id, repeat: 1 }
+    return { reciter: RECITERS[0]!.id, repeat: 1, by: 'ayah' }
   }
 }
 

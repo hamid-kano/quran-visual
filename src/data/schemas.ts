@@ -188,6 +188,12 @@ export const Mushaf = z.object({
   pages: z.array(Ref).length(604),
   juz: z.array(Ref).length(30),
   quarters: z.array(Ref).length(240),
+  /**
+   * The lines of each page as printed: how many words each holds, 0 for a line that holds a
+   * surah's heading (its name, or the basmala above its first ayah). Eight lines on the first
+   * two pages, fifteen on the others.
+   */
+  lines: z.array(z.array(z.number().int().min(0))).length(604),
 })
 export type Mushaf = z.infer<typeof Mushaf>
 
